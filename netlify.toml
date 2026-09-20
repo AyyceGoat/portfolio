@@ -1,0 +1,70 @@
+# Déploiement et en-têtes de sécurité.
+#
+# Le site est entièrement statique : aucune API, aucun formulaire,
+# aucune ressource tierce. La politique ci-dessous en tire parti et
+# n'autorise que ce que la page utilise réellement.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ---------------------------------------------------------------
+# En-têtes appliqués à toutes les réponses
+# ---------------------------------------------------------------
+
+[[headers]]
+  for = "/*"
+
+  [headers.values]
+    # Tout vient du même domaine. Ni 'unsafe-inline' ni 'unsafe-eval' :
+    # le HTML produit ne contient ni script ni style en ligne.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+
+    # Le site ne doit jamais être affiché dans un cadre :
+    # protège du détournement de clic.
+    X-Frame-Options = "DENY"
+
+    # Interdit au navigateur de deviner un type de contenu
+    # différent de celui annoncé.
+    X-Content-Type-Options = "nosniff"
+
+    # L'adresse complète n'est transmise qu'aux pages du même site ;
+    # à l'extérieur, seule l'origine part, et rien en clair.
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+    # Aucune de ces capacités n'est utilisée : on les refuse.
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=()"
+
+    # HTTPS obligatoire pour les visites suivantes.
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-origin"
+
+# ---------------------------------------------------------------
+# Mise en cache : les fichiers versionnés par le build sont
+# immuables, le HTML doit rester revalidé.
+# ---------------------------------------------------------------
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/captures/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

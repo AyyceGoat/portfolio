@@ -1,0 +1,11 @@
+# Fins de ligne normalisées en LF dans le dépôt, quelle que soit
+# la machine qui contribue.
+* text=auto eol=lf
+
+# Binaires : jamais de conversion, jamais de diff textuel.
+*.woff2 binary
+*.webp  binary
+*.pdf   binary
+*.jpeg  binary
+*.jpg   binary
+*.png   binary

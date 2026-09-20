@@ -1,0 +1,65 @@
+/* ------------------------------------------------------------------
+   Jetons de conception — une seule source de verite pour le visuel.
+   Direction : plan d'ingenieur sur fond profond, accent bleu acier.
+   ------------------------------------------------------------------ */
+
+:root {
+  /* Fonds, du plus profond au plus eleve */
+  --c-void: #06080B;
+  --c-bg: #090B0F;
+  --c-surface: #10141A;
+  --c-surface-2: #161B22;
+  --c-line: #1F2732;
+  --c-line-soft: #151A21;
+
+  /* Texte — contrastes mesures sur --c-bg, tous au-dela du seuil AA */
+  --c-text: #E7EBF0;        /* 16.0:1 */
+  --c-text-2: #9AA5B3;      /*  8.0:1 */
+  --c-text-3: #79838F;      /*  5.1:1 */
+
+  /* Accent unique : bleu acier */
+  --c-accent: #6E9BFF;      /*  7.3:1 sur --c-bg */
+  --c-accent-ink: #070910;  /*  7.4:1 pose sur l'accent */
+  --c-accent-deep: #4A78DB;
+  --c-accent-wash: rgba(110, 155, 255, 0.08);
+  --c-accent-line: rgba(110, 155, 255, 0.32);
+  --c-accent-glow: rgba(110, 155, 255, 0.10);
+
+  /* Typographie */
+  --f-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  /* Echelle fluide : se cale sur la largeur sans media query */
+  --t-hero: clamp(2.5rem, 1.1rem + 6.2vw, 6.5rem);
+  --t-h2: clamp(1.75rem, 1.15rem + 2.6vw, 3rem);
+  --t-h3: clamp(1.15rem, 1rem + 0.7vw, 1.5rem);
+  --t-body: clamp(0.975rem, 0.93rem + 0.2vw, 1.075rem);
+  --t-small: 0.8125rem;
+  --t-mono: 0.75rem;
+
+  /* Rythme vertical et gouttieres */
+  --gutter: clamp(1.25rem, 0.5rem + 3vw, 4rem);
+  --section-y: clamp(5rem, 3rem + 9vw, 10rem);
+  --max-w: 76rem;
+
+  /* Mouvement — courbes partagees pour une sensation homogene */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 180ms;
+  --dur-mid: 340ms;
+  --dur-slow: 780ms;
+
+  --radius: 4px;
+  --radius-lg: 10px;
+
+  /* Profondeur : une seule perspective partagee, pour que tous les
+     volumes de la page semblent vus depuis le meme point. */
+  --persp: 1100px;
+  --lift: 0px;
+}
+
+/* Le site est concu en sombre. On l'annonce pour que l'UA accorde
+   ses propres widgets (barres de defilement, champs de formulaire). */
+:root {
+  color-scheme: dark;
+}

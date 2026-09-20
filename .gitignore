@@ -1,0 +1,25 @@
+# Dépendances
+node_modules/
+
+# Résultat de build
+dist/
+
+# Fichiers d'environnement — ne doivent jamais être versionnés
+.env
+.env.*
+!.env.example
+
+# Journaux
+*.log
+npm-debug.log*
+
+# Systèmes et éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Sources brutes des médias : seules les versions optimisées
+# de public/ sont versionnées.
+WhatsApp Image*.jpeg
+CV_AHOUET_Yann_Christ_2026.pdf
