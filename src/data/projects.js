@@ -60,10 +60,10 @@ export const projects = [
     shot: {
       src: '/captures/nexus.webp',
       small: '/captures/nexus-700.webp',
-      alt: "Page d'accueil de NEXUS, plateforme d'évaluation en ligne.",
+      alt: "Page d'accueil de NEXUS : « Explorez l'Univers du Savoir », avec les compteurs de pays, domaines, articles et quiz.",
     },
     desc:
-      "Plateforme d'évaluation cognitive en ligne : passation guidée, restitution d'un rapport détaillé et délivrance d'un certificat, adossées à un moteur de score conçu pour être statistiquement défendable plutôt qu'arbitraire.",
+      "Encyclopédie interactive doublée d'une plateforme d'évaluation : exploration par domaines et par pays, articles, puis quiz qui mesurent ce qui en a été retenu. Le moteur de score est conçu pour être statistiquement défendable plutôt qu'arbitraire.",
     points: [
       'Page d’entrée ramenée de 577 Ko à 3,3 Ko : chargement différé, découpage du code et routage applicatif.',
       'Navigation entièrement utilisable au clavier et travail de référencement.',

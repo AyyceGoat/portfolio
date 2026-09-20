@@ -3,7 +3,7 @@
 Portfolio personnel d'un développeur web basé à Abidjan, en Côte d'Ivoire.
 Page unique, React et Vite, sans dépendance d'interface.
 
-**Le site :** à renseigner après le premier déploiement
+**Le site :** [christ-ahouet.netlify.app](https://christ-ahouet.netlify.app) — à réserver au déploiement
 **Me contacter :** [github.com/AyyceGoat](https://github.com/AyyceGoat)
 
 ---
