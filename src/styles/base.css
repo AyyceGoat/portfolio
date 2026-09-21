@@ -146,7 +146,8 @@ button {
 
 .shell {
   position: relative;
-  z-index: 1;
+  /* Au-dessus de la trame (0) et du globe (1). */
+  z-index: 2;
 }
 
 .wrap {

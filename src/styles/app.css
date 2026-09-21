@@ -1179,3 +1179,69 @@ a.contact__line:hover .contact__line-arrow {
   font-size: 0.95rem;
   line-height: 1.7;
 }
+
+/* =================================================================
+   Globe — element signature du hero
+   ================================================================= */
+
+.globe {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Le canevas ne doit jamais intercepter un clic : les evenements
+     sont ecoutes sur la fenetre, puis filtres. */
+}
+
+.globe__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1100ms var(--ease-out);
+}
+
+/* Le globe ne se montre qu'une fois la premiere image calculee :
+   aucun a-coup, aucun canevas vide a l'ecran. */
+.globe__canvas.is-live {
+  opacity: 1;
+}
+
+/* Repli sans WebGL ou en animation reduite. */
+.globe__still {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: min(60vw, 46rem);
+  transform: translateY(-50%);
+  opacity: 0.85;
+}
+
+@media (max-width: 62rem) {
+  .globe__still {
+    right: 50%;
+    width: min(92vw, 30rem);
+    transform: translate(50%, -50%);
+    opacity: 0.6;
+  }
+}
+
+/* Pendant un glisser, tout le document adopte le curseur de prise. */
+body.globe-saisi,
+body.globe-saisi * {
+  cursor: grabbing !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .globe__canvas {
+    transition: none;
+  }
+}
+
+/* Effacement du globe sur appareil modeste : une simple opacite,
+   composee par le processeur graphique, pendant que son rendu est
+   totalement suspendu. */
+.globe__canvas.is-faded {
+  opacity: 0;
+  transition: opacity 500ms var(--ease-soft);
+}

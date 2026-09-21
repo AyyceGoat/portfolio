@@ -1,8 +1,8 @@
 const STACK = ['PHP', 'Laravel', 'JavaScript', 'React', 'MySQL', 'Python', 'Git'];
 
-export default function Hero() {
+export default function Hero({ innerRef }) {
   return (
-    <header className="hero" id="haut">
+    <header className="hero" id="haut" ref={innerRef}>
       <div className="hero__inner">
         <p className="hero__status reveal">
           <span className="hero__dot" aria-hidden="true" />
