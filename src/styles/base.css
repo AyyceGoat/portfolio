@@ -217,3 +217,84 @@ button {
 .skills .skill:nth-child(4) { --reveal-delay: 180ms; }
 .skills .skill:nth-child(5) { --reveal-delay: 240ms; }
 .skills .skill:nth-child(6) { --reveal-delay: 300ms; }
+
+/* --- Revelation lettre par lettre --------------------------------
+   Le bloc ne bouge plus : ce sont ses lettres qui montent, en vague.
+   L'element porte son texte entier via aria-label, les lettres sont
+   masquees aux lecteurs d'ecran. */
+
+.reveal--lettres {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  will-change: auto;
+}
+
+.lettre {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 0.42em, 0);
+  transition:
+    opacity 620ms var(--ease-out),
+    transform 720ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 26ms);
+  will-change: transform, opacity;
+}
+
+.lettre-espace {
+  display: inline-block;
+}
+
+.reveal--lettres.is-visible .lettre {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Une fois la vague passee, on rend la main au compositeur. */
+.reveal--lettres.is-settled .lettre {
+  will-change: auto;
+}
+
+/* Ce qui entoure un titre decoupe se contente d'un fondu. */
+.reveal--lettres .section-head__num,
+.reveal--lettres .section-head__aside {
+  opacity: 0;
+  transition: opacity 700ms var(--ease-out) 220ms;
+}
+
+.reveal--lettres.is-visible .section-head__num,
+.reveal--lettres.is-visible .section-head__aside {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lettre,
+  .reveal--lettres .section-head__num,
+  .reveal--lettres .section-head__aside {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* --- Defilement amorti (poste de travail uniquement) --------------
+   Le contenu se fige et suit le defilement avec un retard, par une
+   simple translation. La cale rend au document la hauteur perdue. */
+
+html.amorti {
+  /* Le lissage est desormais assure par la boucle : le defilement
+     adouci du navigateur ferait double emploi et donnerait une
+     sensation molle. */
+  scroll-behavior: auto;
+}
+
+html.amorti .shell {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.amorti-cale {
+  pointer-events: none;
+}

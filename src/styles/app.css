@@ -610,7 +610,7 @@
   transition: transform var(--dur-slow) var(--ease-out);
 }
 
-.project:hover .project__shot {
+.project:hover .project__shot-wrap {
   transform: scale3d(1.035, 1.035, 1);
 }
 
@@ -1244,4 +1244,36 @@ body.globe-saisi * {
 .globe__canvas.is-faded {
   opacity: 0;
   transition: opacity 500ms var(--ease-soft);
+}
+
+/* --- Ondulation au survol des captures --------------------------- */
+
+.project__shot-wrap {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+/* Le canevas se superpose exactement a la capture. Il n'apparait
+   qu'une fois la premiere image calculee, et ne capte aucun clic. */
+.ondulation {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms var(--ease-soft);
+}
+
+.ondulation.is-on {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project__shot-wrap,
+  .ondulation {
+    transition: none;
+  }
 }

@@ -1,3 +1,5 @@
+import Lettres from './Lettres.jsx';
+
 const FACTS = [
   { label: 'Formation', value: 'Master 1 Informatique validé, Master 2 en préparation — AGITEL Formation, Abidjan' },
   { label: 'Recherche', value: 'CDI, CDD ou stage en développement web' },
@@ -9,10 +11,12 @@ export default function About() {
   return (
     <section className="section" id="profil" aria-labelledby="titre-profil">
       <div className="wrap">
-        <div className="section-head reveal">
+        <div className="section-head reveal reveal--lettres">
           <span className="section-head__num">01</span>
-          <h2 className="section-head__title" id="titre-profil">
-            Profil
+          <h2 className="section-head__title" id="titre-profil" aria-label="Profil">
+            <span aria-hidden="true">
+              <Lettres texte="Profil" />
+            </span>
           </h2>
           <span className="section-head__aside mono">Qui je suis</span>
         </div>

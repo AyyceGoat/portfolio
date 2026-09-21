@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Lettres from './Lettres.jsx';
 
 /**
  * Adresse stockee a l'envers et en morceaux : la chaine complete
@@ -23,10 +24,12 @@ export default function Contact() {
   return (
     <section className="section" id="contact" aria-labelledby="titre-contact">
       <div className="wrap">
-        <div className="section-head reveal">
+        <div className="section-head reveal reveal--lettres">
           <span className="section-head__num">04</span>
-          <h2 className="section-head__title" id="titre-contact">
-            Contact
+          <h2 className="section-head__title" id="titre-contact" aria-label="Contact">
+            <span aria-hidden="true">
+              <Lettres texte="Contact" />
+            </span>
           </h2>
           <span className="section-head__aside mono">Parlons-en</span>
         </div>

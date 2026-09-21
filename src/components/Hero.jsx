@@ -1,3 +1,5 @@
+import Lettres from './Lettres.jsx';
+
 const STACK = ['PHP', 'Laravel', 'JavaScript', 'React', 'MySQL', 'Python', 'Git'];
 
 export default function Hero({ innerRef }) {
@@ -13,19 +15,30 @@ export default function Hero({ innerRef }) {
           </span>
         </p>
 
-        <h1 className="hero__name reveal reveal--d1">
-          <span className="hero__name-line">Ahouet Yann</span>
-          <span className="hero__name-line">
-            <span className="hero__given">Christ</span> Emmanuel
+        {/* Le nom monte lettre par lettre. Le titre reste entier pour
+            les lecteurs d'ecran, qui ne doivent surtout pas l'epeler. */}
+        <h1
+          className="hero__name reveal reveal--lettres"
+          aria-label="Ahouet Yann Christ Emmanuel"
+        >
+          <span className="hero__name-line" aria-hidden="true">
+            <Lettres texte="Ahouet Yann" />
+          </span>
+          <span className="hero__name-line" aria-hidden="true">
+            <span className="hero__given">
+              <Lettres texte="Christ" depart={10} />
+            </span>
+            <span className="lettre-espace">{' '}</span>
+            <Lettres texte="Emmanuel" depart={16} />
           </span>
         </h1>
 
-        <p className="hero__role reveal reveal--d2">
+        <p className="hero__role reveal reveal--d3">
           <strong>Développeur web.</strong> Je conçois et développe des applications et des
           systèmes d’information complets, de l’analyse du besoin jusqu’au déploiement.
         </p>
 
-        <div className="hero__actions reveal reveal--d3">
+        <div className="hero__actions reveal reveal--d4">
           <a className="btn btn--solid" href="#projets">
             Voir les projets
             <span className="btn__arrow" aria-hidden="true">

@@ -1,3 +1,5 @@
+import { useCallback, useRef } from 'react';
+
 import { useTilt } from '../hooks/useTilt.js';
 import Architecture from './Architecture.jsx';
 
@@ -22,12 +24,56 @@ export default function ProjectCard({ project, flip }) {
   const tilt = useTilt();
   const { shot, links } = project;
 
+  const shotRef = useRef(null);
+  const imgRef = useRef(null);
+  // null = pas encore charge, false = indisponible, objet = module pret
+  const effet = useRef(null);
+  const survol = useRef(false);
+
+  /** Charge l'effet au premier survol, jamais avant. */
+  const entrer = useCallback(async () => {
+    if (project.mission) return;
+    survol.current = true;
+
+    if (effet.current === false) return;
+    if (effet.current === null) {
+      try {
+        const mod = await import('../effets/ondulation.js');
+        effet.current = mod.ondulationPossible() ? mod : false;
+      } catch (e) {
+        effet.current = false;
+      }
+    }
+    // Le curseur a pu repartir pendant le chargement.
+    if (!survol.current || !effet.current) return;
+    effet.current.poser(shotRef.current, imgRef.current);
+  }, [project.mission]);
+
+  const bouger = useCallback(
+    (event) => {
+      tilt.onMouseMove(event);
+      const mod = effet.current;
+      if (!mod || mod === true || !shotRef.current) return;
+      const r = shotRef.current.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
+      mod.viser((event.clientX - r.left) / r.width, (event.clientY - r.top) / r.height);
+    },
+    [tilt]
+  );
+
+  const sortir = useCallback(() => {
+    survol.current = false;
+    tilt.onMouseLeave();
+    if (effet.current && effet.current !== false) effet.current.retirer();
+  }, [tilt]);
+
   return (
     <div className="project-frame reveal">
       <article
         ref={tilt.ref}
-        onMouseMove={tilt.onMouseMove}
-        onMouseLeave={tilt.onMouseLeave}
+        onMouseEnter={entrer}
+        onMouseMove={bouger}
+        onMouseLeave={sortir}
         className={`project${flip ? ' project--flip' : ''}`}
         aria-labelledby={`projet-${project.id}`}
       >
@@ -39,17 +85,20 @@ export default function ProjectCard({ project, flip }) {
           {project.mission ? (
             <Architecture />
           ) : (
-            <img
-              className="project__shot"
-              src={shot.src}
-              srcSet={`${shot.small} 700w, ${shot.src} 1400w`}
-              sizes="(min-width: 62rem) 46vw, 92vw"
-              width="1400"
-              height="875"
-              loading="lazy"
-              decoding="async"
-              alt={shot.alt}
-            />
+            <div className="project__shot-wrap" ref={shotRef}>
+              <img
+                ref={imgRef}
+                className="project__shot"
+                src={shot.src}
+                srcSet={`${shot.small} 700w, ${shot.src} 1400w`}
+                sizes="(min-width: 62rem) 46vw, 92vw"
+                width="1400"
+                height="875"
+                loading="lazy"
+                decoding="async"
+                alt={shot.alt}
+              />
+            </div>
           )}
         </div>
 

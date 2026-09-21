@@ -1,3 +1,5 @@
+import Lettres from './Lettres.jsx';
+
 const GROUPS = [
   {
     num: '01',
@@ -35,10 +37,12 @@ export default function Skills() {
   return (
     <section className="section" id="competences" aria-labelledby="titre-competences">
       <div className="wrap">
-        <div className="section-head reveal">
+        <div className="section-head reveal reveal--lettres">
           <span className="section-head__num">03</span>
-          <h2 className="section-head__title" id="titre-competences">
-            Compétences
+          <h2 className="section-head__title" id="titre-competences" aria-label="Compétences">
+            <span aria-hidden="true">
+              <Lettres texte="Compétences" />
+            </span>
           </h2>
           <span className="section-head__aside mono">Ce que je pratique</span>
         </div>

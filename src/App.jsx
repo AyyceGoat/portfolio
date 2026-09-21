@@ -9,10 +9,13 @@ import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
 import Globe from './globe/Globe.jsx';
 import { useReveal } from './hooks/useReveal.js';
+import { useAmorti } from './hooks/useAmorti.js';
 
 export default function App() {
   useReveal();
   const heroRef = useRef(null);
+  const shellRef = useRef(null);
+  useAmorti(shellRef);
 
   return (
     <>
@@ -26,7 +29,7 @@ export default function App() {
 
       <Nav />
 
-      <div className="shell">
+      <div className="shell" ref={shellRef}>
         <Hero innerRef={heroRef} />
 
         <main id="contenu">
