@@ -21,7 +21,7 @@ Aucun nom de client ni donnée d'exploitation n'apparaît dans ce dépôt.
 ## Démarrer
 
 ```bash
-npm install     # 19 paquets, aucune dépendance d'interface
+npm install     # 20 paquets : React, Vite et three.js
 npm run dev     # serveur de développement
 npm run build   # produit dist/
 npm run preview # sert le résultat du build
@@ -31,18 +31,45 @@ Node 20 ou plus récent.
 
 ## Parti pris techniques
 
-**Aucune bibliothèque d'animation.** Tout le mouvement est en CSS, piloté
-par `IntersectionObserver`. C'est ce qui permet de tenir l'objectif de
-fluidité sans alourdir la page.
+**Le mouvement de la page est en CSS**, piloté par `IntersectionObserver`.
+Seul le globe du hero utilise three.js, chargé après le premier affichage
+dans un fichier séparé. L'ondulation des captures est en WebGL brut : 2 ko,
+chargés au premier survol.
 
-**On n'anime que `transform` et `opacity`.** Aucune propriété qui
-déclenche un recalcul de mise en page n'est animée, nulle part. Mesuré sur
-la page complète, défilement continu de trois secondes :
+**Un globe en WebGL comme élément signature.** Des dizaines de milliers de
+points, uniquement sur les terres émergées, Abidjan seule allumée et des
+arcs vers douze villes. Shaders GLSL écrits à la main, sans bibliothèque de
+globe. Le masque des continents vient de Natural Earth (domaine public) :
+il est rasterisé puis embarqué, aucune ressource externe. Le rendu
+s'interrompt hors écran et quand l'onglet est masqué. Sans WebGL, ou en
+animation réduite, une image fixe le remplace et three.js n'est jamais
+téléchargé.
 
-| | durée médiane d'image | 95ᵉ centile | tâches longues |
-|---|---|---|---|
-| Poste de travail | 16,7 ms (60 i/s) | 16,8 ms | aucune |
-| Mobile, processeur bridé ×6 | 16,7 ms (60 i/s) | 33,3 ms | aucune |
+**Défilement amorti sur poste de travail.** Le contenu suit la position
+native avec un retard, par une simple translation. Désactivé au tactile, où
+le défilement natif est meilleur, et en animation réduite.
+Contrepartie assumée : le contenu étant fixe, le navigateur ne peut plus
+atteindre une ancre de lui-même. Les liens d'ancrage, l'arrivée directe sur
+une ancre et le déplacement du focus au clavier sont donc pris en charge
+explicitement dans `useAmorti`. Un `scrollIntoView()` appelé par du code
+tiers resterait sans effet tant que l'amorti est actif.
+
+**On n'anime que `transform` et `opacity`.** Aucune propriété qui déclenche
+un recalcul de mise en page n'est animée, nulle part.
+
+Mesures prises sur le build de production, GPU réel, après préchauffage
+complet de la page, médiane de cinq répétitions :
+
+| | durée médiane d'image | 95ᵉ centile |
+|---|---|---|
+| Poste de travail, globe actif | 16,7 ms (60 i/s) | 16,7 ms |
+| Poste de travail, défilement | 16,7 ms (60 i/s) | 16,7 ms |
+| Mobile, processeur bridé ×6 | 16,7 ms (60 i/s) | 16,8 ms |
+| Survol avec ondulation | 16,7 ms (60 i/s) | 16,8 ms |
+
+Un rendu du globe coûte 0,3 ms de processeur. Sur appareil modeste, sa
+densité est réduite, sa cadence plafonnée à 30 i/s, et il s'efface dès
+le début du défilement — le moment où la fluidité compte le plus.
 
 **`prefers-reduced-motion` est respecté.** Qui demande moins d'animation
 voit la page complète immédiatement : pas d'apparition différée, pas de
@@ -97,13 +124,16 @@ l'arbre d'accessibilité à la fois.
 ```
 public/
   captures/      captures des projets en ligne, en WebP
+  land-mask.png  masque des continents (Natural Earth, domaine public)
   fonts/         Archivo et IBM Plex Mono (WOFF2)
   CV-*.pdf       CV téléchargeable
 src/
   components/    Nav, Hero, About, Projects, ProjectCard,
                  Architecture, Skills, Contact, Footer
   data/          contenu des quatre projets
-  hooks/         useReveal, useStuckNav, useTilt
+  globe/         globe WebGL : scene, shaders GLSL, villes
+  effets/        ondulation WebGL des captures
+  hooks/         useReveal, useStuckNav, useTilt, useAmorti
   styles/        tokens, fonts, base, app
 netlify.toml     déploiement et en-têtes de sécurité
 ```
