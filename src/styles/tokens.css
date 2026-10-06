@@ -17,7 +17,7 @@
   /* Texte — contrastes mesures sur --c-bg, au-dela du seuil AA */
   --c-text: #EAEEF7;
   --c-text-2: #A4AFC4;
-  --c-text-3: #8E99AF;
+  --c-text-3: #96A1B8;
 
   /* Accent unique : lumiere d'etoile bleue */
   --c-accent: #8AB4FF;
@@ -28,7 +28,7 @@
   --c-accent-glow: rgba(110, 150, 255, 0.16);
 
   /* Typographie */
-  --f-titre: 'Unbounded', 'Archivo', system-ui, sans-serif;
+  --f-titre: 'Unbounded', 'Unbounded secours', 'Archivo', system-ui, sans-serif;
   --f-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
 

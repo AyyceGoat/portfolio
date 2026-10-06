@@ -16,7 +16,7 @@ export const projects = [
     shot: {
       src: '/captures/babi-games.webp',
       small: '/captures/babi-games-700.webp',
-      alt: "Page d'accueil de Babi Games : « Tu connais ton pays ? », avec les trois jeux Versus, Tier List et Juste Prix.",
+      alt: "Le Versus de Babi Games : un duel entre deux footballeurs ivoiriens à départager, en huitièmes de finale.",
     },
     desc:
       'Plateforme de mini-jeux au contenu ivoirien, installable depuis le navigateur et jouable hors ligne. Trois jeux autour de la culture du pays : duels de personnalités, classements et estimation de prix du quotidien.',
@@ -38,12 +38,13 @@ export const projects = [
     shot: {
       src: '/captures/echiquier.webp',
       small: '/captures/echiquier-700.webp',
-      alt: "Page d'accueil de l'Échiquier en production : « Jouez. Comprenez. Progressez. », avec une position de la partie de l'Opéra (Morphy, 1858).",
+      alt: "Jeu assisté de l'Échiquier : après 1.e4 e5, le professeur Ephraim commente le coup joué et laisse le choix de le reprendre ou de le garder.",
     },
     desc:
       "Application d'échecs adossée au moteur Stockfish, exécuté directement sur l'appareil du joueur : sans compte, sans publicité, et utilisable hors ligne. On affronte le moteur au niveau de son choix, on se fait corriger coup par coup, et l'on relit ses parties avec une explication en français plutôt qu'un chiffre.",
     points: [
       "Quatre façons de travailler : partie libre, jeu assisté commenté, analyse de position et apprentissage par exercices tirés de ses propres erreurs.",
+      'Jeu assisté : quatre professeurs aux styles distincts commentent chaque coup, l’évaluent et laissent la possibilité de le reprendre avant de le valider.',
       "Import d'une position par photo, par notation FEN ou par fichier PGN, pour éviter la saisie pièce par pièce.",
     ],
     stack: ['React', 'Stockfish', 'WebAssembly', 'Netlify'],
@@ -60,13 +61,14 @@ export const projects = [
     shot: {
       src: '/captures/nexus.webp',
       small: '/captures/nexus-700.webp',
-      alt: "Page d'accueil de NEXUS en production : « Mesurez vos aptitudes cognitives. », avec l'accès à l'évaluation et au classement.",
+      alt: "Page d'accueil de NEXUS : « Mesurez vos aptitudes cognitives. », avec le robot en trois dimensions qui suit le curseur.",
     },
     desc:
       "Plateforme d'évaluation des aptitudes cognitives : 35 questions, environ 25 minutes, puis un indice, une place sur cent personnes et un profil sur cinq aptitudes — matrices logiques, séries numériques, analogies verbales, rotation spatiale et mémoire de travail.",
     points: [
       'Questions tirées dans une banque de 770 items, pour ne jamais repasser deux fois la même épreuve, et un moteur de score conçu pour être statistiquement défendable plutôt qu’arbitraire.',
-      'Classement des meilleurs résultats, page d’entrée ramenée de 577 Ko à 3,3 Ko et navigation entièrement utilisable au clavier.',
+      'Section Apprendre : cinquante sujets de culture générale lus à voix haute par synthèse vocale, fiches des cent quatre-vingt-quinze pays et quiz de 464 questions en neuf domaines.',
+      'Classement public des meilleurs résultats, page d’entrée ramenée de 577 Ko à 3,3 Ko et navigation entièrement utilisable au clavier.',
     ],
     stack: ['React', 'Vite', 'TypeScript', 'Netlify'],
     links: {

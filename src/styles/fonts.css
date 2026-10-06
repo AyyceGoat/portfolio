@@ -63,3 +63,21 @@
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
+
+/* Secours au gabarit d'Unbounded.
+   Tant que la fonte de titrage n'est pas arrivee, le titre est compose
+   en Archivo — qui est un quart moins large. L'echange decalait alors
+   le hero. On reutilise le meme fichier, deja precharge, etire de 24,8 %
+   et dote des montants d'Unbounded : les deux occupent la meme place,
+   et l'arrivee de la vraie fonte ne deplace plus rien. */
+@font-face {
+  font-family: 'Unbounded secours';
+  src: url('/fonts/archivo-latin.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 124.8%;
+  ascent-override: 100%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}

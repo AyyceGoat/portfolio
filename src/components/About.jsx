@@ -1,7 +1,7 @@
 import Lettres from './Lettres.jsx';
 
 const FACTS = [
-  { label: 'Formation', value: 'Master 1 Informatique validé, Master 2 en préparation — AGITEL Formation, Abidjan' },
+  { label: 'Formation', value: 'Master 2 en développement d’applications web, en cours — AGITEL Formation, Abidjan' },
   { label: 'Recherche', value: 'CDI, CDD ou stage en développement web' },
   { label: 'Lieu', value: "Abidjan, Côte d'Ivoire — ouvert au travail à distance" },
   { label: 'Langues', value: 'Français courant, anglais technique' },
@@ -38,8 +38,9 @@ export default function About() {
           <div className="about__text reveal reveal--d2">
             <p>
               Je m’appelle <strong>Ahouet Yann Christ Emmanuel</strong>, et l’on m’appelle
-              Christ. Je suis développeur web à Abidjan, en Côte d’Ivoire, et j’achève un
-              Master en développement d’applications web à AGITEL Formation.
+              Christ. Je suis développeur web à Abidjan, en Côte d’Ivoire. Master 1 validé,
+              je prépare actuellement le Master 2 en développement d’applications web à
+              AGITEL Formation.
             </p>
             <p>
               Ce qui me caractérise le mieux : j’ai l’habitude de me retrouver seul face à un

@@ -44,7 +44,7 @@ export default function ProjectCard({ project, flip }) {
                 className="project__shot"
                 src={shot.src}
                 srcSet={`${shot.small} 700w, ${shot.src} 1400w`}
-                sizes="(min-width: 62rem) 46vw, 92vw"
+                sizes="(min-width: 62rem) 37rem, 92vw"
                 width="1400"
                 height="875"
                 loading="lazy"

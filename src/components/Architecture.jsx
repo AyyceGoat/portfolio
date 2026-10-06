@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+
 /**
  * Schema d'architecture du projet sous confidentialite.
  *
@@ -48,8 +50,25 @@ const LAYERS = [
 ];
 
 export default function Architecture() {
+  const archiRef = useRef(null);
+
+  /* Le flux ne circule que pendant qu'on regarde le schema : hors champ,
+     le decalage des pointilles repeindrait le trace pour personne. */
+  useEffect(() => {
+    const cible = archiRef.current;
+    if (!cible || typeof IntersectionObserver === 'undefined') {
+      if (cible) cible.classList.add('is-en-vue');
+      return undefined;
+    }
+    const obs = new IntersectionObserver(([e]) => {
+      cible.classList.toggle('is-en-vue', e.isIntersecting);
+    });
+    obs.observe(cible);
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <div className="archi">
+    <div className="archi" ref={archiRef}>
       {/* ---------- Trace, ecrans larges ---------- */}
       <svg
         className="archi__svg"

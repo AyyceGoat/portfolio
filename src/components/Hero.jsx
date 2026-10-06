@@ -12,7 +12,7 @@ export default function Hero() {
         <img
           src="/cosmos/planete-1200.webp"
           srcSet="/cosmos/planete-700.webp 700w, /cosmos/planete-1200.webp 1200w"
-          sizes="(min-width: 62rem) 52vw, 92vw"
+          sizes="(min-width: 62rem) min(44vw, 38rem), min(66vw, 26rem)"
           width="1200"
           height="1200"
           alt=""

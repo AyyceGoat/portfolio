@@ -76,15 +76,28 @@ export default function Cosmos() {
 
     // Les nebuleuses derivent lentement sur toute la longueur de la page :
     // on traverse le ciel en lisant. Seul transform est ecrit.
+    // Reecrire un transform identique suffit a salir le style et a
+    // relancer la passe de mise en forme pour rien. On ne pose que ce
+    // qui change reellement.
+    let dernierFond = '';
+    let dernierVoile = '';
     const surCalques = (px, py, defil) => {
       const avance = Math.min(1, Math.max(0, defil / course));
       if (nuees) nuees.majour(px, avance);
       const p = avance - 0.5;
       if (fondRef.current) {
-        fondRef.current.style.transform = `translate3d(${(-px * 10).toFixed(1)}px, ${(-p * 7 + py * 0.6).toFixed(2)}vh, 0)`;
+        const t = `translate3d(${(-px * 10).toFixed(1)}px, ${(-p * 7 + py * 0.6).toFixed(2)}vh, 0)`;
+        if (t !== dernierFond) {
+          fondRef.current.style.transform = t;
+          dernierFond = t;
+        }
       }
       if (voileRef.current) {
-        voileRef.current.style.transform = `translate3d(${(-px * 26).toFixed(1)}px, ${(-p * 22 + py * 1.2).toFixed(2)}vh, 0) scale(1.08)`;
+        const t = `translate3d(${(-px * 26).toFixed(1)}px, ${(-p * 22 + py * 1.2).toFixed(2)}vh, 0) scale(1.08)`;
+        if (t !== dernierVoile) {
+          voileRef.current.style.transform = t;
+          dernierVoile = t;
+        }
       }
     };
 

@@ -96,31 +96,72 @@ sur une ancre et le focus clavier sont pris en charge explicitement dans
 Build de production, GPU réel, page préchauffée, médiane de cinq
 répétitions :
 
-| | durée médiane d'image | 95ᵉ centile |
-|---|---|---|
-| Poste de travail, au repos | 16,7 ms (60 i/s) | 16,7 ms |
-| Poste de travail, défilement | 16,7 ms (60 i/s) | 16,8 ms |
-| Téléphone moyen (processeur ÷4), au repos | 16,7 ms (60 i/s) | 16,8 ms |
-| Téléphone moyen (processeur ÷4), défilement | 16,7 ms (60 i/s) | 16,8 ms |
-| Téléphone lent (processeur ÷6), défilement | 16,7 ms (60 i/s) | 33,3 ms |
+| | durée médiane d'image | 95ᵉ centile | images au-delà de 33 ms |
+|---|---|---|---|
+| Poste de travail, au repos | 16,7 ms (60 i/s) | 16,8 ms | 0 |
+| Poste de travail, défilement | 16,7 ms (60 i/s) | 16,8 ms | 0 |
+| Téléphone moyen (processeur ÷4), au repos | 16,7 ms (60 i/s) | 16,7 ms | 0 |
+| Téléphone moyen (processeur ÷4), défilement | 16,7 ms (60 i/s) | 16,7 ms | 0 |
+| Téléphone lent (processeur ÷6), défilement | 16,7 ms (60 i/s) | 16,8 ms | 2 |
 
-Les cinq répétitions donnent la même médiane à la décimale près : la
-mesure est stable, elle n'est pas une moyenne qui masque des à-coups.
+Les cinq répétitions donnent la même médiane à la décimale près, et
+l'intervalle entre la plus courte et la plus longue des médianes est nul :
+la mesure est stable, elle n'est pas une moyenne qui masque des à-coups.
+Même sur un téléphone lent, le défilement complet de la page ne laisse
+passer que deux images longues.
 
 Au repos, après dix secondes sans interaction, le téléphone consacre
-2,9 % de son fil principal à la page avec un processeur bridé quatre
-fois, et 0,2 % sans bridage : les deux couches WebGL cessent de dessiner,
-il ne reste que la dérive de la planète, confiée au compositeur. Sur
-poste de travail, le champ d'étoiles continue de tourner pour les étoiles
-filantes : 7,2 % du fil principal.
+2,2 % de son fil principal à la page avec un processeur bridé quatre
+fois : les deux couches WebGL cessent de dessiner, il ne reste que la
+dérive de la planète, confiée au compositeur. Sur poste de travail, le
+champ d'étoiles continue de tourner pour les étoiles filantes : 3,8 % du
+fil principal.
+
+Quatre coûts ont été supprimés après profilage de la trace :
+
+- Le défilement des pointillés du schéma d'architecture ne tourne que
+  lorsque la section est à l'écran ; hors champ, il repeignait le tracé à
+  chaque image sans rien montrer.
+- Les deux plans de parallaxe ne reçoivent une nouvelle transformation que
+  si elle diffère de la précédente, au lieu d'être réécrits à chaque image.
+- Le shader des nuées a une cadence propre sur téléphone : au plus une
+  peinture toutes les trente-deux millisecondes, et aucune si la lecture
+  n'a pas bougé.
+- Le niveau mobile dessine moins d'étoiles et une plaque de nuées plus
+  petite.
+
+## Chargement
+
+Réseau bridé à 1,6 Mbit/s avec 150 ms de latence, build de production :
+
+| | premier affichage | plus grande image | décalage cumulé |
+|---|---|---|---|
+| Poste de travail | 1,71 s | 1,78 s | 0,012 |
+| Téléphone (processeur ÷4) | 1,92 s | 1,92 s | 0 |
+
+Treize requêtes, 555 Ko au total : 270 Ko de script, 113 Ko de polices,
+106 Ko d'images, 32 Ko de styles.
+
+Les attributs `sizes` décrivent la largeur réellement occupée par chaque
+image, et non une approximation : le navigateur choisit la variante de
+700 px sur poste de travail là où il téléchargeait celle de 1200 ou de
+1400. Les images de projets sont passées de 166 à 106 Ko sans perte
+visible.
+
+La fonte de titrage est doublée d'un **repli au même gabarit** : le
+fichier Archivo, déjà préchargé, est redéclaré étiré de 24,8 % avec les
+montants d'Unbounded. Les deux occupent la même place, et l'arrivée de la
+vraie fonte ne déplace plus le titre — le décalage cumulé passe de 0,069
+à 0,012.
 
 ## Accessibilité
 
 - Aucune violation relevée par axe-core (WCAG 2.2 A et AA, plus les bonnes
   pratiques), sur poste de travail comme sur téléphone.
 - Contraste mesuré au pixel, texte par texte, sur le ciel réellement rendu
-  derrière lui : tout le texte visible dépasse le seuil AA, le plus faible
-  à 6,1:1.
+  derrière lui — luminance du fond prise au 95ᵉ centile, donc au pire cas :
+  les quarante-deux styles de texte dépassent le seuil AA sur poste de
+  travail comme sur téléphone, le plus faible à 4,89:1.
 - Navigation au clavier complète, focus toujours visible, lien d'évitement
   en première position.
 - Les titres découpés en lettres gardent leur texte entier pour les

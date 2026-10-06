@@ -47,14 +47,18 @@ export const REGLAGES = {
     // Les nebuleuses sont peintes bien en dessous de la resolution de
     // l'ecran : ce sont des nuages, le flou ne se voit pas, et le cout
     // du fragment shader s'effondre.
-    nuees: { facteur: 0.5, max: 1280 },
+    // pause : delai minimal entre deux peintures des nuees. Nul ici,
+    // le poste de travail peut les suivre image par image.
+    nuees: { facteur: 0.5, max: 1280, pause: 0 },
   },
   mobile: {
-    etoiles: 1700,
+    etoiles: 1400,
     dpr: 1.25,
     repos: 33,
     sommeil: 66,
     arret: 7000,
-    nuees: { facteur: 0.36, max: 760 },
+    // Les nuages sont lents et flous : les repeindre une image sur deux
+    // ne se voit pas, et rend sa moitie du budget au champ d'etoiles.
+    nuees: { facteur: 0.32, max: 700, pause: 32 },
   },
 };

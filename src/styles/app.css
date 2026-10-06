@@ -934,6 +934,13 @@ text.archi__chip {
 .archi__flux {
   stroke-dasharray: 3 11;
   animation: flux 1.9s linear infinite;
+  /* Un decalage de pointilles repeint le trace a chaque image. Hors
+     champ, cela coute sans rien montrer. */
+  animation-play-state: paused;
+}
+
+.archi.is-en-vue .archi__flux {
+  animation-play-state: running;
 }
 
 @media (prefers-reduced-motion: reduce) {

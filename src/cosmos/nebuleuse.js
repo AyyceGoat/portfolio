@@ -226,6 +226,8 @@ export function creerNuees(canvas, reglages) {
   let dessine = false;
   let dernierVoyage = -1;
   let dernierPtr = -9;
+  let dernierTemps = -1e9;
+  const pause = reglages.pause || 0;
 
   function peindre() {
     gl.uniform1f(u.uVoyage, voyage);
@@ -257,9 +259,15 @@ export function creerNuees(canvas, reglages) {
     majour(px, v) {
       voyage = v;
       ptrX = px;
-      if (Math.abs(voyage - dernierVoyage) > 0.0012 || Math.abs(ptrX - dernierPtr) > 0.012) {
-        peindre();
+      const bouge =
+        Math.abs(voyage - dernierVoyage) > 0.0012 || Math.abs(ptrX - dernierPtr) > 0.012;
+      if (!bouge) return;
+      if (pause) {
+        const t = performance.now();
+        if (t - dernierTemps < pause) return;
+        dernierTemps = t;
       }
+      peindre();
     },
     pret() {
       return dessine;
