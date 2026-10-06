@@ -1,7 +1,7 @@
 /* ------------------------------------------------------------------
    Jetons de conception — une seule source de verite pour le visuel.
-   Direction : espace profond. Fond nuit, nebuleuse bleue, lumiere
-   d'eclipse. L'accent reste un bleu d'etoile, jamais criard.
+   Direction : espace profond. Fond nuit, nebuleuses colorees, lumiere
+   des etoiles. L'accent reste un bleu d'etoile, jamais criard.
    ------------------------------------------------------------------ */
 
 :root {
@@ -28,6 +28,7 @@
   --c-accent-glow: rgba(110, 150, 255, 0.16);
 
   /* Typographie */
+  --f-titre: 'Unbounded', 'Archivo', system-ui, sans-serif;
   --f-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
 

@@ -38,8 +38,14 @@
 }
 
 .section-head__title {
+  font-family: var(--f-titre);
   font-size: var(--t-h2);
-  font-weight: 700;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  /* Lueur discrete : le titre est pris dans la lumiere du ciel. */
+  text-shadow:
+    0 0 1.6rem rgba(150, 190, 255, 0.28),
+    0 0 4.5rem rgba(90, 130, 255, 0.18);
 }
 
 .section-head__aside {
@@ -178,10 +184,29 @@
 }
 
 .hero__inner {
+  position: relative;
   width: 100%;
   max-width: var(--max-w);
   margin-inline: auto;
   padding-inline: var(--gutter);
+}
+
+/* Voile sous le texte du hero. Les nuees derriere peuvent etre vives ;
+   plutot que d'eteindre le ciel partout, on pose ici une ombre tres
+   douce, invisible a l'oeil, qui tient le contraste du texte. */
+.hero__inner::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -34% -34% -34% -60%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 72% 100% at 26% 50%,
+    rgba(3, 5, 11, 0.92),
+    rgba(3, 5, 11, 0.78) 34%,
+    rgba(3, 5, 11, 0.4) 58%,
+    transparent 82%
+  );
 }
 
 .hero__status {
@@ -247,11 +272,16 @@
 }
 
 .hero__name {
+  font-family: var(--f-titre);
   font-size: var(--t-hero);
-  font-weight: 800;
-  letter-spacing: -0.042em;
-  line-height: 0.94;
+  font-weight: 300;
+  letter-spacing: -0.028em;
+  line-height: 1.04;
   margin-bottom: clamp(1.5rem, 1rem + 1.6vw, 2.25rem);
+  /* Deux halos : un proche et net, un lointain et large. */
+  text-shadow:
+    0 0 1.8rem rgba(160, 195, 255, 0.3),
+    0 0 6rem rgba(95, 135, 255, 0.22);
 }
 
 .hero__name-line {
@@ -262,6 +292,9 @@
    l'appelle Christ, sans phrase d'explication. */
 .hero__given {
   color: var(--c-accent);
+  text-shadow:
+    0 0 1.4rem rgba(138, 180, 255, 0.55),
+    0 0 5rem rgba(110, 150, 255, 0.35);
 }
 
 .hero__role {
@@ -635,8 +668,11 @@
 }
 
 .project__title {
+  font-family: var(--f-titre);
   font-size: var(--t-h3);
-  font-weight: 700;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  text-shadow: 0 0 1.8rem rgba(150, 190, 255, 0.22);
 }
 
 .project__desc {
@@ -910,11 +946,15 @@ text.archi__chip {
    Competences
    ================================================================= */
 
+/* Six groupes : la largeur minimale est choisie pour que la grille
+   tombe sur 1, 2 ou 3 colonnes, jamais sur 4 — sans quoi la derniere
+   rangee laisse des cellules vides par lesquelles le ciel transparait.
+   La plaque sombre sous la couleur des filets ferme le cas limite. */
 .skills {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
   gap: 1px;
-  background: var(--c-line);
+  background: linear-gradient(var(--c-line), var(--c-line)) rgba(5, 8, 18, 0.72);
   border: 1px solid var(--c-line);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -1159,7 +1199,9 @@ a.contact__line:hover .contact__line-arrow {
   line-height: 1.7;
 }
 
-/* --- Ondulation au survol des captures --------------------------- */
+/* --- Survol des captures ----------------------------------------
+   Zoom tres leger et halo lumineux. Rien d'autre : la capture doit
+   rester lisible, c'est une piece du dossier. */
 
 .project__shot-wrap {
   position: relative;
@@ -1168,25 +1210,25 @@ a.contact__line:hover .contact__line-arrow {
   transition: transform var(--dur-slow) var(--ease-out);
 }
 
-/* Le canevas se superpose exactement a la capture. Il n'apparait
-   qu'une fois la premiere image calculee, et ne capte aucun clic. */
-.ondulation {
+.project__shot-wrap::after {
+  content: '';
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
   pointer-events: none;
-  transition: opacity 200ms var(--ease-soft);
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease-soft);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 200, 255, 0.28),
+    inset 0 0 3.5rem rgba(120, 165, 255, 0.22);
 }
 
-.ondulation.is-on {
+.project:hover .project__shot-wrap::after,
+.project:focus-within .project__shot-wrap::after {
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .project__shot-wrap,
-  .ondulation {
+  .project__shot-wrap {
     transition: none;
   }
 }
@@ -1213,6 +1255,7 @@ a.contact__line:hover .contact__line-arrow {
 .ciel__fond,
 .ciel__poussiere,
 .ciel__voile,
+.ciel__nuees,
 .ciel__champ {
   position: absolute;
 }
@@ -1229,21 +1272,37 @@ a.contact__line:hover .contact__line-arrow {
   transition: opacity 1.4s var(--ease-soft);
 }
 
+/* Le voile est un second plan de parallaxe, peint en degrades : il ne
+   coute pas un octet et il donne de la profondeur au repli CSS. */
 .ciel__voile {
   inset: -22vh -6vw;
-  background: url('/cosmos/voile-1600.webp') center / cover no-repeat;
-  opacity: 0.8;
+  opacity: 0.85;
   transform: scale(1.08);
+  background:
+    radial-gradient(ellipse 42% 34% at 24% 30%, rgba(118, 74, 210, 0.30), transparent 72%),
+    radial-gradient(ellipse 36% 46% at 78% 62%, rgba(26, 108, 190, 0.26), transparent 72%),
+    radial-gradient(ellipse 22% 18% at 58% 24%, rgba(226, 178, 108, 0.14), transparent 76%);
 }
 
 @media (max-width: 56rem) {
   .ciel__fond {
     background-image: url('/cosmos/fond-960.webp');
   }
+}
 
-  .ciel__voile {
-    background-image: url('/cosmos/voile-800.webp');
-  }
+/* Les nuees : six regions de l'espace traversees au defilement. Le
+   canvas est peint sous la resolution de l'ecran et etire — ce sont des
+   nuages, personne ne compte les pixels. */
+.ciel__nuees {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.6s var(--ease-out);
+}
+
+.ciel__nuees.is-vivant {
+  opacity: 1;
 }
 
 .ciel__champ {
@@ -1264,33 +1323,58 @@ a.contact__line:hover .contact__line-arrow {
   opacity: 0.22;
 }
 
-/* =================================================================
-   Hero — eclipse
-   ================================================================= */
-
-.hero__eclipse {
-  position: absolute;
-  z-index: -1;
-  top: 50%;
-  right: -14vw;
-  width: min(48vw, 42rem);
-  aspect-ratio: 1;
-  margin-top: calc(min(48vw, 42rem) / -2);
-  pointer-events: none;
+/* Les nuees calculees remplacent les plaques peintes : on les efface
+   plutot que de superposer deux nebuleuses. La classe est posee par le
+   composant, le :has n'est qu'un filet de securite. */
+.ciel--nuees .ciel__fond,
+.ciel:has(.ciel__nuees.is-vivant) .ciel__fond,
+.ciel--nuees .ciel__voile,
+.ciel:has(.ciel__nuees.is-vivant) .ciel__voile {
+  opacity: 0;
+  transition: opacity 1.6s var(--ease-out);
 }
 
-.hero__eclipse img {
+.ciel--nuees .ciel__poussiere,
+.ciel:has(.ciel__nuees.is-vivant) .ciel__poussiere {
+  opacity: 0.28;
+}
+
+/* =================================================================
+   Hero — la geante aux anneaux
+   ================================================================= */
+
+/* La planete se tient entiere dans l'ecran, sous la ligne du nom : les
+   anneaux ne doivent etre coupes ni par le bord ni par le titre. */
+.hero__planete {
+  position: absolute;
+  z-index: -1;
+  top: 58%;
+  right: -3vw;
+  width: min(44vw, 38rem);
+  aspect-ratio: 1;
+  margin-top: calc(min(44vw, 38rem) / -2);
+  pointer-events: none;
+  /* Entree finie, jouee des la premiere peinture, sans JavaScript. */
+  animation: planete-entree 3.2s 0.1s var(--ease-out) both;
+}
+
+/* La derive est portee par l'image, et par elle seule : deux animations
+   de transform sur un meme element empechent le navigateur de confier
+   le mouvement au compositeur. Il repeignait alors une image de 1200
+   pixels a chaque fil d'image — a lui seul, tout le cout de la page au
+   repos. Une seule animation, un seul calque promu, cout nul. */
+.hero__planete img {
   display: block;
   width: 100%;
   height: 100%;
-  /* Animation finie, jouee des la premiere peinture, sans JavaScript. */
-  animation: eclipse-entree 2.6s 0.15s var(--ease-out) both;
+  will-change: transform;
+  animation: planete-derive 34s 3.3s var(--ease-soft) infinite;
 }
 
-@keyframes eclipse-entree {
+@keyframes planete-entree {
   from {
     opacity: 0;
-    transform: scale(0.86) rotate(-8deg);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;
@@ -1298,18 +1382,39 @@ a.contact__line:hover .contact__line-arrow {
   }
 }
 
-/* Sur ecran etroit, l'eclipse se leve dans une bande reservee au-dessus
+@keyframes planete-derive {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-0.9%, -1.4%, 0);
+  }
+}
+
+/* Sur ecran etroit, la planete se leve dans une bande reservee au-dessus
    du texte : elle ne passe jamais derriere le titre. */
 @media (max-width: 62rem) {
   .hero {
     padding-top: clamp(16.5rem, 11rem + 22vw, 22rem);
   }
 
-  .hero__eclipse {
-    top: 3.4rem;
-    right: -12vw;
-    width: min(54vw, 22rem);
+  .hero__planete {
+    top: 2.2rem;
+    right: -16vw;
+    width: min(66vw, 26rem);
     margin-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__planete {
+    animation: planete-entree 0.01s both;
+  }
+
+  .hero__planete img {
+    animation: none;
+    will-change: auto;
   }
 }
 
@@ -1395,93 +1500,7 @@ a.contact__line:hover .contact__line-arrow {
   box-shadow: 0 30px 80px -40px rgba(60, 100, 220, 0.35);
 }
 
-/* =================================================================
-   Bouton de son
-   ================================================================= */
-
-.son {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 2.5rem;
-  padding: 0.4rem 0.85rem 0.4rem 0.7rem;
-  border: 1px solid var(--c-accent-line);
-  border-radius: 999px;
-  background: rgba(138, 180, 255, 0.07);
-  color: var(--c-text);
-  font-family: var(--f-mono);
-  font-size: var(--t-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-
-.son::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  box-shadow: 0 0 22px 2px rgba(138, 180, 255, 0.45);
-  opacity: 0;
-  transition: opacity var(--dur-mid) var(--ease-soft);
-  pointer-events: none;
-}
-
-.son:hover {
-  transform: translate3d(0, -1px, 0);
-}
-
-.son.is-actif {
-  background: var(--c-accent);
-  border-color: var(--c-accent);
-  color: var(--c-accent-ink);
-}
-
-.son.is-actif::after {
-  opacity: 1;
-}
-
-.son__icone {
-  flex: none;
-}
-
-.son__etat {
-  color: var(--c-text-3);
-}
-
-.son.is-actif .son__etat {
-  color: inherit;
-}
-
-@media (pointer: coarse) {
-  .son {
-    min-height: 2.75rem;
-  }
-}
-
-/* Sur telephone, le bouton se resume a son icone. Le mot « Son » reste
-   dans le nom accessible, simplement masque a l'oeil. */
 @media (max-width: 36rem) {
-  .son__etat {
-    display: none;
-  }
-
-  .son__texte {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  .son {
-    width: 2.75rem;
-    padding: 0;
-    justify-content: center;
-  }
-
   .nav__links {
     gap: 0.95rem;
   }
@@ -1630,8 +1649,26 @@ a.contact__line:hover .contact__line-arrow {
 }
 
 .signal__lieu {
-  margin-top: 1.25rem;
-  color: var(--c-text-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0 0 1.5rem;
+  font-family: var(--f-titre);
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2.1rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--c-text);
+  text-shadow: 0 0 2.2rem rgba(140, 180, 255, 0.3);
+}
+
+.signal__lieu span {
+  font-family: var(--f-mono);
+  font-size: var(--t-mono);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  text-shadow: none;
 }
 
 @media (max-width: 30rem) {
@@ -1640,111 +1677,142 @@ a.contact__line:hover .contact__line-arrow {
   }
 }
 
+
+/* --- Portee : fuseaux horaires et faits ---------------------------
+   La barre est un SVG : les rectangles portent des attributs x et
+   width, jamais d'attribut style — la CSP l'interdit. */
+
+.signal__portee {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
 .signal__intro {
+  margin: 0 0 2.25rem;
   color: var(--c-text-2);
-  max-width: 46ch;
-  line-height: 1.7;
+  font-size: var(--t-body);
+  line-height: 1.75;
+  max-width: 44ch;
 }
 
-.signal__compteur {
-  margin: 1.1rem 0 0.4rem;
-  font-size: clamp(2rem, 1.2rem + 3.6vw, 3.6rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  color: var(--c-text);
-  font-variant-numeric: tabular-nums;
-  /* Le texte change dix fois par seconde : on l'isole pour que le
-     recalcul ne deborde jamais sur le reste de la page. */
-  contain: layout paint;
-  min-height: 1.1em;
-  overflow-wrap: anywhere;
-}
-
-.signal__compteur span {
-  background: linear-gradient(100deg, #fff 20%, var(--c-accent) 80%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.signal__depuis {
-  text-transform: none;
-  letter-spacing: 0.04em;
-  margin-bottom: 2rem;
-}
-
-.signal__depuis span {
-  font-variant-numeric: tabular-nums;
-}
-
-.signal__jalons {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--c-line);
-}
-
-.signal__jalons li {
-  display: grid;
-  grid-template-columns: 1.25rem 1fr auto;
-  grid-template-areas:
-    "repere nom duree"
-    "repere distance duree";
-  column-gap: 0.9rem;
-  align-items: center;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--c-line-soft);
-}
-
-.signal__repere {
-  grid-area: repere;
-  position: relative;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 1px solid var(--c-text-3);
-}
-
-.signal__repere::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 50%;
-  background: var(--c-accent);
-  box-shadow: 0 0 14px 2px rgba(138, 180, 255, 0.7);
-  opacity: 0;
-  transform: scale(0.3);
-  transition:
-    opacity 600ms var(--ease-out),
-    transform 600ms var(--ease-out);
-}
-
-.signal__jalons li.is-atteint .signal__repere::after {
-  opacity: 1;
-  transform: none;
-}
-
-.signal__nom {
-  grid-area: nom;
+.signal__intro strong {
   color: var(--c-text);
   font-weight: 600;
 }
 
-.signal__distance {
-  grid-area: distance;
-  color: var(--c-text-3);
-  font-size: 0.9rem;
+.signal__fuseaux {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.signal__duree {
-  grid-area: duree;
-  text-transform: none;
-  letter-spacing: 0.04em;
-  color: var(--c-text-2);
+.signal__fuseaux li {
+  display: grid;
+  grid-template-columns: 7rem 4.5rem 1fr 3rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.signal__ville {
+  color: var(--c-text);
+  font-size: 0.975rem;
+}
+
+.signal__ville-heure {
+  color: var(--c-text-3);
+  font-size: var(--t-mono);
   font-variant-numeric: tabular-nums;
 }
 
-.signal__jalons li.is-atteint .signal__duree {
+.signal__barre {
+  display: block;
+  width: 100%;
+  height: 0.85rem;
+  overflow: visible;
+}
+
+.signal__piste {
+  fill: rgba(150, 175, 255, 0.12);
+}
+
+.signal__plage {
+  fill: rgba(150, 180, 255, 0.26);
+}
+
+.signal__recouvre {
+  fill: var(--c-accent);
+  filter: drop-shadow(0 0 5px rgba(138, 180, 255, 0.65));
+}
+
+.signal__commun {
   color: var(--c-accent);
+  font-size: var(--t-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.signal__echelle {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.6rem 0 0;
+  padding-left: calc(7rem + 4.5rem + 1.5rem);
+  padding-right: 3.75rem;
+  color: var(--c-text-3);
+  font-size: var(--t-mono);
+}
+
+.signal__legende {
+  margin: 1rem 0 0;
+  color: var(--c-text-3);
+  font-size: var(--t-small);
+  line-height: 1.6;
+  max-width: 46ch;
+}
+
+.signal__faits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 2rem;
+  margin: 2.5rem 0 0;
+  padding-top: 2rem;
+  border-top: 1px solid var(--c-line);
+}
+
+.signal__faits dt {
+  margin-bottom: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: var(--t-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+}
+
+.signal__faits dd {
+  margin: 0;
+  color: var(--c-text);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 40rem) {
+  .signal__fuseaux li {
+    grid-template-columns: 5.5rem 1fr 2.75rem;
+  }
+
+  .signal__ville-heure {
+    display: none;
+  }
+
+  .signal__echelle {
+    padding-left: 6.25rem;
+    padding-right: 3.5rem;
+  }
+
+  .signal__faits {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
 }

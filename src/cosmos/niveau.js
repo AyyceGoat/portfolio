@@ -38,6 +38,23 @@ export function choisirNiveau() {
 }
 
 export const REGLAGES = {
-  complet: { etoiles: 5200, dpr: 1.75, repos: 33, sommeil: 50, arret: 0 },
-  mobile: { etoiles: 1700, dpr: 1.25, repos: 33, sommeil: 66, arret: 7000 },
+  complet: {
+    etoiles: 5200,
+    dpr: 1.75,
+    repos: 33,
+    sommeil: 50,
+    arret: 0,
+    // Les nebuleuses sont peintes bien en dessous de la resolution de
+    // l'ecran : ce sont des nuages, le flou ne se voit pas, et le cout
+    // du fragment shader s'effondre.
+    nuees: { facteur: 0.5, max: 1280 },
+  },
+  mobile: {
+    etoiles: 1700,
+    dpr: 1.25,
+    repos: 33,
+    sommeil: 66,
+    arret: 7000,
+    nuees: { facteur: 0.36, max: 760 },
+  },
 };

@@ -1,5 +1,4 @@
 import { useStuckNav } from '../hooks/useStuckNav.js';
-import BoutonSon from '../son/BoutonSon.jsx';
 
 const LINKS = [
   { href: '#profil', label: 'Profil', optional: true },
@@ -35,9 +34,6 @@ export default function Nav() {
               </a>
             </li>
           ))}
-          <li>
-            <BoutonSon />
-          </li>
         </ul>
       </div>
     </nav>

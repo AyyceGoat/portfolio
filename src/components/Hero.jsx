@@ -5,14 +5,16 @@ const STACK = ['PHP', 'Laravel', 'JavaScript', 'React', 'MySQL', 'Python', 'Git'
 export default function Hero() {
   return (
     <header className="hero" id="haut">
-      {/* Eclipse : la lumiere d'une etoile cachee, en bord d'ecran. */}
-      <div className="hero__eclipse" aria-hidden="true">
+      {/* Une geante gazeuse et ses anneaux, en bord d'ecran. Image
+          calculee par shader hors ligne : rien a animer au chargement,
+          et elle est la meme sans JavaScript. */}
+      <div className="hero__planete" aria-hidden="true">
         <img
-          src="/cosmos/couronne-900.webp"
-          srcSet="/cosmos/couronne-520.webp 520w, /cosmos/couronne-900.webp 900w"
-          sizes="(min-width: 62rem) 46vw, 90vw"
-          width="900"
-          height="900"
+          src="/cosmos/planete-1200.webp"
+          srcSet="/cosmos/planete-700.webp 700w, /cosmos/planete-1200.webp 1200w"
+          sizes="(min-width: 62rem) 52vw, 92vw"
+          width="1200"
+          height="1200"
           alt=""
           decoding="async"
           fetchPriority="low"
@@ -37,7 +39,7 @@ export default function Hero() {
             <span className="hero__given">
               <Lettres texte="Christ" depart={10} />
             </span>
-            <span className="lettre-espace">{'\u00A0'}</span>
+            {' '}
             <Lettres texte="Emmanuel" depart={16} />
           </span>
         </h1>

@@ -32,25 +32,38 @@ Node 20.11 ou plus récent.
 
 ## Parti pris
 
-**Le ciel.** Trois plans peints en CSS — nébuleuse, poussière d'étoiles,
-voile lumineux — sont présents dès le premier octet. Par-dessus, un champ
-d'étoiles en WebGL brut, sans bibliothèque : parallaxe au curseur et au
-défilement, scintillement, et un étirement des étoiles en traînées
-proportionnel à la vitesse de défilement, renforcé au passage de chaque
-section. À l'ouverture, les étoiles jaillissent du centre. Les visuels de
-nébuleuse et l'éclipse du hero sont calculés par shader puis exportés en
-WebP.
+**Le ciel.** Deux plans peints en CSS — une plaque de nébuleuse et une
+poussière d'étoiles — sont présents dès le premier octet. Par-dessus, deux
+couches WebGL brut, sans bibliothèque, chargées après le premier affichage.
 
-**Le son.** Une ambiance discrète et de légers effets au survol et entre
-les sections, entièrement synthétisés par la Web Audio API — aucun fichier
-audio. Coupé à chaque visite, activé uniquement par le bouton de la barre
-de navigation. Le moteur n'est téléchargé qu'au premier clic ; coupé, le
-contexte audio est suspendu et ne calcule plus rien.
+Les *nuées* sont un seul quadrilatère peint par un shader : trois plans de
+nuages à des vitesses différentes, des galaxies spirales, des cœurs
+lumineux. La palette se déplace avec la position de lecture, si bien que
+chaque section a son propre paysage — bleu d'encre au hero, violet au
+profil, bleu profond aux projets, magenta aux compétences, turquoise à
+Signal, pourpre et or au contact. On descend d'une région de l'espace à
+une autre. Le shader ne se repeint que si la lecture a réellement bougé :
+page immobile, coût nul.
 
-**Signal.** Les coordonnées réelles d'Abidjan, l'heure locale, et la
-distance qu'a parcourue, depuis l'ouverture de la page, un signal lumineux
-parti d'Abidjan — avec ses jalons : la Lune, Vénus, le Soleil, Mars,
-Jupiter, Voyager 1.
+Le *champ d'étoiles* ajoute la parallaxe au curseur et au défilement, le
+scintillement, et un étirement des étoiles en traînées proportionnel à la
+vitesse de défilement, renforcé au passage de chaque section. À
+l'ouverture, les étoiles jaillissent du centre.
+
+La plaque de repli est calculée hors ligne **avec le même shader** que les
+nuées, puis exportée en WebP : le premier affichage et le rendu animé sont
+la même image. La géante aux anneaux du hero est peinte de la même façon.
+
+Une nuance de moteur mérite d'être notée : une toile WebGL que l'on ne
+peint qu'au besoin doit conserver son tampon de dessin. Sans cela, WebKit
+le vide après chaque composition et la page immobile se retrouve devant un
+ciel noir, là où Chromium garde la dernière image. Vérifié sur les deux.
+
+**Signal.** Ce que la position d'Abidjan change concrètement pour une
+équipe. Abidjan vit à UTC+0 toute l'année : les coordonnées réelles,
+l'heure locale, et pour Paris, Londres et Montréal l'heure qu'il y est et
+le nombre d'heures de travail réellement communes, calculées à partir du
+décalage du jour relevé par `Intl` — pas d'une table figée.
 
 **Rendu au build.** La page est rendue côté serveur au moment du build et
 injectée dans le HTML : elle est lisible avant tout JavaScript, et même
@@ -85,13 +98,21 @@ répétitions :
 
 | | durée médiane d'image | 95ᵉ centile |
 |---|---|---|
-| Poste de travail, au repos | 16,7 ms (60 i/s) | 16,8 ms |
+| Poste de travail, au repos | 16,7 ms (60 i/s) | 16,7 ms |
 | Poste de travail, défilement | 16,7 ms (60 i/s) | 16,8 ms |
+| Téléphone moyen (processeur ÷4), au repos | 16,7 ms (60 i/s) | 16,8 ms |
 | Téléphone moyen (processeur ÷4), défilement | 16,7 ms (60 i/s) | 16,8 ms |
 | Téléphone lent (processeur ÷6), défilement | 16,7 ms (60 i/s) | 33,3 ms |
 
-Au repos, après dix secondes sans interaction, le téléphone consacre moins
-de 3 % de son fil principal à la page.
+Les cinq répétitions donnent la même médiane à la décimale près : la
+mesure est stable, elle n'est pas une moyenne qui masque des à-coups.
+
+Au repos, après dix secondes sans interaction, le téléphone consacre
+2,9 % de son fil principal à la page avec un processeur bridé quatre
+fois, et 0,2 % sans bridage : les deux couches WebGL cessent de dessiner,
+il ne reste que la dérive de la planète, confiée au compositeur. Sur
+poste de travail, le champ d'étoiles continue de tourner pour les étoiles
+filantes : 7,2 % du fil principal.
 
 ## Accessibilité
 
@@ -103,7 +124,9 @@ de 3 % de son fil principal à la page.
 - Navigation au clavier complète, focus toujours visible, lien d'évitement
   en première position.
 - Les titres découpés en lettres gardent leur texte entier pour les
-  lecteurs d'écran. Le bouton de son expose son état par `aria-pressed`.
+  lecteurs d'écran, et un mot n'est jamais coupé en fin de ligne. Les
+  barres de recouvrement horaire de Signal portent un libellé en toutes
+  lettres.
 
 ## Sécurité
 
@@ -114,8 +137,9 @@ de 3 % de son fil principal à la page.
 - Politique de sécurité stricte, sans `unsafe-inline` ni `unsafe-eval`,
   vérifiée sur le site construit. Le build échoue si le rendu serveur
   contient un attribut `style`.
-- Aucune ressource externe : polices, visuels et sons sont produits ou
-  servis par le site lui-même.
+- Aucune ressource externe : polices et visuels sont produits ou servis
+  par le site lui-même. Aucun son, aucun fichier audio, aucun contexte
+  Web Audio.
 - L'adresse e-mail n'apparaît pas en clair dans les fichiers servis.
 - `npm audit` : aucune vulnérabilité.
 
@@ -123,14 +147,12 @@ de 3 % de son fil principal à la page.
 
 ```
 public/
-  cosmos/        nebuleuses, poussiere d'etoiles, eclipse (WebP)
+  cosmos/        plaque de nebuleuse, poussiere d'etoiles, planete (WebP)
   captures/      captures des projets en production
-  fonts/         Archivo et IBM Plex Mono (WOFF2)
+  fonts/         Unbounded, Archivo et IBM Plex Mono (WOFF2)
 src/
-  cosmos/        ciel : niveaux de rendu, champ d'etoiles WebGL
-  son/           moteur Web Audio et bouton
+  cosmos/        ciel : niveaux de rendu, nuees et champ d'etoiles WebGL
   components/    sections de la page
-  effets/        ondulation WebGL des captures
   hooks/         apparitions, defilement amorti, inclinaison
   entry-server   rendu au build
 scripts/         injection du rendu dans dist/index.html
@@ -144,5 +166,5 @@ Ne sont **pas** couverts par cette licence : le contenu rédactionnel, le
 CV, le portrait et les captures d'écran des projets, qui restent la
 propriété de leur auteur.
 
-Les fontes Archivo et IBM Plex Mono sont distribuées sous
+Les fontes Unbounded, Archivo et IBM Plex Mono sont distribuées sous
 [SIL Open Font License 1.1](https://scripts.sil.org/OFL).

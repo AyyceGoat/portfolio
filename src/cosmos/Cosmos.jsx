@@ -9,15 +9,23 @@ import { choisirNiveau, REGLAGES } from './niveau.js';
  * le fond de nebuleuse, une poussiere d'etoiles, un voile lumineux. La
  * page n'est donc jamais vide, meme avant le moindre JavaScript.
  *
- * Par-dessus, si l'appareil le permet, un champ d'etoiles WebGL ajoute
- * la profondeur, la parallaxe et les sauts en vitesse lumiere. Il est
- * charge apres le premier affichage, dans un fichier separe.
+ * Par-dessus, si l'appareil le permet, deux couches WebGL chargees apres
+ * le premier affichage prennent le relais :
+ *
+ *  - les nuees, un seul quad peint par shader, qui traversent six regions
+ *    de l'espace au fil du defilement : une par section ;
+ *  - le champ d'etoiles, sa parallaxe et ses sauts en vitesse lumiere.
+ *
+ * Les nuees ne se repeignent que si la position de lecture a reellement
+ * bouge : page immobile, cout nul.
  */
 export default function Cosmos() {
   const canvasRef = useRef(null);
+  const nueesRef = useRef(null);
   const fondRef = useRef(null);
   const voileRef = useRef(null);
   const [vivant, setVivant] = useState(false);
+  const [nuageux, setNuageux] = useState(false);
 
   /* --- Passage d'une section a l'autre ------------------------------
      Signal commun au champ d'etoiles (impulsion de vitesse lumiere) et
@@ -54,6 +62,7 @@ export default function Cosmos() {
     if (niveau === 'fixe') return undefined;
 
     let champ = null;
+    let nuees = null;
     let actif = true;
     let course = 1;
 
@@ -68,7 +77,9 @@ export default function Cosmos() {
     // Les nebuleuses derivent lentement sur toute la longueur de la page :
     // on traverse le ciel en lisant. Seul transform est ecrit.
     const surCalques = (px, py, defil) => {
-      const p = Math.min(1, Math.max(0, defil / course)) - 0.5;
+      const avance = Math.min(1, Math.max(0, defil / course));
+      if (nuees) nuees.majour(px, avance);
+      const p = avance - 0.5;
       if (fondRef.current) {
         fondRef.current.style.transform = `translate3d(${(-px * 10).toFixed(1)}px, ${(-p * 7 + py * 0.6).toFixed(2)}vh, 0)`;
       }
@@ -84,8 +95,15 @@ export default function Cosmos() {
 
     const demarrer = async () => {
       try {
-        const { creerChamp } = await import('./champ.js');
+        const [{ creerChamp }, { creerNuees }] = await Promise.all([
+          import('./champ.js'),
+          import('./nebuleuse.js'),
+        ]);
         if (!actif || !canvasRef.current) return;
+        if (nueesRef.current) {
+          nuees = creerNuees(nueesRef.current, REGLAGES[niveau].nuees);
+          if (nuees) setNuageux(true);
+        }
         champ = creerChamp(canvasRef.current, REGLAGES[niveau], {
           intro: window.scrollY < 80,
           surCalques,
@@ -95,6 +113,11 @@ export default function Cosmos() {
             if (champ) champ.detruire();
             champ = null;
             setVivant(false);
+            if (nuees) {
+              nuees.detruire();
+              nuees = null;
+              setNuageux(false);
+            }
           },
         });
         if (!champ) {
@@ -121,14 +144,16 @@ export default function Cosmos() {
       window.removeEventListener('cosmos:passage', surPassage);
       if (ro) ro.disconnect();
       if (champ) champ.detruire();
+      if (nuees) nuees.detruire();
     };
   }, []);
 
   return (
-    <div className="ciel" aria-hidden="true">
+    <div className={`ciel${nuageux ? ' ciel--nuees' : ''}`} aria-hidden="true">
       <div className="ciel__fond" ref={fondRef} />
       <div className="ciel__poussiere" />
       <div className="ciel__voile" ref={voileRef} />
+      <canvas className={`ciel__nuees${nuageux ? ' is-vivant' : ''}`} ref={nueesRef} />
       <canvas className={`ciel__champ${vivant ? ' is-vivant' : ''}`} ref={canvasRef} />
     </div>
   );

@@ -199,8 +199,11 @@ button {
   transition-delay: calc(var(--i, 0) * 26ms);
 }
 
-.lettre-espace {
+/* Un mot est une boite insecable ; l'espace qui le suit reste un point
+   de coupure legitime. */
+.lettre-mot {
   display: inline-block;
+  white-space: nowrap;
 }
 
 .anime .reveal--lettres:not(.is-visible) .lettre {

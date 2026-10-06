@@ -2,104 +2,108 @@ import { useEffect, useRef, useState } from 'react';
 
 import Lettres from './Lettres.jsx';
 
-const C_KM_S = 299792.458; // vitesse de la lumiere, km/s
+/* ------------------------------------------------------------------
+   Signal — ce que la position d'Abidjan change concretement pour une
+   equipe. Abidjan vit a UTC+0 toute l'annee : l'heure locale de Christ
+   est l'heure universelle, ce qui fait de la Cote d'Ivoire un fuseau
+   commode pour l'Europe comme pour l'Amerique du Nord.
 
-// Distances moyennes depuis la Terre, arrondies. Voyager 1 est la sonde
-// la plus lointaine jamais lancee ; sa distance grandit chaque jour.
-const JALONS = [
-  { nom: 'La Lune', detail: '384 400 km', km: 384400 },
-  { nom: 'Vénus, au plus près', detail: '38 millions de km', km: 38e6 },
-  { nom: 'Le Soleil', detail: '149,6 millions de km', km: 149.6e6 },
-  { nom: 'Mars, en moyenne', detail: '225 millions de km', km: 225e6 },
-  { nom: 'Jupiter, en moyenne', detail: '778 millions de km', km: 778e6 },
-  { nom: 'Voyager 1', detail: 'plus de 25 milliards de km', km: 25.5e9 },
+   Journee de travail retenue : 8 h - 19 h, heure d'Abidjan.
+   ------------------------------------------------------------------ */
+
+const MOI = { debut: 8, fin: 19 };
+
+// Les decalages par defaut sont ceux de l'heure d'hiver. Ils servent au
+// rendu du serveur et au premier rendu du client — identiques de part et
+// d'autre, donc aucune divergence a l'hydratation. Le decalage reel du
+// jour est releve juste apres, par Intl.
+const VILLES = [
+  { nom: 'Paris', zone: 'Europe/Paris', off: 1 },
+  { nom: 'Londres', zone: 'Europe/London', off: 0 },
+  { nom: 'Montréal', zone: 'America/Toronto', off: -5 },
 ];
 
-function duree(s) {
-  if (s < 60) return `${s.toFixed(1).replace('.', ',')} s`;
-  if (s < 3600) {
-    const m = Math.floor(s / 60);
-    return `${m} min ${String(Math.floor(s % 60)).padStart(2, '0')} s`;
+const FAITS = [
+  { dt: 'Disponibilité', dd: 'CDI, CDD ou stage — dès maintenant' },
+  { dt: 'Modalité', dd: 'Sur place à Abidjan, ou à distance' },
+  { dt: 'Langues', dd: 'Français courant, anglais technique' },
+  { dt: 'Réponse', dd: 'Sous 24 heures' },
+];
+
+/** Decalage horaire reel d'une zone, en heures, releve par Intl. */
+function decalage(zone, defaut) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: zone,
+      timeZoneName: 'shortOffset',
+    }).formatToParts(new Date());
+    const nom = parts.find((p) => p.type === 'timeZoneName');
+    if (!nom) return defaut;
+    if (nom.value === 'GMT') return 0;
+    const m = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(nom.value);
+    if (!m) return defaut;
+    return (m[1] === '-' ? -1 : 1) * (Number(m[2]) + Number(m[3] || 0) / 60);
+  } catch (e) {
+    return defaut;
   }
-  const h = Math.floor(s / 3600);
-  return `${h} h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')} min`;
 }
 
-function trajet(km) {
-  return duree(km / C_KM_S);
+/**
+ * Heures de travail communes avec une ville, exprimees dans mon horloge.
+ * La fenetre de l'autre (9 h - 18 h chez elle) est ramenee a UTC+0, puis
+ * decalee d'un tour de cadran si cela donne un meilleur recouvrement.
+ */
+function commun(off) {
+  let meilleur = { debut: MOI.debut, fin: MOI.debut };
+  for (const tour of [-24, 0, 24]) {
+    const a = Math.max(MOI.debut, 9 - off + tour);
+    const b = Math.min(MOI.fin, 18 - off + tour);
+    if (b - a > meilleur.fin - meilleur.debut) meilleur = { debut: a, fin: b };
+  }
+  return meilleur;
+}
+
+function horloge(zone) {
+  try {
+    return new Intl.DateTimeFormat('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: zone,
+    }).format(new Date());
+  } catch (e) {
+    return '--:--';
+  }
 }
 
 export default function Signal() {
-  const compteurRef = useRef(null);
-  const tempsRef = useRef(null);
-  const jalonsRef = useRef(null);
+  const [villes, setVilles] = useState(() => VILLES.map((v) => ({ ...v, heure: null })));
+  const [heure, setHeure] = useState(null);
   const baliseRef = useRef(null);
-  const [heure, setHeure] = useState('--:--');
 
-  /* Heure d'Abidjan (UTC+0, sans heure d'ete). */
+  /* La balise ne s'anime que pendant qu'on la regarde. */
   useEffect(() => {
-    const fmt = new Intl.DateTimeFormat('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'Africa/Abidjan',
+    const cible = baliseRef.current;
+    if (!cible || typeof IntersectionObserver === 'undefined') {
+      if (cible) cible.classList.add('is-en-vue');
+      return undefined;
+    }
+    const obs = new IntersectionObserver(([e]) => {
+      cible.classList.toggle('is-en-vue', e.isIntersecting);
     });
-    const maj = () => setHeure(fmt.format(new Date()));
-    maj();
-    const id = window.setInterval(maj, 15000);
-    return () => window.clearInterval(id);
+    obs.observe(cible.closest('section'));
+    return () => obs.disconnect();
   }, []);
 
-  /* Le signal part a l'ouverture de la page. On n'ecrit que du texte, dans
-     un bloc isole (contain) a chiffres de chasse fixe : aucun recalcul de
-     mise en page ne deborde sur le reste du document. */
   useEffect(() => {
-    const depart = performance.now();
-    const nombre = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
-    const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const items = jalonsRef.current ? Array.from(jalonsRef.current.children) : [];
-    let id = 0;
-    let enVue = false;
-
     const maj = () => {
-      const s = (performance.now() - depart) / 1000;
-      const km = s * C_KM_S;
-      // Separateur de milliers : espace insecable ordinaire. L'espace fine
-      // insecable renvoyee par Intl n'existe pas dans toutes les polices.
-      const texte = nombre.format(km).replace(/\u202f/g, '\u00a0');
-      if (compteurRef.current) compteurRef.current.textContent = `${texte}\u00a0km`;
-      if (tempsRef.current) tempsRef.current.textContent = duree(s);
-      items.forEach((li, i) => {
-        if (km >= JALONS[i].km && !li.classList.contains('is-atteint')) li.classList.add('is-atteint');
-      });
+      setHeure(horloge('Africa/Abidjan'));
+      setVilles(
+        VILLES.map((v) => ({ ...v, off: decalage(v.zone, v.off), heure: horloge(v.zone) }))
+      );
     };
-
-    const lancer = () => {
-      window.clearInterval(id);
-      if (!enVue || document.visibilityState === 'hidden') return;
-      maj();
-      id = window.setInterval(maj, reduit ? 1000 : 100);
-    };
-
-    const obs =
-      typeof IntersectionObserver !== 'undefined'
-        ? new IntersectionObserver(([e]) => {
-            enVue = e.isIntersecting;
-            if (baliseRef.current) baliseRef.current.classList.toggle('is-en-vue', enVue);
-            lancer();
-          })
-        : null;
-    if (obs && baliseRef.current) obs.observe(baliseRef.current.closest('section'));
-    else {
-      enVue = true;
-      lancer();
-    }
-    document.addEventListener('visibilitychange', lancer);
-
-    return () => {
-      window.clearInterval(id);
-      if (obs) obs.disconnect();
-      document.removeEventListener('visibilitychange', lancer);
-    };
+    maj();
+    const id = window.setInterval(maj, 30000);
+    return () => window.clearInterval(id);
   }, []);
 
   return (
@@ -127,6 +131,11 @@ export default function Signal() {
               <span className="signal__point" />
             </div>
 
+            <p className="signal__lieu">
+              Abidjan
+              <span>Côte d’Ivoire</span>
+            </p>
+
             <dl className="signal__coord">
               <div>
                 <dt>Latitude</dt>
@@ -139,35 +148,78 @@ export default function Signal() {
               <div>
                 <dt>Heure locale</dt>
                 <dd>
-                  <span className="signal__heure">{heure}</span> <span className="signal__fuseau">UTC+0</span>
+                  <span className="signal__heure">{heure || '--:--'}</span>{' '}
+                  <span className="signal__fuseau">UTC+0</span>
                 </dd>
               </div>
             </dl>
-            <p className="signal__lieu">Abidjan, Côte d’Ivoire</p>
           </div>
 
-          <div className="signal__trajet reveal reveal--d2">
+          <div className="signal__portee reveal reveal--d2">
             <p className="signal__intro">
-              À l’instant où vous avez ouvert cette page, un signal lumineux est parti d’Abidjan
-              vers l’espace. Il a déjà parcouru&nbsp;:
-            </p>
-            <p className="signal__compteur">
-              <span ref={compteurRef}>0 km</span>
-            </p>
-            <p className="signal__depuis mono">
-              en <span ref={tempsRef}>0,0 s</span> — à 299 792 km par seconde
+              Abidjan vit à <strong>UTC+0</strong>, sans changement d’heure. Mes journées
+              recouvrent presque entièrement celles de l’Europe et rejoignent encore la
+              matinée nord-américaine&nbsp;: travailler depuis ici ne coûte à une équipe
+              presque aucune heure décalée.
             </p>
 
-            <ol className="signal__jalons" ref={jalonsRef}>
-              {JALONS.map((j) => (
-                <li key={j.nom}>
-                  <span className="signal__repere" aria-hidden="true" />
-                  <span className="signal__nom">{j.nom}</span>
-                  <span className="signal__distance">{j.detail}</span>
-                  <span className="signal__duree mono">{trajet(j.km)}</span>
-                </li>
+            <ul className="signal__fuseaux">
+              {villes.map((v) => {
+                const c = commun(v.off);
+                const largeur = c.fin - c.debut;
+                return (
+                  <li key={v.nom}>
+                    <span className="signal__ville">{v.nom}</span>
+                    <span className="signal__ville-heure mono">{v.heure || '--:--'}</span>
+                    <svg
+                      className="signal__barre"
+                      viewBox="0 0 240 12"
+                      preserveAspectRatio="none"
+                      role="img"
+                      aria-label={`${v.nom} : ${Math.round(largeur)} heures de travail en commun avec Abidjan`}
+                    >
+                      <rect className="signal__piste" x="0" y="4.5" width="240" height="3" rx="1.5" />
+                      <rect
+                        className="signal__plage"
+                        x={(MOI.debut * 10).toFixed(1)}
+                        y="3.5"
+                        width={((MOI.fin - MOI.debut) * 10).toFixed(1)}
+                        height="5"
+                        rx="2.5"
+                      />
+                      <rect
+                        className="signal__recouvre"
+                        x={(c.debut * 10).toFixed(1)}
+                        y="1.5"
+                        width={(largeur * 10).toFixed(1)}
+                        height="9"
+                        rx="4.5"
+                      />
+                    </svg>
+                    <span className="signal__commun mono">{Math.round(largeur)} h</span>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <p className="signal__echelle mono" aria-hidden="true">
+              <span>00 h</span>
+              <span>12 h</span>
+              <span>24 h</span>
+            </p>
+            <p className="signal__legende">
+              L’échelle est une journée à Abidjan. La bande pâle est ma plage de travail,
+              la bande vive les heures communes avec la ville.
+            </p>
+
+            <dl className="signal__faits">
+              {FAITS.map((f) => (
+                <div key={f.dt}>
+                  <dt>{f.dt}</dt>
+                  <dd>{f.dd}</dd>
+                </div>
               ))}
-            </ol>
+            </dl>
           </div>
         </div>
       </div>
