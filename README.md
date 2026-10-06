@@ -1,9 +1,9 @@
 # Portfolio — Ahouet Yann Christ Emmanuel
 
 Portfolio personnel d'un développeur web basé à Abidjan, en Côte d'Ivoire.
-Page unique, React et Vite, sans dépendance d'interface.
+Page unique, React et Vite, direction artistique « espace profond ».
 
-**Le site :** [christ-ahouet.netlify.app](https://christ-ahouet.netlify.app) — à réserver au déploiement
+**Le site :** [christ-ahouet.netlify.app](https://christ-ahouet.netlify.app)
 **Me contacter :** [github.com/AyyceGoat](https://github.com/AyyceGoat)
 
 ---
@@ -11,7 +11,8 @@ Page unique, React et Vite, sans dépendance d'interface.
 ## Ce qu'on y trouve
 
 Une page qui se parcourt d'un seul défilement : présentation, quatre
-réalisations, compétences, contact et CV téléchargeable.
+réalisations, compétences, une section « Signal » depuis Abidjan, contact
+et CV téléchargeable.
 
 Le quatrième projet est une mission en entreprise sous confidentialité.
 Ni dépôt, ni lien, ni capture : il est présenté par un schéma
@@ -21,121 +22,118 @@ Aucun nom de client ni donnée d'exploitation n'apparaît dans ce dépôt.
 ## Démarrer
 
 ```bash
-npm install     # 20 paquets : React, Vite et three.js
+npm install     # React et Vite, rien d'autre
 npm run dev     # serveur de développement
-npm run build   # produit dist/
+npm run build   # build client, rendu serveur, injection dans dist/
 npm run preview # sert le résultat du build
 ```
 
-Node 20 ou plus récent.
+Node 20.11 ou plus récent.
 
-## Parti pris techniques
+## Parti pris
 
-**Le mouvement de la page est en CSS**, piloté par `IntersectionObserver`.
-Seul le globe du hero utilise three.js, chargé après le premier affichage
-dans un fichier séparé. L'ondulation des captures est en WebGL brut : 2 ko,
-chargés au premier survol.
+**Le ciel.** Trois plans peints en CSS — nébuleuse, poussière d'étoiles,
+voile lumineux — sont présents dès le premier octet. Par-dessus, un champ
+d'étoiles en WebGL brut, sans bibliothèque : parallaxe au curseur et au
+défilement, scintillement, et un étirement des étoiles en traînées
+proportionnel à la vitesse de défilement, renforcé au passage de chaque
+section. À l'ouverture, les étoiles jaillissent du centre. Les visuels de
+nébuleuse et l'éclipse du hero sont calculés par shader puis exportés en
+WebP.
 
-**Un globe en WebGL comme élément signature.** Des dizaines de milliers de
-points, uniquement sur les terres émergées, Abidjan seule allumée et des
-arcs vers douze villes. Shaders GLSL écrits à la main, sans bibliothèque de
-globe. Le masque des continents vient de Natural Earth (domaine public) :
-il est rasterisé puis embarqué, aucune ressource externe. Le rendu
-s'interrompt hors écran et quand l'onglet est masqué. Sans WebGL, ou en
-animation réduite, une image fixe le remplace et three.js n'est jamais
-téléchargé.
+**Le son.** Une ambiance discrète et de légers effets au survol et entre
+les sections, entièrement synthétisés par la Web Audio API — aucun fichier
+audio. Coupé à chaque visite, activé uniquement par le bouton de la barre
+de navigation. Le moteur n'est téléchargé qu'au premier clic ; coupé, le
+contexte audio est suspendu et ne calcule plus rien.
+
+**Signal.** Les coordonnées réelles d'Abidjan, l'heure locale, et la
+distance qu'a parcourue, depuis l'ouverture de la page, un signal lumineux
+parti d'Abidjan — avec ses jalons : la Lune, Vénus, le Soleil, Mars,
+Jupiter, Voyager 1.
+
+**Rendu au build.** La page est rendue côté serveur au moment du build et
+injectée dans le HTML : elle est lisible avant tout JavaScript, et même
+sans. Les états d'apparition ne s'appliquent qu'une fois le script chargé,
+après avoir marqué comme visible ce qui est déjà à l'écran : jamais d'écran
+vide, jamais de clignotement.
+
+**Version allégée automatique.** Mouvement réduit demandé, absence de
+WebGL, mode économie de données ou appareil très modeste : le ciel reste
+peint en CSS, sans animation, et le champ d'étoiles n'est jamais
+téléchargé. En cours de route, si l'appareil ne tient pas la cadence, le
+moteur dessine moins d'étoiles, puis rend la main au ciel fixe.
+
+**Économie d'énergie.** Le champ d'étoiles suit l'activité : 60 images par
+seconde pendant un défilement ou un mouvement de souris, 30 au repos, moins
+encore ensuite ; sur téléphone, il s'arrête tout à fait quand la page est
+immobile. Onglet masqué : arrêt complet. Les animations CSS sont finies ou
+ne tournent que lorsque leur section est visible.
 
 **Défilement amorti sur poste de travail.** Le contenu suit la position
-native avec un retard, par une simple translation. Désactivé au tactile, où
-le défilement natif est meilleur, et en animation réduite.
-Contrepartie assumée : le contenu étant fixe, le navigateur ne peut plus
-atteindre une ancre de lui-même. Les liens d'ancrage, l'arrivée directe sur
-une ancre et le déplacement du focus au clavier sont donc pris en charge
-explicitement dans `useAmorti`. Un `scrollIntoView()` appelé par du code
-tiers resterait sans effet tant que l'amorti est actif.
+native avec un retard, par une simple translation. Désactivé au tactile et
+en mouvement réduit. Le contenu étant fixe, les liens d'ancrage, l'arrivée
+sur une ancre et le focus clavier sont pris en charge explicitement dans
+`useAmorti`.
 
-**On n'anime que `transform` et `opacity`.** Aucune propriété qui déclenche
-un recalcul de mise en page n'est animée, nulle part.
+**On n'anime que `transform` et `opacity`.**
 
-Mesures prises sur le build de production, GPU réel, après préchauffage
-complet de la page, médiane de cinq répétitions :
+## Mesures
+
+Build de production, GPU réel, page préchauffée, médiane de cinq
+répétitions :
 
 | | durée médiane d'image | 95ᵉ centile |
 |---|---|---|
-| Poste de travail, globe actif | 16,7 ms (60 i/s) | 16,7 ms |
-| Poste de travail, défilement | 16,7 ms (60 i/s) | 16,7 ms |
-| Mobile, processeur bridé ×6 | 16,7 ms (60 i/s) | 16,8 ms |
-| Survol avec ondulation | 16,7 ms (60 i/s) | 16,8 ms |
+| Poste de travail, au repos | 16,7 ms (60 i/s) | 16,8 ms |
+| Poste de travail, défilement | 16,7 ms (60 i/s) | 16,8 ms |
+| Téléphone moyen (processeur ÷4), défilement | 16,7 ms (60 i/s) | 16,8 ms |
+| Téléphone lent (processeur ÷6), défilement | 16,7 ms (60 i/s) | 33,3 ms |
 
-Un rendu du globe coûte 0,3 ms de processeur. Sur appareil modeste, sa
-densité est réduite, sa cadence plafonnée à 30 i/s, et il s'efface dès
-le début du défilement — le moment où la fluidité compte le plus.
-
-**`prefers-reduced-motion` est respecté.** Qui demande moins d'animation
-voit la page complète immédiatement : pas d'apparition différée, pas de
-défilement adouci, pas d'inclinaison au survol, et le flux animé du schéma
-s'arrête.
-
-**Polices auto-hébergées.** Archivo et IBM Plex Mono, toutes deux sous
-licence SIL Open Font 1.1, servies depuis le domaine du site. Aucune
-requête vers un tiers, et donc aucune fuite d'adresse IP des visiteurs.
-Découpage par plage Unicode : seuls 64 Ko de fontes sont réellement
-téléchargés.
-
-**Images en WebP, chargement différé**, avec `srcset` en deux largeurs et
-dimensions déclarées pour éviter tout saut de mise en page.
-
-**Deux rendus pour le schéma d'architecture.** Le tracé SVG au-delà de
-48 rem, une version empilée en dessous — un schéma large rendrait ses
-libellés illisibles sur téléphone. Un seul des deux est présent dans
-l'arbre d'accessibilité à la fois.
+Au repos, après dix secondes sans interaction, le téléphone consacre moins
+de 3 % de son fil principal à la page.
 
 ## Accessibilité
 
-- Aucune violation relevée par axe-core (règles WCAG 2.1 A et AA, plus les
-  bonnes pratiques), sur poste de travail comme sur mobile.
-- Contrastes vérifiés élément par élément sur le rendu : tous au-delà du
-  seuil AA, le plus faible à 4,8:1.
-- Navigation au clavier complète, ordre de tabulation conforme à la
-  lecture, focus toujours visible, lien d'évitement en première position.
-- Le schéma SVG porte un `<title>` et une `<desc>` qui décrivent
-  l'architecture en toutes lettres.
+- Aucune violation relevée par axe-core (WCAG 2.2 A et AA, plus les bonnes
+  pratiques), sur poste de travail comme sur téléphone.
+- Contraste mesuré au pixel, texte par texte, sur le ciel réellement rendu
+  derrière lui : tout le texte visible dépasse le seuil AA, le plus faible
+  à 6,1:1.
+- Navigation au clavier complète, focus toujours visible, lien d'évitement
+  en première position.
+- Les titres découpés en lettres gardent leur texte entier pour les
+  lecteurs d'écran. Le bouton de son expose son état par `aria-pressed`.
 
 ## Sécurité
 
-- Aucune clé, aucun jeton, aucun secret : le site est entièrement statique
-  et n'appelle aucune API.
-- En-têtes configurés dans [`netlify.toml`](netlify.toml) :
-  `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`,
-  `Referrer-Policy`, `Permissions-Policy` et `Strict-Transport-Security`.
-- La politique de sécurité est stricte : ni `unsafe-inline` ni
-  `unsafe-eval`. Elle a été vérifiée sur le site construit, sans aucune
-  violation — ce qui a demandé de n'avoir aucun style en ligne dans les
-  composants.
-- Pas de formulaire de contact, donc aucune entrée utilisateur à valider
-  et aucune surface d'attaque côté serveur.
-- L'adresse e-mail n'apparaît en clair ni dans le HTML servi, ni comme
-  chaîne unique dans le JavaScript : elle est reconstituée à l'affichage,
-  ce qui met en échec les moissonneurs d'adresses.
+- Aucune clé, aucun jeton, aucun secret : le site est entièrement statique.
+- En-têtes dans [`netlify.toml`](netlify.toml) : `Content-Security-Policy`,
+  `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`,
+  `Permissions-Policy`, `Strict-Transport-Security`.
+- Politique de sécurité stricte, sans `unsafe-inline` ni `unsafe-eval`,
+  vérifiée sur le site construit. Le build échoue si le rendu serveur
+  contient un attribut `style`.
+- Aucune ressource externe : polices, visuels et sons sont produits ou
+  servis par le site lui-même.
+- L'adresse e-mail n'apparaît pas en clair dans les fichiers servis.
 - `npm audit` : aucune vulnérabilité.
 
 ## Structure
 
 ```
 public/
-  captures/      captures des projets en ligne, en WebP
-  land-mask.png  masque des continents (Natural Earth, domaine public)
+  cosmos/        nebuleuses, poussiere d'etoiles, eclipse (WebP)
+  captures/      captures des projets en production
   fonts/         Archivo et IBM Plex Mono (WOFF2)
-  CV-*.pdf       CV téléchargeable
 src/
-  components/    Nav, Hero, About, Projects, ProjectCard,
-                 Architecture, Skills, Contact, Footer
-  data/          contenu des quatre projets
-  globe/         globe WebGL : scene, shaders GLSL, villes
+  cosmos/        ciel : niveaux de rendu, champ d'etoiles WebGL
+  son/           moteur Web Audio et bouton
+  components/    sections de la page
   effets/        ondulation WebGL des captures
-  hooks/         useReveal, useStuckNav, useTilt, useAmorti
-  styles/        tokens, fonts, base, app
-netlify.toml     déploiement et en-têtes de sécurité
+  hooks/         apparitions, defilement amorti, inclinaison
+  entry-server   rendu au build
+scripts/         injection du rendu dans dist/index.html
 ```
 
 ## Licences

@@ -5,15 +5,15 @@ import Hero from './components/Hero.jsx';
 import About from './components/About.jsx';
 import Projects from './components/Projects.jsx';
 import Skills from './components/Skills.jsx';
+import Signal from './components/Signal.jsx';
 import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
-import Globe from './globe/Globe.jsx';
+import Cosmos from './cosmos/Cosmos.jsx';
 import { useReveal } from './hooks/useReveal.js';
 import { useAmorti } from './hooks/useAmorti.js';
 
 export default function App() {
   useReveal();
-  const heroRef = useRef(null);
   const shellRef = useRef(null);
   useAmorti(shellRef);
 
@@ -22,20 +22,20 @@ export default function App() {
       <a className="skip-link" href="#contenu">
         Aller au contenu
       </a>
-      <div className="blueprint" aria-hidden="true" />
 
-      {/* Decoratif, et charge seulement une fois le texte affiche. */}
-      <Globe heroRef={heroRef} />
+      {/* Le ciel : peint en CSS des le premier octet, anime ensuite. */}
+      <Cosmos />
 
       <Nav />
 
       <div className="shell" ref={shellRef}>
-        <Hero innerRef={heroRef} />
+        <Hero />
 
         <main id="contenu">
           <About />
           <Projects />
           <Skills />
+          <Signal />
           <Contact />
         </main>
 

@@ -125,28 +125,11 @@ button {
   border: 0;
 }
 
-/* --- Trame de fond : le "papier millimetre" du plan -------------- */
-
-.blueprint {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--c-line-soft) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--c-line-soft) 1px, transparent 1px);
-  background-size: 72px 72px;
-  /* Le voile s'attenue vers le bas : la trame se devine, ne domine pas. */
-  -webkit-mask-image: radial-gradient(ellipse 120% 80% at 50% 0%, #000 0%, transparent 78%);
-  mask-image: radial-gradient(ellipse 120% 80% at 50% 0%, #000 0%, transparent 78%);
-  opacity: 0.85;
-}
-
 /* --- Structure ---------------------------------------------------- */
 
 .shell {
   position: relative;
-  /* Au-dessus de la trame (0) et du globe (1). */
+  /* Au-dessus du ciel (0) et du champ d'etoiles (1). */
   z-index: 2;
 }
 
@@ -161,27 +144,125 @@ button {
   padding-block: var(--section-y);
 }
 
-/* --- Apparition au defilement ------------------------------------ */
+/* --- Apparitions ---------------------------------------------------
+   La page est rendue cote serveur : sans JavaScript, ou avant qu'il ne
+   s'execute, TOUT est visible. Les etats caches n'existent que sous
+   html.anime, classe posee par le script une fois qu'il a deja revele
+   ce qui se trouve a l'ecran — jamais d'ecran vide, jamais de clignotement.
+
+   L'entree evoque une arrivee depuis la profondeur : l'element vient
+   de loin (leger retrait d'echelle) et monte vers le lecteur. */
 
 .reveal {
-  opacity: 0;
-  transform: translate3d(0, 22px, 0);
   transition:
     opacity var(--dur-slow) var(--ease-out),
     transform var(--dur-slow) var(--ease-out);
   transition-delay: var(--reveal-delay, 0ms);
+}
+
+.anime .reveal:not(.is-visible) {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) scale(0.965);
+}
+
+.anime .reveal:not(.is-settled) {
   will-change: transform, opacity;
 }
 
-.reveal.is-visible {
+.reveal--d1 { --reveal-delay: 80ms; }
+.reveal--d2 { --reveal-delay: 160ms; }
+.reveal--d3 { --reveal-delay: 240ms; }
+.reveal--d4 { --reveal-delay: 320ms; }
+
+.skills .skill:nth-child(2) { --reveal-delay: 60ms; }
+.skills .skill:nth-child(3) { --reveal-delay: 120ms; }
+.skills .skill:nth-child(4) { --reveal-delay: 180ms; }
+.skills .skill:nth-child(5) { --reveal-delay: 240ms; }
+.skills .skill:nth-child(6) { --reveal-delay: 300ms; }
+
+/* --- Revelation lettre par lettre --------------------------------
+   Le titre porte son texte entier en aria-label, les lettres sont
+   masquees aux lecteurs d'ecran. Le rang de chaque lettre est un
+   attribut data-i, traduit ici : aucun style en ligne, la politique de
+   securite stricte reste intacte meme dans le HTML rendu au serveur. */
+
+.anime .reveal--lettres:not(.is-visible) {
   opacity: 1;
-  transform: translate3d(0, 0, 0);
+  transform: none;
 }
 
-/* Une fois l'element arrive, on rend la main au compositeur. */
-.reveal.is-settled {
-  will-change: auto;
+.lettre {
+  display: inline-block;
+  transition:
+    opacity 620ms var(--ease-out),
+    transform 760ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 26ms);
 }
+
+.lettre-espace {
+  display: inline-block;
+}
+
+.anime .reveal--lettres:not(.is-visible) .lettre {
+  opacity: 0;
+  transform: translate3d(0, 0.42em, 0);
+}
+
+.anime .reveal--lettres:not(.is-settled) .lettre {
+  will-change: transform, opacity;
+}
+
+.reveal--lettres .section-head__num,
+.reveal--lettres .section-head__aside {
+  transition: opacity 700ms var(--ease-out) 220ms;
+}
+
+.anime .reveal--lettres:not(.is-visible) .section-head__num,
+.anime .reveal--lettres:not(.is-visible) .section-head__aside {
+  opacity: 0;
+}
+
+.lettre[data-i="0"] { --i: 0; }
+.lettre[data-i="1"] { --i: 1; }
+.lettre[data-i="2"] { --i: 2; }
+.lettre[data-i="3"] { --i: 3; }
+.lettre[data-i="4"] { --i: 4; }
+.lettre[data-i="5"] { --i: 5; }
+.lettre[data-i="6"] { --i: 6; }
+.lettre[data-i="7"] { --i: 7; }
+.lettre[data-i="8"] { --i: 8; }
+.lettre[data-i="9"] { --i: 9; }
+.lettre[data-i="10"] { --i: 10; }
+.lettre[data-i="11"] { --i: 11; }
+.lettre[data-i="12"] { --i: 12; }
+.lettre[data-i="13"] { --i: 13; }
+.lettre[data-i="14"] { --i: 14; }
+.lettre[data-i="15"] { --i: 15; }
+.lettre[data-i="16"] { --i: 16; }
+.lettre[data-i="17"] { --i: 17; }
+.lettre[data-i="18"] { --i: 18; }
+.lettre[data-i="19"] { --i: 19; }
+.lettre[data-i="20"] { --i: 20; }
+.lettre[data-i="21"] { --i: 21; }
+.lettre[data-i="22"] { --i: 22; }
+.lettre[data-i="23"] { --i: 23; }
+.lettre[data-i="24"] { --i: 24; }
+.lettre[data-i="25"] { --i: 25; }
+.lettre[data-i="26"] { --i: 26; }
+.lettre[data-i="27"] { --i: 27; }
+.lettre[data-i="28"] { --i: 28; }
+.lettre[data-i="29"] { --i: 29; }
+.lettre[data-i="30"] { --i: 30; }
+.lettre[data-i="31"] { --i: 31; }
+.lettre[data-i="32"] { --i: 32; }
+.lettre[data-i="33"] { --i: 33; }
+.lettre[data-i="34"] { --i: 34; }
+.lettre[data-i="35"] { --i: 35; }
+.lettre[data-i="36"] { --i: 36; }
+.lettre[data-i="37"] { --i: 37; }
+.lettre[data-i="38"] { --i: 38; }
+.lettre[data-i="39"] { --i: 39; }
+.lettre[data-i="40"] { --i: 40; }
 
 /* --- Respect de prefers-reduced-motion --------------------------- */
 
@@ -194,97 +275,11 @@ button {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-
-  .reveal {
-    opacity: 1;
-    transform: none;
-  }
 }
 
-/* Echelonnement des apparitions.
-   Ces classes remplacent des styles en ligne : la page peut ainsi
-   etre servie sous une politique de securite qui interdit
-   l'attribut style, sans rien perdre de la mise en scene. */
-
-.reveal--d1 { --reveal-delay: 80ms; }
-.reveal--d2 { --reveal-delay: 160ms; }
-.reveal--d3 { --reveal-delay: 240ms; }
-.reveal--d4 { --reveal-delay: 320ms; }
-
-/* Les listes s'egrenent d'elles-memes, sans calcul dans le rendu. */
-.skills .skill:nth-child(2) { --reveal-delay: 60ms; }
-.skills .skill:nth-child(3) { --reveal-delay: 120ms; }
-.skills .skill:nth-child(4) { --reveal-delay: 180ms; }
-.skills .skill:nth-child(5) { --reveal-delay: 240ms; }
-.skills .skill:nth-child(6) { --reveal-delay: 300ms; }
-
-/* --- Revelation lettre par lettre --------------------------------
-   Le bloc ne bouge plus : ce sont ses lettres qui montent, en vague.
-   L'element porte son texte entier via aria-label, les lettres sont
-   masquees aux lecteurs d'ecran. */
-
-.reveal--lettres {
-  opacity: 1;
-  transform: none;
-  transition: none;
-  will-change: auto;
-}
-
-.lettre {
-  display: inline-block;
-  opacity: 0;
-  transform: translate3d(0, 0.42em, 0);
-  transition:
-    opacity 620ms var(--ease-out),
-    transform 720ms var(--ease-out);
-  transition-delay: calc(var(--i, 0) * 26ms);
-  will-change: transform, opacity;
-}
-
-.lettre-espace {
-  display: inline-block;
-}
-
-.reveal--lettres.is-visible .lettre {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-/* Une fois la vague passee, on rend la main au compositeur. */
-.reveal--lettres.is-settled .lettre {
-  will-change: auto;
-}
-
-/* Ce qui entoure un titre decoupe se contente d'un fondu. */
-.reveal--lettres .section-head__num,
-.reveal--lettres .section-head__aside {
-  opacity: 0;
-  transition: opacity 700ms var(--ease-out) 220ms;
-}
-
-.reveal--lettres.is-visible .section-head__num,
-.reveal--lettres.is-visible .section-head__aside {
-  opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lettre,
-  .reveal--lettres .section-head__num,
-  .reveal--lettres .section-head__aside {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
-/* --- Defilement amorti (poste de travail uniquement) --------------
-   Le contenu se fige et suit le defilement avec un retard, par une
-   simple translation. La cale rend au document la hauteur perdue. */
+/* --- Defilement amorti (poste de travail uniquement) -------------- */
 
 html.amorti {
-  /* Le lissage est desormais assure par la boucle : le defilement
-     adouci du navigateur ferait double emploi et donnerait une
-     sensation molle. */
   scroll-behavior: auto;
 }
 
@@ -297,4 +292,10 @@ html.amorti .shell {
 
 .amorti-cale {
   pointer-events: none;
+}
+
+/* Une section qui recoit le focus apres un lien d'ancrage n'est pas un
+   controle : pas de contour, le focus sert seulement a la lecture. */
+[tabindex='-1']:focus {
+  outline: none;
 }

@@ -38,13 +38,13 @@ export const projects = [
     shot: {
       src: '/captures/echiquier.webp',
       small: '/captures/echiquier-700.webp',
-      alt: "Partie en cours sur l'Échiquier : plateau complet, panneau des coups joués et niveau du moteur.",
+      alt: "Page d'accueil de l'Échiquier en production : « Jouez. Comprenez. Progressez. », avec une position de la partie de l'Opéra (Morphy, 1858).",
     },
     desc:
-      "Application d'analyse de parties d'échecs adossée au moteur Stockfish, exécuté directement dans le navigateur et utilisable sur téléphone. Trois usages : partie libre, jeu assisté commenté par le moteur, et analyse complète coup par coup.",
+      "Application d'échecs adossée au moteur Stockfish, exécuté directement sur l'appareil du joueur : sans compte, sans publicité, et utilisable hors ligne. On affronte le moteur au niveau de son choix, on se fait corriger coup par coup, et l'on relit ses parties avec une explication en français plutôt qu'un chiffre.",
     points: [
-      "Import d'une position à partir d'une photo ou d'une capture d'écran, pour éviter la saisie pièce par pièce.",
-      'Six niveaux de jeu, du débutant à la pleine force du moteur.',
+      "Quatre façons de travailler : partie libre, jeu assisté commenté, analyse de position et apprentissage par exercices tirés de ses propres erreurs.",
+      "Import d'une position par photo, par notation FEN ou par fichier PGN, pour éviter la saisie pièce par pièce.",
     ],
     stack: ['React', 'Stockfish', 'WebAssembly', 'Netlify'],
     links: {
@@ -60,17 +60,17 @@ export const projects = [
     shot: {
       src: '/captures/nexus.webp',
       small: '/captures/nexus-700.webp',
-      alt: "Page d'accueil de NEXUS : « Explorez l'Univers du Savoir », avec les compteurs de pays, domaines, articles et quiz.",
+      alt: "Page d'accueil de NEXUS en production : « Mesurez vos aptitudes cognitives. », avec l'accès à l'évaluation et au classement.",
     },
     desc:
-      "Encyclopédie interactive doublée d'une plateforme d'évaluation : exploration par domaines et par pays, articles, puis quiz qui mesurent ce qui en a été retenu. Le moteur de score est conçu pour être statistiquement défendable plutôt qu'arbitraire.",
+      "Plateforme d'évaluation des aptitudes cognitives : 35 questions, environ 25 minutes, puis un indice, une place sur cent personnes et un profil sur cinq aptitudes — matrices logiques, séries numériques, analogies verbales, rotation spatiale et mémoire de travail.",
     points: [
-      'Page d’entrée ramenée de 577 Ko à 3,3 Ko : chargement différé, découpage du code et routage applicatif.',
-      'Navigation entièrement utilisable au clavier et travail de référencement.',
+      'Questions tirées dans une banque de 770 items, pour ne jamais repasser deux fois la même épreuve, et un moteur de score conçu pour être statistiquement défendable plutôt qu’arbitraire.',
+      'Classement des meilleurs résultats, page d’entrée ramenée de 577 Ko à 3,3 Ko et navigation entièrement utilisable au clavier.',
     ],
     stack: ['React', 'Vite', 'TypeScript', 'Netlify'],
     links: {
-      site: 'https://taupe-lily-ac2081.netlify.app',
+      site: 'https://nexus-evaluation-cognitive.netlify.app',
       repo: 'https://github.com/AyyceGoat/nexus-evaluation-cognitive',
     },
   },

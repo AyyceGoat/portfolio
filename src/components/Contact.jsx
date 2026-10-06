@@ -25,7 +25,7 @@ export default function Contact() {
     <section className="section" id="contact" aria-labelledby="titre-contact">
       <div className="wrap">
         <div className="section-head reveal reveal--lettres">
-          <span className="section-head__num">04</span>
+          <span className="section-head__num">05</span>
           <h2 className="section-head__title" id="titre-contact" aria-label="Contact">
             <span aria-hidden="true">
               <Lettres texte="Contact" />

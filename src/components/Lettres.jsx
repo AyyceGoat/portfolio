@@ -6,9 +6,9 @@
  * lettres sont masquees aux technologies d'assistance — sans quoi un
  * lecteur d'ecran epellerait le titre.
  *
- * Performance : chaque lettre ne fait varier que transform et opacity.
- * Le decalage est porte par une variable CSS, donc lu par la feuille
- * de style et non recalcule dans le rendu.
+ * Le rang de chaque lettre passe par un attribut data-i, traduit en
+ * delai par la feuille de style. Pas de style en ligne : le HTML rendu
+ * au serveur reste compatible avec la politique de securite stricte.
  */
 export default function Lettres({ texte, depart = 0 }) {
   let i = depart;
@@ -16,28 +16,21 @@ export default function Lettres({ texte, depart = 0 }) {
   return (
     <>
       {Array.from(texte).map((caractere, index) => {
-        // Les espaces ne sont pas animes : ils ne se voient pas, et les
-        // compter fausserait la cadence de la vague.
         if (caractere === ' ') {
           return (
             <span className="lettre-espace" key={`e${index}`}>
-              {' '}
+              {'\u00A0'}
             </span>
           );
         }
-        const style = { '--i': i };
+        const rang = Math.min(i, 40);
         i += 1;
         return (
-          <span className="lettre" key={`${caractere}${index}`} style={style}>
+          <span className="lettre" data-i={rang} key={`${caractere}${index}`}>
             {caractere}
           </span>
         );
       })}
     </>
   );
-}
-
-/** Nombre de lettres reellement animees, pour enchainer les segments. */
-export function compterLettres(texte) {
-  return Array.from(texte).filter((c) => c !== ' ').length;
 }

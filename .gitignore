@@ -3,6 +3,7 @@ node_modules/
 
 # Résultat de build
 dist/
+dist-serveur/
 
 # Fichiers d'environnement — ne doivent jamais être versionnés
 .env

@@ -1,9 +1,11 @@
 import { useStuckNav } from '../hooks/useStuckNav.js';
+import BoutonSon from '../son/BoutonSon.jsx';
 
 const LINKS = [
   { href: '#profil', label: 'Profil', optional: true },
   { href: '#projets', label: 'Projets' },
   { href: '#competences', label: 'Compétences', optional: true },
+  { href: '#signal', label: 'Signal', optional: true },
   { href: '#contact', label: 'Contact' },
   { href: '/CV-Ahouet-Yann-Christ-Emmanuel.pdf', label: 'CV', download: true },
 ];
@@ -33,6 +35,9 @@ export default function Nav() {
               </a>
             </li>
           ))}
+          <li>
+            <BoutonSon />
+          </li>
         </ul>
       </div>
     </nav>

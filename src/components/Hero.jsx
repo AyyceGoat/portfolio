@@ -2,9 +2,23 @@ import Lettres from './Lettres.jsx';
 
 const STACK = ['PHP', 'Laravel', 'JavaScript', 'React', 'MySQL', 'Python', 'Git'];
 
-export default function Hero({ innerRef }) {
+export default function Hero() {
   return (
-    <header className="hero" id="haut" ref={innerRef}>
+    <header className="hero" id="haut">
+      {/* Eclipse : la lumiere d'une etoile cachee, en bord d'ecran. */}
+      <div className="hero__eclipse" aria-hidden="true">
+        <img
+          src="/cosmos/couronne-900.webp"
+          srcSet="/cosmos/couronne-520.webp 520w, /cosmos/couronne-900.webp 900w"
+          sizes="(min-width: 62rem) 46vw, 90vw"
+          width="900"
+          height="900"
+          alt=""
+          decoding="async"
+          fetchPriority="low"
+        />
+      </div>
+
       <div className="hero__inner">
         <p className="hero__status reveal">
           <span className="hero__dot" aria-hidden="true" />
@@ -15,12 +29,7 @@ export default function Hero({ innerRef }) {
           </span>
         </p>
 
-        {/* Le nom monte lettre par lettre. Le titre reste entier pour
-            les lecteurs d'ecran, qui ne doivent surtout pas l'epeler. */}
-        <h1
-          className="hero__name reveal reveal--lettres"
-          aria-label="Ahouet Yann Christ Emmanuel"
-        >
+        <h1 className="hero__name reveal reveal--lettres" aria-label="Ahouet Yann Christ Emmanuel">
           <span className="hero__name-line" aria-hidden="true">
             <Lettres texte="Ahouet Yann" />
           </span>
@@ -28,17 +37,17 @@ export default function Hero({ innerRef }) {
             <span className="hero__given">
               <Lettres texte="Christ" depart={10} />
             </span>
-            <span className="lettre-espace">{' '}</span>
+            <span className="lettre-espace">{'\u00A0'}</span>
             <Lettres texte="Emmanuel" depart={16} />
           </span>
         </h1>
 
-        <p className="hero__role reveal reveal--d3">
+        <p className="hero__role reveal reveal--d2">
           <strong>Développeur web.</strong> Je conçois et développe des applications et des
           systèmes d’information complets, de l’analyse du besoin jusqu’au déploiement.
         </p>
 
-        <div className="hero__actions reveal reveal--d4">
+        <div className="hero__actions reveal reveal--d3">
           <a className="btn btn--solid" href="#projets">
             Voir les projets
             <span className="btn__arrow" aria-hidden="true">
@@ -56,6 +65,10 @@ export default function Hero({ innerRef }) {
           ))}
         </ul>
       </div>
+
+      <a className="hero__descendre" href="#profil" aria-label="Descendre vers le profil">
+        <span aria-hidden="true" />
+      </a>
     </header>
   );
 }
