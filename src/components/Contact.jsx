@@ -136,7 +136,7 @@ export default function Contact() {
               <span className="visually-hidden" role="status">
                 {ANNONCES[cv.etat]}
               </span>
-              <p className="cv-card__meta">PDF · 2 pages · 78 Ko</p>
+              <p className="cv-card__meta">PDF · 2 pages · 58 Ko</p>
             </div>
           </div>
         </div>

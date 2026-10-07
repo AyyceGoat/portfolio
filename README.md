@@ -82,10 +82,11 @@ la navigation. Si le fichier n'est pas encore arrivé, le bouton affiche
 « Préparation… » et l'attend. Sans JavaScript, le lien reste un lien de
 téléchargement, et le serveur l'envoie de toute façon en pièce jointe.
 
-Le PDF tient en deux pages A4 à une taille de lecture normale (corps
-9,75 pt). Ses polices sont des instances statiques d'Archivo, embarquées
-en TrueType plutôt que glyphe par glyphe : le fichier passe de 436 à
-78 Ko et reste lisible par les logiciels de tri de candidatures.
+Le PDF tient en deux pages A4 (58 Ko, polices embarquées en TrueType,
+texte lisible par les logiciels de tri de candidatures). Dans sa colonne
+Contact, l'e-mail, GitHub et le portfolio sont des liens cliquables et
+soulignés ; l'e-mail ouvre la rédaction d'un message dans Gmail, dans le
+navigateur, sans dépendre d'un logiciel de messagerie installé.
 
 **Signal.** Ce que la position d'Abidjan change concrètement pour une
 équipe. Abidjan vit à UTC+0 toute l'année : les coordonnées réelles,
