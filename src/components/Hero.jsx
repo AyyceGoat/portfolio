@@ -1,24 +1,71 @@
+import { useEffect, useRef } from 'react';
+
+import { choisirNiveau } from '../cosmos/niveau.js';
 import Lettres from './Lettres.jsx';
 
 const STACK = ['PHP', 'Laravel', 'JavaScript', 'React', 'MySQL', 'Python', 'Git'];
 
 export default function Hero() {
+  const planeteRef = useRef(null);
+  const toileRef = useRef(null);
+
+  /* La geante tourne, calculee en temps reel (voir cosmos/planete.js).
+     L'image fixe, rendue par le meme shader, tient la place jusqu'a la
+     premiere image calculee, et reste seule en ciel fixe. */
+  useEffect(() => {
+    const niveau = choisirNiveau();
+    if (niveau === 'fixe') return undefined;
+    let planete = null;
+    let actif = true;
+
+    const demarrer = async () => {
+      try {
+        const { creerPlanete } = await import('../cosmos/planete.js');
+        if (!actif || !toileRef.current) return;
+        planete = creerPlanete(toileRef.current, {
+          dpr: niveau === 'complet' ? 1.5 : 1.25,
+          fps: niveau === 'complet' ? 30 : 12,
+          surPrete: () => {
+            if (planeteRef.current) planeteRef.current.classList.add('is-vivante');
+          },
+        });
+      } catch (err) {
+        planete = null;
+      }
+    };
+
+    const viaIdle = typeof window.requestIdleCallback === 'function';
+    const attente = viaIdle
+      ? window.requestIdleCallback(demarrer, { timeout: 1200 })
+      : window.setTimeout(demarrer, 200);
+
+    return () => {
+      actif = false;
+      if (viaIdle) window.cancelIdleCallback(attente);
+      else window.clearTimeout(attente);
+      if (planete) planete.detruire();
+      if (planeteRef.current) planeteRef.current.classList.remove('is-vivante');
+    };
+  }, []);
+
   return (
     <header className="hero" id="haut">
-      {/* Une geante gazeuse et ses anneaux, en bord d'ecran. Image
-          calculee par shader hors ligne : rien a animer au chargement,
-          et elle est la meme sans JavaScript. */}
-      <div className="hero__planete" aria-hidden="true">
-        <img
-          src="/cosmos/planete-1200.webp"
-          srcSet="/cosmos/planete-700.webp 700w, /cosmos/planete-1200.webp 1200w"
-          sizes="(min-width: 62rem) min(44vw, 38rem), min(66vw, 26rem)"
-          width="1200"
-          height="1200"
-          alt=""
-          decoding="async"
-          fetchPriority="low"
-        />
+      {/* Une geante gazeuse et ses anneaux, eclairee par une etoile hors
+          champ. */}
+      <div className="hero__planete" aria-hidden="true" ref={planeteRef}>
+        <div className="hero__planete-corps">
+          <img
+            src="/cosmos/planete-1200.webp"
+            srcSet="/cosmos/planete-700.webp 700w, /cosmos/planete-1200.webp 1200w"
+            sizes="(min-width: 62rem) min(44vw, 38rem), min(66vw, 26rem)"
+            width="1200"
+            height="1200"
+            alt=""
+            decoding="async"
+            fetchPriority="low"
+          />
+          <canvas className="hero__planete-toile" ref={toileRef} />
+        </div>
       </div>
 
       <div className="hero__inner">

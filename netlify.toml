@@ -65,6 +65,18 @@
     Cache-Control = "public, max-age=2592000"
 
 [[headers]]
+  for = "/cosmos/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+# Le CV part toujours en téléchargement, même ouvert directement.
+[[headers]]
+  for = "/CV-Ahouet-Yann-Christ-Emmanuel.pdf"
+  [headers.values]
+    Content-Disposition = "attachment; filename=\"CV-Ahouet-Yann-Christ-Emmanuel.pdf\""
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
   for = "/index.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"

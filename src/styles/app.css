@@ -95,6 +95,17 @@
   opacity: 1;
 }
 
+/* En haut de page, avant le bandeau plein : une ombre douce suffit a
+   detacher les liens de la photographie. */
+.nav::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 -2rem;
+  background: linear-gradient(to bottom, rgba(3, 5, 11, 0.78), rgba(3, 5, 11, 0.5) 55%, transparent);
+  pointer-events: none;
+}
+
 .nav__inner {
   position: relative;
   display: flex;
@@ -191,7 +202,7 @@
   padding-inline: var(--gutter);
 }
 
-/* Voile sous le texte du hero. Les nuees derriere peuvent etre vives ;
+/* Voile sous le texte du hero. Les photographies derriere peuvent etre vives ;
    plutot que d'eteindre le ciel partout, on pose ici une ombre tres
    douce, invisible a l'oeil, qui tient le contraste du texte. */
 .hero__inner::before {
@@ -1145,8 +1156,41 @@ a.contact__line:hover .contact__line-arrow {
    ================================================================= */
 
 .footer {
+  position: relative;
   border-top: 1px solid var(--c-line);
   padding-block: 2.5rem 3rem;
+  background: rgba(3, 5, 11, 0.88);
+}
+
+/* Credits des photographies : discrets, mais lisibles et complets. */
+.footer__credits {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--c-line);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--c-text-3);
+}
+
+.footer__credits ul {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 1.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.footer__credits a {
+  color: var(--c-text-2);
+  text-decoration: underline;
+  text-decoration-color: var(--c-line);
+  text-underline-offset: 0.2em;
+  transition: color var(--dur-fast) var(--ease-soft);
+}
+
+.footer__credits a:hover {
+  color: var(--c-accent);
 }
 
 .footer__inner {
@@ -1196,6 +1240,93 @@ a.contact__line:hover .contact__line-arrow {
   opacity: 1;
 }
 
+/* Etat du telechargement, a gauche du libelle : rien ne bouge. */
+.nav__cv-etat {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin: -0.35rem 0.45rem 0 0;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-soft);
+}
+
+.nav__link--cv.is-prepa .nav__cv-etat,
+.nav__link--cv.is-fait .nav__cv-etat {
+  opacity: 1;
+}
+
+.nav__link--cv.is-prepa .nav__cv-etat,
+.btn--cv.is-prepa .btn__etat::before {
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: tourne 0.7s linear infinite;
+}
+
+.nav__link--cv.is-fait .nav__cv-etat::before {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+/* Le bouton garde sa largeur d'un etat a l'autre. */
+.btn--cv {
+  min-width: 15.5rem;
+  justify-content: center;
+}
+
+.btn--cv.is-prepa {
+  cursor: progress;
+}
+
+.btn--cv.is-fait {
+  cursor: default;
+}
+
+.btn--cv .btn__etat {
+  position: relative;
+  display: inline-block;
+  min-width: 0.9em;
+  text-align: center;
+}
+
+.btn--cv.is-prepa .btn__etat::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0.9em;
+  height: 0.9em;
+  margin-top: -0.45em;
+  box-sizing: border-box;
+}
+
+/* Un eclair bref confirme le clic. */
+.btn--cv.is-fait::after {
+  animation: eclair 0.7s var(--ease-out);
+}
+
+@keyframes eclair {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes tourne {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 .contact__lede {
   margin-bottom: 1.75rem;
 }
@@ -1242,8 +1373,10 @@ a.contact__line:hover .contact__line-arrow {
 
 /* =================================================================
    Ciel — fond de toute la page
-   Trois plans peints en CSS, presents des le premier octet, puis le
-   champ d'etoiles WebGL par-dessus quand l'appareil le permet.
+   Six photographies du telescope James Webb, une par section, en
+   fondu enchaine. La premiere est servie par le CSS des le premier
+   octet ; le champ d'etoiles WebGL passe par-dessus quand l'appareil
+   le permet.
    ================================================================= */
 
 .ciel {
@@ -1252,67 +1385,92 @@ a.contact__line:hover .contact__line-arrow {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  /* Repli immediat, avant meme le chargement des images. */
+  /* Repli immediat, avant meme l'arrivee de la premiere photo. */
   background:
-    radial-gradient(ellipse 60% 50% at 72% 28%, rgba(40, 72, 150, 0.32), transparent 70%),
-    radial-gradient(ellipse 50% 45% at 18% 82%, rgba(18, 88, 110, 0.18), transparent 70%),
+    radial-gradient(ellipse 70% 45% at 50% 12%, rgba(40, 72, 150, 0.4), transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 92%, rgba(150, 70, 30, 0.3), transparent 70%),
     var(--c-void);
 }
 
-.ciel__fond,
-.ciel__poussiere,
-.ciel__voile,
-.ciel__nuees,
-.ciel__champ {
+/* Le plan photographique deborde de l'ecran : la parallaxe et la
+   derive ne decouvrent jamais son bord. */
+.ciel__photos {
   position: absolute;
+  inset: -5vh -3vw;
+  will-change: transform;
 }
 
-.ciel__fond {
-  inset: -9vh -2vw;
-  background: url('/cosmos/fond-1920.webp') center / cover no-repeat;
-}
-
-.ciel__poussiere {
+.ciel__plan {
+  position: absolute;
   inset: 0;
-  background: url('/cosmos/etoiles.webp') 0 0 / 512px 512px repeat;
-  opacity: 0.6;
-  transition: opacity 1.4s var(--ease-soft);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 1.6s var(--ease-soft),
+    visibility 0s linear 1.6s;
 }
 
-/* Le voile est un second plan de parallaxe, peint en degrades : il ne
-   coute pas un octet et il donne de la profondeur au repli CSS. */
-.ciel__voile {
-  inset: -22vh -6vw;
-  opacity: 0.85;
-  transform: scale(1.08);
-  background:
-    radial-gradient(ellipse 42% 34% at 24% 30%, rgba(118, 74, 210, 0.30), transparent 72%),
-    radial-gradient(ellipse 36% 46% at 78% 62%, rgba(26, 108, 190, 0.26), transparent 72%),
-    radial-gradient(ellipse 22% 18% at 58% 24%, rgba(226, 178, 108, 0.14), transparent 76%);
+.ciel__plan.is-actif {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 1.6s var(--ease-soft);
 }
 
-@media (max-width: 56rem) {
-  .ciel__fond {
-    background-image: url('/cosmos/fond-960.webp');
+/* La derive est portee par l'image seule — le plan, lui, porte le
+   fondu : une animation de transform par element, pas deux. Elle ne
+   tourne que sur la photo affichee. */
+.ciel__image {
+  position: absolute;
+  inset: 0;
+  background: center / cover no-repeat;
+  transform: scale(1.04);
+}
+
+.ciel__plan.is-actif .ciel__image {
+  will-change: transform;
+  animation: derive 90s var(--ease-soft) infinite alternate;
+}
+
+@keyframes derive {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(-1.4%, -1%, 0);
   }
 }
 
-/* Les nuees : six regions de l'espace traversees au defilement. Le
-   canvas est peint sous la resolution de l'ecran et etire — ce sont des
-   nuages, personne ne compte les pixels. */
-.ciel__nuees {
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 1.6s var(--ease-out);
+.ciel__plan--haut .ciel__image {
+  background-image: url('/cosmos/webb/haut-1280.webp');
 }
 
-.ciel__nuees.is-vivant {
-  opacity: 1;
+@media (min-width: 1400px), (min-width: 900px) and (min-resolution: 1.5dppx) {
+  .ciel__plan--haut .ciel__image {
+    background-image: url('/cosmos/webb/haut-1920.webp');
+  }
+}
+
+@media (orientation: portrait) {
+  .ciel__plan--haut .ciel__image {
+    background-image: url('/cosmos/webb/haut-portrait.webp');
+  }
+}
+
+/* Vignette : les bords de l'ecran s'enfoncent dans le noir, le centre
+   reste lumineux. Un seul plan statique, peint une fois. */
+.ciel__voile {
+  position: absolute;
+  inset: 0;
+  background:
+    /* Bande sombre sous la navigation : ses liens restent lisibles
+       quelle que soit l'etoile qui passe derriere. */
+    linear-gradient(to bottom, rgba(2, 3, 9, 0.82), rgba(2, 3, 9, 0.6) 4.25rem, transparent 9rem),
+    radial-gradient(ellipse 120% 95% at 50% 45%, transparent 45%, rgba(2, 3, 9, 0.6) 100%),
+    rgba(2, 3, 9, 0.12);
 }
 
 .ciel__champ {
+  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
@@ -1324,26 +1482,50 @@ a.contact__line:hover .contact__line-arrow {
   opacity: 1;
 }
 
-/* Le champ WebGL prend le relais : la poussiere peinte s'efface en
-   partie pour ne pas doubler les etoiles. */
-.ciel:has(.ciel__champ.is-vivant) .ciel__poussiere {
-  opacity: 0.22;
+[data-ciel='fixe'] .ciel__photos {
+  will-change: auto;
 }
 
-/* Les nuees calculees remplacent les plaques peintes : on les efface
-   plutot que de superposer deux nebuleuses. La classe est posee par le
-   composant, le :has n'est qu'un filet de securite. */
-.ciel--nuees .ciel__fond,
-.ciel:has(.ciel__nuees.is-vivant) .ciel__fond,
-.ciel--nuees .ciel__voile,
-.ciel:has(.ciel__nuees.is-vivant) .ciel__voile {
-  opacity: 0;
-  transition: opacity 1.6s var(--ease-out);
+[data-ciel='fixe'] .ciel__plan.is-actif .ciel__image {
+  animation: none;
+  will-change: auto;
 }
 
-.ciel--nuees .ciel__poussiere,
-.ciel:has(.ciel__nuees.is-vivant) .ciel__poussiere {
-  opacity: 0.28;
+@media (prefers-reduced-motion: reduce) {
+  .ciel__plan,
+  .ciel__plan.is-actif {
+    transition-duration: 0.4s;
+  }
+
+  .ciel__plan.is-actif .ciel__image {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+/* Voile de lecture. Les photographies sont vives ; le texte des
+   sections repose sur une ombre douce, sans bord, qui suit le contenu.
+   Entre deux sections, la nebuleuse reapparait entiere. */
+main > .section {
+  position: relative;
+  isolation: isolate;
+}
+
+main > .section::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: clamp(3rem, 2rem + 4vw, 6rem) 0 clamp(2rem, 1rem + 3vw, 4rem);
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(3, 5, 11, 0.84) max(8%, calc(50% - var(--max-w) / 2)),
+    rgba(3, 5, 11, 0.84) min(92%, calc(50% + var(--max-w) / 2)),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(transparent, #000 9rem, #000 calc(100% - 7rem), transparent);
+  mask-image: linear-gradient(transparent, #000 9rem, #000 calc(100% - 7rem), transparent);
 }
 
 /* =================================================================
@@ -1355,8 +1537,8 @@ a.contact__line:hover .contact__line-arrow {
 .hero__planete {
   position: absolute;
   z-index: -1;
-  top: 58%;
-  right: -3vw;
+  top: 61%;
+  right: max(0.5rem, calc(50% - var(--max-w) / 2 - 4rem));
   width: min(44vw, 38rem);
   aspect-ratio: 1;
   margin-top: calc(min(44vw, 38rem) / -2);
@@ -1365,17 +1547,42 @@ a.contact__line:hover .contact__line-arrow {
   animation: planete-entree 3.2s 0.1s var(--ease-out) both;
 }
 
-/* La derive est portee par l'image, et par elle seule : deux animations
+/* La derive est portee par un seul element, le corps : deux animations
    de transform sur un meme element empechent le navigateur de confier
-   le mouvement au compositeur. Il repeignait alors une image de 1200
-   pixels a chaque fil d'image — a lui seul, tout le cout de la page au
-   repos. Une seule animation, un seul calque promu, cout nul. */
-.hero__planete img {
-  display: block;
+   le mouvement au compositeur. L'image fixe et la toile calculee
+   partagent ce corps, et se relaient en fondu. */
+.hero__planete-corps {
+  position: relative;
   width: 100%;
   height: 100%;
   will-change: transform;
   animation: planete-derive 34s 3.3s var(--ease-soft) infinite;
+}
+
+.hero__planete img,
+.hero__planete-toile {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hero__planete-toile {
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-soft);
+}
+
+.hero__planete img {
+  transition: opacity 1.2s var(--ease-soft);
+}
+
+.hero__planete.is-vivante .hero__planete-toile {
+  opacity: 1;
+}
+
+.hero__planete.is-vivante img {
+  opacity: 0;
 }
 
 @keyframes planete-entree {
@@ -1406,10 +1613,24 @@ a.contact__line:hover .contact__line-arrow {
     padding-top: clamp(16.5rem, 11rem + 22vw, 22rem);
   }
 
+  /* Sur ecran etroit, le texte occupe toute la largeur, au-dessus des
+     falaises : un voile vertical, fondu en haut et en bas, sans aucune
+     arete visible. */
+  .hero__inner::before {
+    inset: -4rem -40% -6rem;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(3, 5, 11, 0.8) 4rem,
+      rgba(3, 5, 11, 0.8) calc(100% - 6rem),
+      transparent
+    );
+  }
+
   .hero__planete {
     top: 2.2rem;
-    right: -16vw;
-    width: min(66vw, 26rem);
+    right: 0;
+    width: min(70vw, 26rem);
     margin-top: 0;
   }
 }
@@ -1419,7 +1640,7 @@ a.contact__line:hover .contact__line-arrow {
     animation: planete-entree 0.01s both;
   }
 
-  .hero__planete img {
+  .hero__planete-corps {
     animation: none;
     will-change: auto;
   }

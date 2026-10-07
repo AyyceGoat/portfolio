@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import useTelechargement, { prechargerCV } from '../hooks/useTelechargement.js';
 import Lettres from './Lettres.jsx';
 
 /**
@@ -14,11 +15,43 @@ const flip = (s) => s.split('').reverse().join('');
 const PHONE_DISPLAY = '+225 01 72 96 97 33';
 const PHONE_HREF = 'tel:+2250172969733';
 
+const LIBELLES = {
+  repos: 'Télécharger le CV',
+  prepa: 'Préparation…',
+  fait: 'CV téléchargé',
+};
+const ANNONCES = {
+  repos: '',
+  prepa: 'Préparation du CV…',
+  fait: 'CV téléchargé.',
+};
+
 export default function Contact() {
   const [email, setEmail] = useState('');
+  const cv = useTelechargement();
+  const carteRef = useRef(null);
 
   useEffect(() => {
     setEmail(`${flip(PARTS[0])}@${flip(PARTS[1])}.${flip(PARTS[2])}`);
+  }, []);
+
+  // Le CV est rapatrie quand la carte approche : au clic, il est deja la.
+  // Pas en mode economie de donnees, ou l'on attend le geste.
+  useEffect(() => {
+    const carte = carteRef.current;
+    const nav = window.navigator || {};
+    if (!carte || (nav.connection && nav.connection.saveData)) return undefined;
+    if (typeof IntersectionObserver === 'undefined') return undefined;
+    const obs = new IntersectionObserver(
+      (entrees) => {
+        if (!entrees.some((en) => en.isIntersecting)) return;
+        obs.disconnect();
+        prechargerCV().catch(() => {});
+      },
+      { rootMargin: '0px 0px 900px 0px' }
+    );
+    obs.observe(carte);
+    return () => obs.disconnect();
   }, []);
 
   return (
@@ -88,23 +121,22 @@ export default function Contact() {
           </div>
 
           <div className="contact__aside reveal reveal--d2">
-            <div className="cv-card">
+            <div className="cv-card" ref={carteRef}>
               <p className="cv-card__meta">Curriculum vitæ</p>
               <h3 className="cv-card__title">Le parcours en deux pages</h3>
               <p className="cv-card__text">
                 Formation, expériences, réalisations et compétences détaillées, au format PDF.
               </p>
-              <a
-                className="btn btn--solid"
-                href="/CV-Ahouet-Yann-Christ-Emmanuel.pdf"
-                download
-              >
-                Télécharger le CV
-                <span className="btn__arrow" aria-hidden="true">
-                  ↓
+              <a className={`btn btn--solid btn--cv is-${cv.etat}`} {...cv.props}>
+                {LIBELLES[cv.etat]}
+                <span className="btn__arrow btn__etat" aria-hidden="true">
+                  {cv.etat === 'fait' ? '✓' : cv.etat === 'repos' ? '↓' : ''}
                 </span>
               </a>
-              <p className="cv-card__meta">PDF · 60 Ko</p>
+              <span className="visually-hidden" role="status">
+                {ANNONCES[cv.etat]}
+              </span>
+              <p className="cv-card__meta">PDF · 2 pages · 78 Ko</p>
             </div>
           </div>
         </div>

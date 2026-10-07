@@ -5,9 +5,10 @@
  *    au curseur et au defilement.
  *  - 'mobile'  : trois fois moins d'etoiles, resolution plafonnee, rendu
  *    suspendu des que la page est immobile.
- *  - 'fixe'    : aucune animation, aucun WebGL. Le ciel reste peint en
- *    CSS. C'est la version servie en mouvement reduit, sans WebGL, en
- *    mode economie de donnees, ou sur un appareil tres modeste.
+ *  - 'fixe'    : aucune animation, aucun WebGL. Les photographies
+ *    restent, immobiles. C'est la version servie en mouvement reduit,
+ *    sans WebGL, en mode economie de donnees, ou sur un appareil tres
+ *    modeste.
  *
  * Le moteur peut encore redescendre d'un cran en cours de route s'il
  * mesure qu'il ne tient pas la cadence : voir champ.js.
@@ -44,12 +45,6 @@ export const REGLAGES = {
     repos: 33,
     sommeil: 50,
     arret: 0,
-    // Les nebuleuses sont peintes bien en dessous de la resolution de
-    // l'ecran : ce sont des nuages, le flou ne se voit pas, et le cout
-    // du fragment shader s'effondre.
-    // pause : delai minimal entre deux peintures des nuees. Nul ici,
-    // le poste de travail peut les suivre image par image.
-    nuees: { facteur: 0.5, max: 1280, pause: 0 },
   },
   mobile: {
     etoiles: 1400,
@@ -57,8 +52,5 @@ export const REGLAGES = {
     repos: 33,
     sommeil: 66,
     arret: 7000,
-    // Les nuages sont lents et flous : les repeindre une image sur deux
-    // ne se voit pas, et rend sa moitie du budget au champ d'etoiles.
-    nuees: { facteur: 0.32, max: 700, pause: 32 },
   },
 };

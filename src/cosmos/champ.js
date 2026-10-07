@@ -7,6 +7,10 @@
    la vitesse reelle du defilement. Les etoiles proches bougent plus que
    les lointaines : c'est la parallaxe qui donne la profondeur.
 
+   Les plus brillantes portent les aigrettes du telescope James Webb :
+   six branches longues, deux courtes a l'horizontale. Elles s'effacent
+   des que l'etoile s'etire en trainee.
+
    Economie d'energie : la cadence suit l'activite. 60 i/s pendant qu'on
    defile ou qu'on bouge la souris, 30 au repos, moins encore apres
    quelques secondes, et sur telephone le rendu s'arrete tout a fait
@@ -32,6 +36,8 @@ const VERT = `
   varying float vRayon;
   varying float vAlpha;
   varying vec3 vCouleur;
+  varying float vEclat;
+  varying float vAigrette;
 
   void main() {
     float proche = 1.0 - aPos.z;
@@ -57,7 +63,12 @@ const VERT = `
     vec2 dir = lon > 0.4 ? trainee / lon : vec2(0.0, 1.0);
     vec2 nrm = vec2(-dir.y, dir.x);
     float demi = lon * 0.5;
-    float bord = rayon + 1.5;
+
+    // Aigrettes : etoiles brillantes et proches seulement, au repos.
+    float eclat = smoothstep(1.55, 2.3, aInfo.x) * smoothstep(0.3, 0.7, proche);
+    eclat *= (1.0 - smoothstep(0.4, 5.0, lon)) * (1.0 - uIntro);
+    float aigrette = eclat * (9.0 + 15.0 * proche);
+    float bord = rayon + 1.5 + aigrette;
 
     vec2 p = c - dir * demi
            + nrm * aCoin.x * bord
@@ -68,6 +79,8 @@ const VERT = `
     vLoc = vec2(aCoin.x * bord, aCoin.y * (demi + bord));
     vDemi = demi;
     vRayon = rayon;
+    vEclat = eclat;
+    vAigrette = max(aigrette, 0.001);
 
     float scint = 0.7 + 0.3 * sin(uTemps * (0.4 + aInfo.y * 2.0) + aInfo.y * 61.0);
     float energie = rayon / (rayon + lon * 0.3);
@@ -83,12 +96,31 @@ const FRAG = `
   varying float vRayon;
   varying float vAlpha;
   varying vec3 vCouleur;
+  varying float vEclat;
+  varying float vAigrette;
   uniform float uGain;
+
+  // Une branche d'aigrette : fine, effilee vers son extremite.
+  float branche(vec2 p, vec2 axe, float lon) {
+    float le = abs(dot(p, axe));
+    float tr = abs(dot(p, vec2(-axe.y, axe.x)));
+    float fin = max(0.0, 1.0 - le / lon);
+    return exp(-tr * tr * 3.2) * fin * fin;
+  }
 
   void main() {
     vec2 q = vec2(vLoc.x, max(abs(vLoc.y) - vDemi, 0.0));
     float d = length(q) / max(vRayon, 0.35);
-    float a = (exp(-d * d * 2.4) + exp(-d * 1.7) * 0.22) * vAlpha * uGain;
+    float a = exp(-d * d * 2.4) + exp(-d * 1.7) * 0.22;
+    if (vEclat > 0.01) {
+      float L = vAigrette;
+      float b = branche(vLoc, vec2(0.0, 1.0), L)
+              + branche(vLoc, vec2(0.866, 0.5), L)
+              + branche(vLoc, vec2(-0.866, 0.5), L)
+              + 0.5 * branche(vLoc, vec2(1.0, 0.0), L * 0.42);
+      a += b * vEclat * 0.75;
+    }
+    a *= vAlpha * uGain;
     if (a < 0.004) discard;
     gl_FragColor = vec4(vCouleur * a, a);
   }
@@ -163,6 +195,9 @@ export function creerChamp(canvas, reglages, options) {
     depth: false,
     stencil: false,
     premultipliedAlpha: true,
+    // Rendu suspendu sur telephone : WebKit viderait le tampon apres
+    // composition et laisserait un ciel sans etoiles.
+    preserveDrawingBuffer: reglages.arret > 0,
     powerPreference: 'low-power',
   });
   if (!gl) return null;
