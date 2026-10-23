@@ -1,28 +1,54 @@
-# Portfolio — Ahouet Yann Christ Emmanuel
+# Portfolio — Ahouet Yao Yann Christ Emmanuel
 
-Portfolio personnel d'un développeur web basé à Abidjan, en Côte d'Ivoire.
-Page unique, React et Vite, direction artistique « espace profond ».
+Portfolio de développeur d'applications full-stack basé à Abidjan, en Côte
+d'Ivoire. Page unique en React et Vite, mise en scène comme un plan-séquence
+spatial piloté par le défilement.
 
 **Le site :** [christ-ahouet.netlify.app](https://christ-ahouet.netlify.app)
 **Me contacter :** [github.com/AyyceGoat](https://github.com/AyyceGoat)
 
 ---
 
-## Ce qu'on y trouve
+## Le parcours
 
-Une page qui se parcourt d'un seul défilement : présentation, quatre
-réalisations, compétences, une section « Signal » depuis Abidjan, contact
-et CV téléchargeable.
+Un astronaute marche sur un chemin de lumière vers une planète. Le
+défilement pilote tout : quand on descend, il avance et la caméra avance
+avec lui ; les contenus arrivent du fond de la scène, un à un, puis passent
+derrière nous. Quand on remonte, tout recule exactement en sens inverse.
 
-Le quatrième projet est une mission en entreprise sous confidentialité.
-Ni dépôt, ni lien, ni capture : il est présenté par un schéma
-d'architecture dessiné en SVG, qui ne montre que la forme du système.
-Aucun nom de client ni donnée d'exploitation n'apparaît dans ce dépôt.
+1. **Ouverture** — le nom, en très grand, et le titre. Au premier geste,
+   les lettres se détachent et volent vers l'objectif.
+2. **Profil** — portrait, présentation, formation et recherche.
+3. **Projets** — chaque réalisation arrive en profondeur, sa capture
+   pivotant vers le visiteur. Le projet sous confidentialité est présenté
+   par un schéma de ses couches, sans nom de client ni donnée.
+4. **Arrivée** — l'éclairage a tourné pendant le voyage : planète éclairée
+   de face, puis éclipse, puis lever de soleil sur le limbe. La caméra
+   plonge dans l'atmosphère.
+5. **L'atelier** — en orbite, face au lever de soleil, le développeur à son
+   poste ; ses compétences flottent autour de lui, reliées à l'ordinateur.
+6. **Contact** — téléchargement du CV, e-mail (rédaction dans Gmail),
+   GitHub et LinkedIn.
+
+## Ajouter un projet
+
+Un seul fichier : [`src/data/projects.js`](src/data/projects.js). Copier un
+bloc, le compléter, déposer les deux captures (1400 et 700 px de large, WebP,
+format 16:10) dans `public/captures/`. La scène, la navigation, la jauge de
+progression et le compteur de projets s'adaptent seuls.
+
+Les textes s'écrivent avec des apostrophes droites : l'apostrophe
+typographique et les espaces insécables de la typographie française sont
+posées à l'affichage ([`src/lib/typo.js`](src/lib/typo.js)).
+
+Le reste du contenu (présentation, compétences, liens, CV) est dans
+[`src/data/profil.js`](src/data/profil.js). Le lien LinkedIn n'est affiché
+que si son adresse y est renseignée.
 
 ## Démarrer
 
 ```bash
-npm install     # React et Vite, rien d'autre
+npm install     # React, Vite, GSAP, Lenis
 npm run dev     # serveur de développement
 npm run build   # build client, rendu serveur, injection dans dist/
 npm run preview # sert le résultat du build
@@ -30,209 +56,99 @@ npm run preview # sert le résultat du build
 
 Node 20.11 ou plus récent.
 
-## Parti pris
+## Technique
 
-**Le ciel.** Six photographies du télescope spatial James Webb, une par
-section : les Falaises cosmiques au hero, les Piliers de la Création au
-profil, le premier champ profond aux projets, la nébuleuse de la Tarentule
-aux compétences, NGC 346 à Signal, Rho Ophiuchi au contact. On descend
-d'une région de l'espace à une autre, en fondu.
+**Une chronologie, un défilement.** Toute la mise en scène est une seule
+chronologie GSAP ([`src/scene/parcours.js`](src/scene/parcours.js)),
+attachée au défilement par ScrollTrigger et amortie par Lenis. Le
+défilement ne fait que déplacer la tête de lecture : marche, caméra,
+soleil et contenus en découlent, ce qui rend le retour en arrière exact.
+Une seule boucle d'images : Lenis, puis la chronologie, puis le monde.
 
-L'image du hero est servie par le CSS dès le premier octet ; les autres ne
-sont téléchargées qu'à l'approche de leur section, puis **décodées avant
-d'apparaître** : jamais de fondu sur une image à moitié peinte. Chaque
-photo existe en trois cadrages (paysage 1920 et 1280, portrait pour les
-téléphones), recadrés à la main sur le sujet.
+**Le monde en WebGL brut, sans bibliothèque**
+([`src/scene/monde.js`](src/scene/monde.js), [`glsl.js`](src/scene/glsl.js)).
+Trois appels de dessin par image : un triangle plein écran (ciel, planète
+lancée en rayons avec atmosphère, soleil, reflets d'objectif, grain), une
+bande pour la lueur du chemin, un nuage de points (étoiles sur deux plans
+de parallaxe, poussière en suspension, grains du chemin). La surface de la
+planète et la Voie lactée sont calculées une seule fois au démarrage dans
+deux textures. L'initialisation est découpée en étapes, une par image, pour
+ne jamais bloquer le fil principal. Toutes les positions sont relatives à
+la caméra : aucune perte de précision au fil du voyage.
 
-La profondeur vient de trois mouvements, tous confiés au compositeur : une
-dérive très lente de la photo affichée, la parallaxe du plan
-photographique au curseur et au défilement, et par-dessus le champ
-d'étoiles en WebGL brut, sans bibliothèque. Plus proche, il bouge
-davantage, scintille, et ses étoiles les plus brillantes portent les
-aigrettes à six branches caractéristiques des miroirs de Webb. Un voile
-de lecture, fondu sur ses bords, assombrit la photo derrière le texte de
-chaque section.
+**Qualité adaptative.** Trois niveaux de détail choisis selon l'appareil
+(processeur, mémoire, écran tactile). En cours de route, si la cadence
+faiblit, la résolution de rendu baisse par paliers, puis le nombre de
+grains. Sans processeur graphique (rendu logiciel), le WebGL n'est pas
+lancé : une affiche rendue par le même moteur prend le relais et joue le
+voyage par un simple zoom.
 
-**La planète.** Une géante gazeuse calculée en temps réel par un seul
-fragment shader : sphère et plan d'anneaux lancés en rayons. Bandes et
-tempête forment une texture calculée une fois au démarrage, enroulée sur
-la sphère et tournée lentement autour de l'axe des anneaux. Elle est
-éclairée par une étoile hors champ : terminateur adouci par l'atmosphère,
-liseré bleu lumineux sur le limbe éclairé. Les anneaux portent leur ombre
-sur la planète, la planète la sienne sur les anneaux, la moitié avant
-passe devant le globe et l'arrière derrière ; leurs divisions s'éteignent
-quand elles deviennent plus fines que le pixel, ce qui supprime le moiré.
+**Premier affichage immédiat.** La page est rendue au build et injectée
+dans le HTML ; l'affiche de la scène d'ouverture est préchargée et peinte
+avant tout JavaScript. GSAP, Lenis et la scène sont chargés ensuite, à
+part. Les lettres du nom entrent par une transformation seule : elles sont
+visibles dès la première image.
 
-L'image de repli, affichée avant la première image calculée et seule en
-version allégée, est rendue hors ligne **par le même shader**.
+**On n'anime que `transform` et `opacity`**, y compris la marche de
+l'astronaute (attributs `transform` de ses membres) et le flottement des
+compétences, suspendu hors de l'écran.
 
-Une nuance de moteur mérite d'être notée : une toile WebGL que l'on ne
-peint qu'au besoin doit conserver son tampon de dessin. Sans cela, WebKit
-le vide après chaque composition et la page immobile se retrouve devant un
-ciel noir, là où Chromium garde la dernière image. Vérifié sur les deux.
-
-**Le CV se télécharge au premier clic.** Un lien `download` ordinaire ne
-montre rien tant que le serveur n'a pas répondu, et chaque clic de plus
-lance un téléchargement de plus. Ici, le PDF est rapatrié en mémoire dès
-que l'on s'en approche (carte en vue, survol, focus, doigt posé) : au
-clic, l'enregistrement part dans le geste même, en quelques dizaines de
-millisecondes. Le bouton passe à « CV téléchargé ✓ », et les clics
-suivants sont ignorés pendant quelques secondes, sur la carte comme dans
-la navigation. Si le fichier n'est pas encore arrivé, le bouton affiche
-« Préparation… » et l'attend. Sans JavaScript, le lien reste un lien de
-téléchargement, et le serveur l'envoie de toute façon en pièce jointe.
-
-Le PDF tient en deux pages A4 (58 Ko, polices embarquées en TrueType,
-texte lisible par les logiciels de tri de candidatures). Dans sa colonne
-Contact, l'e-mail, GitHub et le portfolio sont des liens cliquables et
-soulignés ; l'e-mail ouvre la rédaction d'un message dans Gmail, dans le
-navigateur, sans dépendre d'un logiciel de messagerie installé.
-
-**Signal.** Ce que la position d'Abidjan change concrètement pour une
-équipe. Abidjan vit à UTC+0 toute l'année : les coordonnées réelles,
-l'heure locale, et pour Paris, Londres et Montréal l'heure qu'il y est et
-le nombre d'heures de travail réellement communes, calculées à partir du
-décalage du jour relevé par `Intl` — pas d'une table figée.
-
-**Rendu au build.** La page est rendue côté serveur au moment du build et
-injectée dans le HTML : elle est lisible avant tout JavaScript, et même
-sans. Les états d'apparition ne s'appliquent qu'une fois le script chargé,
-après avoir marqué comme visible ce qui est déjà à l'écran : jamais d'écran
-vide, jamais de clignotement.
-
-**Version allégée automatique.** Mouvement réduit demandé, absence de
-WebGL, mode économie de données ou appareil très modeste : les
-photographies restent, immobiles, la planète est son image fixe, et ni le
-champ d'étoiles ni le shader de la planète ne sont téléchargés. En cours de route, si l'appareil ne tient pas la cadence, le
-moteur dessine moins d'étoiles, puis rend la main au ciel fixe.
-
-**Économie d'énergie.** Le champ d'étoiles suit l'activité : 60 images par
-seconde pendant un défilement ou un mouvement de souris, 30 au repos, moins
-encore ensuite ; sur téléphone, il s'arrête tout à fait quand la page est
-immobile. La planète tourne à 30 images par seconde sur poste de travail,
-12 sur téléphone — à cette vitesse de rotation, moins d'un tiers de pixel
-par image — et seulement quand le hero est à l'écran. Elle ne demande une
-image au navigateur que lorsqu'elle est due. Onglet masqué : arrêt
-complet. Les animations CSS sont finies ou
-ne tournent que lorsque leur section est visible.
-
-**Défilement amorti sur poste de travail.** Le contenu suit la position
-native avec un retard, par une simple translation. Désactivé au tactile et
-en mouvement réduit. Le contenu étant fixe, les liens d'ancrage, l'arrivée
-sur une ancre et le focus clavier sont pris en charge explicitement dans
-`useAmorti`.
-
-**On n'anime que `transform` et `opacity`.**
+**Mouvement réduit, ou sans JavaScript** : la page redevient une suite de
+sections ordinaires devant un décor immobile. Le basculement est décidé en
+CSS (`scripting` et `prefers-reduced-motion`), sans aucun saut de mise en
+page au chargement.
 
 ## Mesures
 
-Build de production, GPU réel, page préchauffée, médiane de cinq
-répétitions :
+Lighthouse 13.5, build de production servi compressé avec les en-têtes de
+`netlify.toml` :
 
-| | durée médiane d'image | 95ᵉ centile | images au-delà de 33 ms |
-|---|---|---|---|
-| Poste de travail, au repos | 16,7 ms (60 i/s) | 16,7 ms | 0 |
-| Poste de travail, défilement | 16,7 ms (60 i/s) | 16,7 ms | 1 |
-| Téléphone moyen (processeur ÷4), au repos | 16,7 ms (60 i/s) | 16,8 ms | 2 |
-| Téléphone moyen (processeur ÷4), défilement | 16,7 ms (60 i/s) | 16,8 ms | 2 |
-| Téléphone lent (processeur ÷6), défilement | 16,7 ms (60 i/s) | 33,3 ms | 10 |
+| | Performance | Accessibilité | Bonnes pratiques | SEO |
+|---|---|---|---|---|
+| Mobile | 97 | 100 | 100 | 100 |
+| Ordinateur | 97 | 100 | 100 | 100 |
 
-Les cinq répétitions donnent la même médiane, et l'intervalle entre la
-plus courte et la plus longue des médianes est nul. La version précédente
-du site, sans photographies ni planète calculée, mesurée le même jour sur
-la même machine, laisse passer 9 images longues sur le téléphone lent :
-photographies et planète ne coûtent rien de mesurable au défilement.
+Mobile : premier affichage 1,6 s, plus grand affichage 2,2 s, blocage
+total 110 ms, décalage cumulé 0. Ordinateur : 0,9 s, 1,1 s, 0 ms, 0.
 
-Au repos, après dix secondes sans interaction, la page occupe 5,1 % du fil
-principal sur poste de travail. Sur téléphone, processeur bridé quatre
-fois, elle en occupe 12,6 % : c'est le prix de la planète qui continue de
-tourner, là où la version précédente s'arrêtait tout à fait (1,8 %).
-
-Coûts supprimés après profilage de la trace :
-
-- La planète demandait une image à chaque rafraîchissement d'écran pour
-  n'en peindre qu'une sur trois, et imposait chaque fois au navigateur
-  style, intersections et commit : 54 % du fil principal au repos sur
-  téléphone. Elle n'en demande plus que lorsqu'elle est due.
-- Le défilement des pointillés du schéma d'architecture ne tourne que
-  lorsque la section est à l'écran.
-- Le plan photographique et le champ d'étoiles ne reçoivent une nouvelle
-  transformation que si elle diffère de la précédente.
-- Le niveau mobile dessine moins d'étoiles, à une résolution plafonnée.
-
-## Chargement
-
-Réseau bridé à 1,6 Mbit/s avec 150 ms de latence, build de production :
-
-| | premier affichage | plus grande image | décalage cumulé |
-|---|---|---|---|
-| Poste de travail | 1,76 s | 1,91 s | 0,012 |
-| Téléphone (processeur ÷4) | 1,92 s | 1,92 s | 0 |
-
-Treize requêtes, dont la photographie de la section suivante, préparée
-pendant que la page est au repos. Les photographies sont en WebP, de 33 à
-280 Ko selon la région et le cadrage ; le téléphone reçoit le cadrage
-portrait, plus léger que le paysage 1920.
-
-Les attributs `sizes` décrivent la largeur réellement occupée par chaque
-image, et non une approximation : le navigateur choisit la variante de
-700 px sur poste de travail là où il téléchargeait celle de 1200 ou de
-1400. Les images de projets sont passées de 166 à 106 Ko sans perte
-visible.
-
-La fonte de titrage est doublée d'un **repli au même gabarit** : le
-fichier Archivo, déjà préchargé, est redéclaré étiré de 24,8 % avec les
-montants d'Unbounded. Les deux occupent la même place, et l'arrivée de la
-vraie fonte ne déplace plus le titre — le décalage cumulé passe de 0,069
-à 0,012.
+Coût du fil principal par image pendant un défilement continu, chemin
+WebGL complet : médiane inférieure à 1 ms, 95ᵉ centile 5 ms ; processeur
+bridé quatre fois : 95ᵉ centile 13 ms. Le budget d'une image à 60 i/s est
+de 16,7 ms.
 
 ## Accessibilité
 
-- Aucune violation relevée par axe-core (WCAG 2.2 A et AA, plus les bonnes
-  pratiques), sur poste de travail comme sur téléphone.
-- Contraste mesuré au pixel, texte par texte, sur le ciel réellement rendu
-  derrière lui — luminance du fond prise au 95ᵉ centile, donc au pire cas :
-  les quarante-six styles de texte dépassent le seuil AA sur poste de
-  travail comme sur téléphone, le plus faible à 4,6:1. Une bande sombre
-  fixe protège la navigation de l'étoile qui passe derrière.
-- Navigation au clavier complète, focus toujours visible, lien d'évitement
-  en première position.
-- Les titres découpés en lettres gardent leur texte entier pour les
-  lecteurs d'écran, et un mot n'est jamais coupé en fin de ligne. Les
-  barres de recouvrement horaire de Signal portent un libellé en toutes
-  lettres.
+- Navigation au clavier complète : un élément qui reçoit le focus amène sa
+  scène à l'écran ; les ancres de la navigation mènent au bon instant du
+  parcours.
+- Lien d'évitement, focus toujours visible, titres découpés en lettres qui
+  gardent leur texte entier pour les lecteurs d'écran.
+- Préférence de mouvement réduit respectée.
 
 ## Sécurité
 
-- Aucune clé, aucun jeton, aucun secret : le site est entièrement statique.
-- En-têtes dans [`netlify.toml`](netlify.toml) : `Content-Security-Policy`,
-  `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`,
-  `Permissions-Policy`, `Strict-Transport-Security`.
-- Politique de sécurité stricte, sans `unsafe-inline` ni `unsafe-eval`,
-  vérifiée sur le site construit. Le build échoue si le rendu serveur
-  contient un attribut `style`.
-- Aucune ressource externe : polices, photographies et visuels sont
-  servis par le site lui-même. Aucun son, aucun fichier audio, aucun contexte
-  Web Audio.
+- Site entièrement statique : aucune clé, aucun secret.
+- Politique de sécurité stricte (`netlify.toml`), sans `unsafe-inline` ni
+  `unsafe-eval`, vérifiée sur le site construit. Le build échoue si le
+  rendu serveur contient un attribut `style`.
+- Aucune ressource externe : polices et visuels sont servis par le site.
 - L'adresse e-mail n'apparaît pas en clair dans les fichiers servis.
-- `npm audit` : aucune vulnérabilité.
 
 ## Structure
 
 ```
 public/
-  cosmos/webb/   photographies Webb, trois cadrages par region (WebP)
-  cosmos/        image fixe de la planete (WebP)
-  captures/      captures des projets en production
-  fonts/         Unbounded, Archivo et IBM Plex Mono (WOFF2)
+  scene/       affiches de la scène, rendues par le moteur WebGL (WebP)
+  captures/    captures des projets
+  fonts/       Archivo et IBM Plex Mono (WOFF2)
 src/
-  cosmos/        ciel : niveaux de rendu, photographies, champ d'etoiles
-                 et planete en WebGL
-  components/    sections de la page
-  hooks/         apparitions, defilement amorti, inclinaison,
-                 telechargement du CV
-  entry-server   rendu au build
-scripts/         injection du rendu dans dist/index.html
+  data/        projets, profil, compétences, logos — le contenu
+  scene/       chronologie, monde WebGL, shaders, astronaute
+  components/  sections de la page et personnage de l'atelier
+  lib/         typographie française
+  hooks/       téléchargement du CV
+  entry-server rendu au build
+scripts/       injection du rendu dans dist/index.html
 ```
 
 ## Licences
@@ -243,19 +159,9 @@ Ne sont **pas** couverts par cette licence : le contenu rédactionnel, le
 CV, le portrait et les captures d'écran des projets, qui restent la
 propriété de leur auteur.
 
-Les fontes Unbounded, Archivo et IBM Plex Mono sont distribuées sous
+Tous les visuels de la scène (planète, ciel, astronaute, personnage de
+l'atelier) sont créés pour ce site, en code. Les logos des compétences
+proviennent de [Simple Icons](https://simpleicons.org) (CC0 1.0) ; les
+marques restent la propriété de leurs détenteurs. Les fontes Archivo et
+IBM Plex Mono sont distribuées sous
 [SIL Open Font License 1.1](https://scripts.sil.org/OFL).
-
-Les photographies du ciel proviennent du télescope spatial James Webb et
-sont publiées par [ESA/Webb](https://esawebb.org/copyright/) sous licence
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Elles ont été
-recadrées et compressées pour le site. Crédits, tels que publiés :
-
-- [Cosmic Cliffs](https://esawebb.org/images/weic2205a/) — NASA, ESA, CSA, and STScI
-- [Pillars of Creation](https://esawebb.org/images/weic2216b/) — NASA, ESA, CSA, STScI; J. DePasquale, A. Koekemoer, A. Pagan (STScI).
-- [Webb's First Deep Field](https://esawebb.org/images/weic2209a/) — NASA, ESA, CSA, and STScI
-- [Tarantula Nebula](https://esawebb.org/images/weic2212a/) — NASA, ESA, CSA, and STScI
-- [NGC 346](https://esawebb.org/images/weic2301a/) — NASA, ESA, CSA, STScI, A. Pagan (STScI)
-- [Rho Ophiuchi](https://esawebb.org/images/weic2316a/) — NASA, ESA, CSA, STScI, K. Pontoppidan (STScI), A. Pagan (STScI)
-
-Les mêmes crédits figurent en pied de page du site.

@@ -1,22 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import useTelechargement, { prechargerCV } from '../hooks/useTelechargement.js';
-import Lettres from './Lettres.jsx';
+import { CV as FICHE, IDENTITE, LIENS } from '../data/profil.js';
+import { typo } from '../lib/typo.js';
+import { Coche, FlecheBas, FlecheOblique } from './Icones.jsx';
 
-/**
- * Adresse stockee a l'envers et en morceaux : la chaine complete
- * n'existe telle quelle ni dans le HTML servi, ni dans le fichier
- * JavaScript livre. Elle n'est reconstituee qu'une fois la page
- * ouverte dans un vrai navigateur, ce qui met en echec les
- * moissonneurs d'adresses qui se contentent de lire les sources.
- */
-const PARTS = ['7tsirhcnnaY', 'liamg', 'moc'];
-const flip = (s) => s.split('').reverse().join('');
-
-const PHONE_DISPLAY = '+225 01 72 96 97 33';
-const PHONE_HREF = 'tel:+2250172969733';
+const inverser = (s) => s.split('').reverse().join('');
 
 const LIBELLES = {
-  repos: 'Télécharger le CV',
+  repos: 'Télécharger mon CV',
   prepa: 'Préparation…',
   fait: 'CV téléchargé',
 };
@@ -27,20 +18,22 @@ const ANNONCES = {
 };
 
 export default function Contact() {
-  const [email, setEmail] = useState('');
+  const [gmail, setGmail] = useState('');
   const cv = useTelechargement();
-  const carteRef = useRef(null);
+  const boutonRef = useRef(null);
 
+  // L'adresse n'est reconstituée qu'ici, une fois la page ouverte.
   useEffect(() => {
-    setEmail(`${flip(PARTS[0])}@${flip(PARTS[1])}.${flip(PARTS[2])}`);
+    const [nom, domaine, ext] = LIENS.courriel.map(inverser);
+    setGmail(`https://mail.google.com/mail/?view=cm&fs=1&to=${nom}@${domaine}.${ext}`);
   }, []);
 
-  // Le CV est rapatrie quand la carte approche : au clic, il est deja la.
-  // Pas en mode economie de donnees, ou l'on attend le geste.
+  // Le CV est rapatrié à l'approche : au clic, il est déjà là. Pas en
+  // mode économie de données, où l'on attend le geste.
   useEffect(() => {
-    const carte = carteRef.current;
+    const bouton = boutonRef.current;
     const nav = window.navigator || {};
-    if (!carte || (nav.connection && nav.connection.saveData)) return undefined;
+    if (!bouton || (nav.connection && nav.connection.saveData)) return undefined;
     if (typeof IntersectionObserver === 'undefined') return undefined;
     const obs = new IntersectionObserver(
       (entrees) => {
@@ -48,98 +41,81 @@ export default function Contact() {
         obs.disconnect();
         prechargerCV().catch(() => {});
       },
-      { rootMargin: '0px 0px 900px 0px' }
+      { rootMargin: '0px 0px 600px 0px' }
     );
-    obs.observe(carte);
+    obs.observe(bouton);
     return () => obs.disconnect();
   }, []);
 
   return (
-    <section className="section" id="contact" aria-labelledby="titre-contact">
-      <div className="wrap">
-        <div className="section-head reveal reveal--lettres">
-          <span className="section-head__num">05</span>
-          <h2 className="section-head__title" id="titre-contact" aria-label="Contact">
-            <span aria-hidden="true">
-              <Lettres texte="Contact" />
-            </span>
-          </h2>
-          <span className="section-head__aside mono">Parlons-en</span>
+    <section className="plan plan--contact" id="contact" aria-labelledby="titre-contact">
+      <div className="plan__corps contact">
+        <p className="entete mono">
+          <span className="entete__num">04</span> Contact
+        </p>
+        <h2 className="contact__titre" id="titre-contact">
+          Construisons la suite.
+        </h2>
+        <p className="contact__texte">
+          {typo(
+            "Disponible pour un CDI, un CDD ou un stage en développement d'applications, à Abidjan ou à distance. Réponse sous 24 heures."
+          )}
+        </p>
+
+        <div className="contact__cv">
+          <a className={`bouton bouton--plein bouton--cv est-${cv.etat}`} ref={boutonRef} {...cv.props}>
+            {LIBELLES[cv.etat]}
+            {cv.etat === 'fait' ? <Coche /> : cv.etat === 'repos' ? <FlecheBas /> : null}
+          </a>
+          <span className="contact__poids mono">{FICHE.poids}</span>
+          <span className="visuellement-cache" role="status">
+            {ANNONCES[cv.etat]}
+          </span>
         </div>
 
-        <div className="contact__grid">
-          <div className="reveal">
-            <p className="lede contact__lede">
-              Je cherche un CDI, un CDD ou un stage en développement web, à Abidjan ou à
-              distance. Écrivez-moi : je réponds à tout message sérieux.
-            </p>
-
-            <div className="contact__lines">
-              <a
-                className="contact__line"
-                href={email ? `mailto:${email}` : undefined}
-                aria-label="M’écrire par courriel"
-              >
-                <span className="contact__line-label">E-mail</span>
-                <span className="contact__line-value">
-                  {email || <span className="mono">chargement…</span>}
-                </span>
-                <span className="contact__line-arrow" aria-hidden="true">
-                  →
-                </span>
-              </a>
-
-              <a className="contact__line" href={PHONE_HREF}>
-                <span className="contact__line-label">Téléphone</span>
-                <span className="contact__line-value">{PHONE_DISPLAY}</span>
-                <span className="contact__line-arrow" aria-hidden="true">
-                  →
-                </span>
-              </a>
-
-              <a
-                className="contact__line"
-                href="https://github.com/AyyceGoat"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                <span className="contact__line-label">GitHub</span>
-                <span className="contact__line-value">
-                  github.com/AyyceGoat
-                  <span className="visually-hidden"> — nouvel onglet</span>
-                </span>
-                <span className="contact__line-arrow" aria-hidden="true">
-                  →
-                </span>
-              </a>
-
-              <p className="contact__line">
-                <span className="contact__line-label">Lieu</span>
-                <span className="contact__line-value">Abidjan, Côte d’Ivoire</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="contact__aside reveal reveal--d2">
-            <div className="cv-card" ref={carteRef}>
-              <p className="cv-card__meta">Curriculum vitæ</p>
-              <h3 className="cv-card__title">Le parcours en deux pages</h3>
-              <p className="cv-card__text">
-                Formation, expériences, réalisations et compétences détaillées, au format PDF.
-              </p>
-              <a className={`btn btn--solid btn--cv is-${cv.etat}`} {...cv.props}>
-                {LIBELLES[cv.etat]}
-                <span className="btn__arrow btn__etat" aria-hidden="true">
-                  {cv.etat === 'fait' ? '✓' : cv.etat === 'repos' ? '↓' : ''}
-                </span>
-              </a>
-              <span className="visually-hidden" role="status">
-                {ANNONCES[cv.etat]}
+        <ul className="contact__liens">
+          <li>
+            <a className="lien-contact" href={gmail || undefined} target="_blank" rel="noreferrer noopener">
+              <span className="lien-contact__nom mono">E-mail</span>
+              <span className="lien-contact__valeur">Écrire via Gmail</span>
+              <span className="lien-contact__fleche">
+                <FlecheOblique />
               </span>
-              <p className="cv-card__meta">PDF · 2 pages · 58 Ko</p>
-            </div>
-          </div>
-        </div>
+              <span className="visuellement-cache"> (nouvel onglet)</span>
+            </a>
+          </li>
+          <li>
+            <a className="lien-contact" href={LIENS.github} target="_blank" rel="noreferrer noopener">
+              <span className="lien-contact__nom mono">GitHub</span>
+              <span className="lien-contact__valeur">github.com/AyyceGoat</span>
+              <span className="lien-contact__fleche">
+                <FlecheOblique />
+              </span>
+              <span className="visuellement-cache"> (nouvel onglet)</span>
+            </a>
+          </li>
+          {LIENS.linkedin && (
+            <li>
+              <a className="lien-contact" href={LIENS.linkedin} target="_blank" rel="noreferrer noopener">
+                <span className="lien-contact__nom mono">LinkedIn</span>
+                <span className="lien-contact__valeur">Profil professionnel</span>
+                <span className="lien-contact__fleche">
+                  <FlecheOblique />
+                </span>
+                <span className="visuellement-cache"> (nouvel onglet)</span>
+              </a>
+            </li>
+          )}
+        </ul>
+
+        <footer className="pied">
+          <p>
+            © {IDENTITE.complet} — {typo(IDENTITE.lieu)}
+          </p>
+          <a className="pied__haut" href="#haut">
+            Revenir au départ <span aria-hidden="true">↑</span>
+          </a>
+        </footer>
       </div>
     </section>
   );

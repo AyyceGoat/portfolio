@@ -1,40 +1,24 @@
 /* ------------------------------------------------------------------
-   Polices auto-hebergees. Aucun appel a un domaine tiers.
-   Archivo, Unbounded et IBM Plex Mono sont sous licence SIL Open
-   Font 1.1.
-
-   Unbounded ne sert qu'aux titres : le jeu latin de base suffit, les
-   titres du site n'emploient aucun caractere au-dela.
+   Polices auto-hébergées, aucun appel à un domaine tiers.
+   Archivo (variable, graisses 100 à 900) et IBM Plex Mono, toutes deux
+   sous licence SIL Open Font 1.1.
    ------------------------------------------------------------------ */
-
-@font-face {
-  font-family: 'Unbounded';
-  font-style: normal;
-  font-weight: 300 600;
-  font-display: swap;
-  src: url('/fonts/unbounded-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
-}
 
 @font-face {
   font-family: 'Archivo';
   font-style: normal;
-  font-weight: 400 800;
-  font-stretch: 100%;
+  font-weight: 100 900;
   font-display: swap;
   src: url('/fonts/archivo-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
+    U+2197, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
   font-family: 'Archivo';
   font-style: normal;
-  font-weight: 400 800;
-  font-stretch: 100%;
+  font-weight: 100 900;
   font-display: swap;
   src: url('/fonts/archivo-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
@@ -50,34 +34,16 @@
   src: url('/fonts/plex-mono-400-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
+    U+2197, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* Secours aux métriques d'Archivo : le texte ne bouge pas quand la
+   fonte arrive. */
 @font-face {
-  font-family: 'IBM Plex Mono';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/fonts/plex-mono-500-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-/* Secours au gabarit d'Unbounded.
-   Tant que la fonte de titrage n'est pas arrivee, le titre est compose
-   en Archivo — qui est un quart moins large. L'echange decalait alors
-   le hero. On reutilise le meme fichier, deja precharge, etire de 24,8 %
-   et dote des montants d'Unbounded : les deux occupent la meme place,
-   et l'arrivee de la vraie fonte ne deplace plus rien. */
-@font-face {
-  font-family: 'Unbounded secours';
-  src: url('/fonts/archivo-latin.woff2') format('woff2');
-  font-weight: 400 800;
-  font-style: normal;
-  font-display: swap;
-  size-adjust: 124.8%;
-  ascent-override: 100%;
-  descent-override: 25%;
+  font-family: 'Archivo secours';
+  src: local('Arial'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 102%;
+  ascent-override: 87.8%;
+  descent-override: 21%;
   line-gap-override: 0%;
 }

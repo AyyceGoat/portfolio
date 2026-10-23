@@ -65,7 +65,7 @@
     Cache-Control = "public, max-age=2592000"
 
 [[headers]]
-  for = "/cosmos/*"
+  for = "/scene/*"
   [headers.values]
     Cache-Control = "public, max-age=2592000"
 
@@ -73,7 +73,7 @@
 [[headers]]
   for = "/CV-Ahouet-Yann-Christ-Emmanuel.pdf"
   [headers.values]
-    Content-Disposition = "attachment; filename=\"CV-Ahouet-Yann-Christ-Emmanuel.pdf\""
+    Content-Disposition = "attachment; filename=\"CV-Ahouet-Yao-Yann-Christ-Emmanuel.pdf\""
     Cache-Control = "public, max-age=3600, must-revalidate"
 
 [[headers]]

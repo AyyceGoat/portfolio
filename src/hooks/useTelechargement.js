@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { CV as FICHE } from '../data/profil.js';
 
 /**
  * Telechargement du CV, instantane et a l'abri des doubles clics.
@@ -15,8 +16,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * clic est ignore. Sans JavaScript, le lien reste un lien `download`.
  */
 
-export const CV = '/CV-Ahouet-Yann-Christ-Emmanuel.pdf';
-const NOM = 'CV-Ahouet-Yann-Christ-Emmanuel.pdf';
+export const CV = FICHE.fichier;
+const NOM = FICHE.nom;
 const REPOS = 4000;
 
 let promesse = null;

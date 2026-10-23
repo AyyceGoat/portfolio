@@ -1,46 +1,56 @@
-import { useRef } from 'react';
+import { useEffect } from 'react';
 
 import Nav from './components/Nav.jsx';
-import Hero from './components/Hero.jsx';
-import About from './components/About.jsx';
-import Projects from './components/Projects.jsx';
-import Skills from './components/Skills.jsx';
-import Signal from './components/Signal.jsx';
+import Ouverture from './components/Ouverture.jsx';
+import Profil from './components/Profil.jsx';
+import Projets from './components/Projets.jsx';
+import Atelier from './components/Atelier.jsx';
 import Contact from './components/Contact.jsx';
-import Footer from './components/Footer.jsx';
-import Cosmos from './cosmos/Cosmos.jsx';
-import { useReveal } from './hooks/useReveal.js';
-import { useAmorti } from './hooks/useAmorti.js';
+import Astronaute from './scene/Astronaute.jsx';
 
 export default function App() {
-  useReveal();
-  const shellRef = useRef(null);
-  useAmorti(shellRef);
+  // La mise en scène (défilement, chronologie, monde WebGL) arrive dans
+  // un second fichier, chargé après le premier affichage.
+  useEffect(() => {
+    let arreter = null;
+    let annule = false;
+    import('./scene/parcours.js').then(({ lancer }) => {
+      if (!annule) arreter = lancer();
+    });
+    return () => {
+      annule = true;
+      if (arreter) arreter();
+    };
+  }, []);
 
   return (
     <>
-      <a className="skip-link" href="#contenu">
+      <a className="lien-evitement" href="#contenu">
         Aller au contenu
       </a>
 
-      {/* Le ciel : peint en CSS des le premier octet, anime ensuite. */}
-      <Cosmos />
+      {/* Le monde : deux affiches rendues par le même moteur (affichées
+          dès le premier octet, et seules sans processeur graphique), puis
+          la scène calculée en temps réel par-dessus. */}
+      <div className="monde" aria-hidden="true">
+        <div className="monde__affiche monde__affiche--depart" />
+        <div className="monde__affiche monde__affiche--orbite" />
+        <canvas className="monde__toile" />
+      </div>
+      <Astronaute />
 
       <Nav />
 
-      <div className="shell" ref={shellRef}>
-        <Hero />
+      <main className="scene" id="contenu">
+        <Ouverture />
+        <Profil />
+        <Projets />
+        <Atelier />
+        <Contact />
+      </main>
 
-        <main id="contenu">
-          <About />
-          <Projects />
-          <Skills />
-          <Signal />
-          <Contact />
-        </main>
-
-        <Footer />
-      </div>
+      <div className="eclat" aria-hidden="true" />
+      <div className="parcours" aria-hidden="true" />
     </>
   );
 }

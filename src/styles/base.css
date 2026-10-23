@@ -1,7 +1,31 @@
 /* ------------------------------------------------------------------
-   Socle : remise a zero, rythme, accessibilite, mouvement.
-   Regle du projet : on n'anime que transform et opacity.
+   Jetons et fondations.
+   La palette vient de la scène : noir spatial, blanc crème des titres,
+   bleu de l'atmosphère, lumière chaude du chemin.
    ------------------------------------------------------------------ */
+
+:root {
+  --fond: #02040a;
+  --nuit: #060b18;
+  --encre: #eee6d4;
+  --encre-2: rgba(238, 230, 212, 0.78);
+  --encre-3: rgba(238, 230, 212, 0.56);
+  --atmo: #9cc3ff;
+  --atmo-vif: #6ea4ff;
+  --chemin: #ffeccb;
+  --trait: rgba(176, 202, 255, 0.16);
+  --trait-fort: rgba(176, 202, 255, 0.32);
+  --verre: rgba(6, 11, 24, 0.72);
+
+  --titre: 'Archivo', 'Archivo secours', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --gouttiere: clamp(1rem, 4vw, 3rem);
+  --rayon: 1.5rem;
+  --sortie: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: dark;
+}
 
 *,
 *::before,
@@ -11,49 +35,50 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: auto;
+  text-size-adjust: 100%;
+  background: var(--fond);
 }
 
-/* Defilement fluide, mais jamais impose a qui demande moins d'animation. */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
+/* Lenis : défilement amorti sur poste de travail. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
 }
 
 body {
   margin: 0;
-  background-color: var(--c-bg);
-  color: var(--c-text);
-  font-family: var(--f-sans);
-  font-size: var(--t-body);
-  font-weight: 400;
-  line-height: 1.65;
+  min-height: 100svh;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--titre);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-kerning: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-synthesis-weight: none;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 
 h1,
 h2,
 h3,
-h4 {
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
   margin: 0;
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.028em;
-  text-wrap: balance;
 }
 
-p {
-  margin: 0;
-  text-wrap: pretty;
-}
-
-ul {
-  margin: 0;
+ul,
+ol {
   padding: 0;
   list-style: none;
 }
@@ -69,236 +94,97 @@ a {
   text-decoration: none;
 }
 
-button {
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+.mono {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+:focus-visible {
+  outline: 2px solid var(--atmo);
+  outline-offset: 4px;
+  border-radius: 6px;
 }
 
 ::selection {
-  background: var(--c-accent);
-  color: var(--c-accent-ink);
+  background: rgba(110, 164, 255, 0.4);
+  color: #fff;
 }
 
-/* --- Accessibilite clavier -------------------------------------- */
-
-:focus-visible {
-  outline: 2px solid var(--c-accent);
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-
-/* Le lien d'evitement reste hors champ jusqu'au premier Tab. */
-.skip-link {
-  position: fixed;
-  top: 0.75rem;
-  left: 0.75rem;
-  z-index: 200;
-  padding: 0.7rem 1.1rem;
-  background: var(--c-accent);
-  color: var(--c-accent-ink);
-  font-family: var(--f-mono);
-  font-size: var(--t-small);
-  font-weight: 500;
-  border-radius: var(--radius);
-  transform: translateY(-160%);
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-
-.skip-link:focus-visible {
-  transform: translateY(0);
-  outline-offset: 2px;
-}
-
-.visually-hidden {
-  position: absolute;
+.visuellement-cache {
+  position: absolute !important;
   width: 1px;
   height: 1px;
-  margin: -1px;
   padding: 0;
+  margin: -1px;
   overflow: hidden;
-  clip-path: inset(50%);
+  clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
 }
 
-/* --- Structure ---------------------------------------------------- */
-
-.shell {
-  position: relative;
-  /* Au-dessus du ciel (0) et du champ d'etoiles (1). */
-  z-index: 2;
+.lien-evitement {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 10;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  background: var(--encre);
+  color: var(--fond);
+  font-weight: 600;
+  transform: translateY(-200%);
 }
-
-.wrap {
-  width: 100%;
-  max-width: var(--max-w);
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-}
-
-.section {
-  padding-block: var(--section-y);
-}
-
-/* --- Apparitions ---------------------------------------------------
-   La page est rendue cote serveur : sans JavaScript, ou avant qu'il ne
-   s'execute, TOUT est visible. Les etats caches n'existent que sous
-   html.anime, classe posee par le script une fois qu'il a deja revele
-   ce qui se trouve a l'ecran — jamais d'ecran vide, jamais de clignotement.
-
-   L'entree evoque une arrivee depuis la profondeur : l'element vient
-   de loin (leger retrait d'echelle) et monte vers le lecteur. */
-
-.reveal {
-  transition:
-    opacity var(--dur-slow) var(--ease-out),
-    transform var(--dur-slow) var(--ease-out);
-  transition-delay: var(--reveal-delay, 0ms);
-}
-
-.anime .reveal:not(.is-visible) {
-  opacity: 0;
-  transform: translate3d(0, 28px, 0) scale(0.965);
-}
-
-.anime .reveal:not(.is-settled) {
-  will-change: transform, opacity;
-}
-
-.reveal--d1 { --reveal-delay: 80ms; }
-.reveal--d2 { --reveal-delay: 160ms; }
-.reveal--d3 { --reveal-delay: 240ms; }
-.reveal--d4 { --reveal-delay: 320ms; }
-
-.skills .skill:nth-child(2) { --reveal-delay: 60ms; }
-.skills .skill:nth-child(3) { --reveal-delay: 120ms; }
-.skills .skill:nth-child(4) { --reveal-delay: 180ms; }
-.skills .skill:nth-child(5) { --reveal-delay: 240ms; }
-.skills .skill:nth-child(6) { --reveal-delay: 300ms; }
-
-/* --- Revelation lettre par lettre --------------------------------
-   Le titre porte son texte entier en aria-label, les lettres sont
-   masquees aux lecteurs d'ecran. Le rang de chaque lettre est un
-   attribut data-i, traduit ici : aucun style en ligne, la politique de
-   securite stricte reste intacte meme dans le HTML rendu au serveur. */
-
-.anime .reveal--lettres:not(.is-visible) {
-  opacity: 1;
+.lien-evitement:focus {
   transform: none;
 }
 
-.lettre {
+.icone {
   display: inline-block;
-  transition:
-    opacity 620ms var(--ease-out),
-    transform 760ms var(--ease-out);
-  transition-delay: calc(var(--i, 0) * 26ms);
+  flex: none;
 }
 
-/* Un mot est une boite insecable ; l'espace qui le suit reste un point
-   de coupure legitime. */
-.lettre-mot {
-  display: inline-block;
+/* ---------- Boutons ---------- */
+
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.9rem;
+  padding: 0.7rem 1.3rem;
+  border-radius: 999px;
+  font-family: var(--titre);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
   white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.4s var(--sortie),
+    opacity 0.3s ease;
+}
+.bouton:hover {
+  transform: translateY(-2px);
+}
+.bouton:active {
+  transform: translateY(0) scale(0.98);
 }
 
-.anime .reveal--lettres:not(.is-visible) .lettre {
-  opacity: 0;
-  transform: translate3d(0, 0.42em, 0);
+.bouton--plein {
+  background: var(--encre);
+  color: #05070d;
+  box-shadow: 0 10px 40px -10px rgba(255, 236, 203, 0.55);
 }
-
-.anime .reveal--lettres:not(.is-settled) .lettre {
-  will-change: transform, opacity;
+.bouton--clair {
+  background: rgba(238, 230, 212, 0.94);
+  color: #05070d;
 }
-
-.reveal--lettres .section-head__num,
-.reveal--lettres .section-head__aside {
-  transition: opacity 700ms var(--ease-out) 220ms;
+.bouton--trait {
+  border: 1px solid var(--trait-fort);
+  color: var(--encre);
 }
-
-.anime .reveal--lettres:not(.is-visible) .section-head__num,
-.anime .reveal--lettres:not(.is-visible) .section-head__aside {
-  opacity: 0;
-}
-
-.lettre[data-i="0"] { --i: 0; }
-.lettre[data-i="1"] { --i: 1; }
-.lettre[data-i="2"] { --i: 2; }
-.lettre[data-i="3"] { --i: 3; }
-.lettre[data-i="4"] { --i: 4; }
-.lettre[data-i="5"] { --i: 5; }
-.lettre[data-i="6"] { --i: 6; }
-.lettre[data-i="7"] { --i: 7; }
-.lettre[data-i="8"] { --i: 8; }
-.lettre[data-i="9"] { --i: 9; }
-.lettre[data-i="10"] { --i: 10; }
-.lettre[data-i="11"] { --i: 11; }
-.lettre[data-i="12"] { --i: 12; }
-.lettre[data-i="13"] { --i: 13; }
-.lettre[data-i="14"] { --i: 14; }
-.lettre[data-i="15"] { --i: 15; }
-.lettre[data-i="16"] { --i: 16; }
-.lettre[data-i="17"] { --i: 17; }
-.lettre[data-i="18"] { --i: 18; }
-.lettre[data-i="19"] { --i: 19; }
-.lettre[data-i="20"] { --i: 20; }
-.lettre[data-i="21"] { --i: 21; }
-.lettre[data-i="22"] { --i: 22; }
-.lettre[data-i="23"] { --i: 23; }
-.lettre[data-i="24"] { --i: 24; }
-.lettre[data-i="25"] { --i: 25; }
-.lettre[data-i="26"] { --i: 26; }
-.lettre[data-i="27"] { --i: 27; }
-.lettre[data-i="28"] { --i: 28; }
-.lettre[data-i="29"] { --i: 29; }
-.lettre[data-i="30"] { --i: 30; }
-.lettre[data-i="31"] { --i: 31; }
-.lettre[data-i="32"] { --i: 32; }
-.lettre[data-i="33"] { --i: 33; }
-.lettre[data-i="34"] { --i: 34; }
-.lettre[data-i="35"] { --i: 35; }
-.lettre[data-i="36"] { --i: 36; }
-.lettre[data-i="37"] { --i: 37; }
-.lettre[data-i="38"] { --i: 38; }
-.lettre[data-i="39"] { --i: 39; }
-.lettre[data-i="40"] { --i: 40; }
-
-/* --- Respect de prefers-reduced-motion --------------------------- */
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* --- Defilement amorti (poste de travail uniquement) -------------- */
-
-html.amorti {
-  scroll-behavior: auto;
-}
-
-html.amorti .shell {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-}
-
-.amorti-cale {
-  pointer-events: none;
-}
-
-/* Une section qui recoit le focus apres un lien d'ancrage n'est pas un
-   controle : pas de contour, le focus sert seulement a la lecture. */
-[tabindex='-1']:focus {
-  outline: none;
+.bouton--trait:hover {
+  border-color: var(--atmo);
 }
