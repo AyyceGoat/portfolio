@@ -9,7 +9,7 @@ import Contact from './components/Contact.jsx';
 import Astronaute from './scene/Astronaute.jsx';
 
 export default function App() {
-  // La mise en scène (défilement, chronologie, monde WebGL) arrive dans
+  // La mise en scène (chronologie, navigation, monde WebGL) arrive dans
   // un second fichier, chargé après le premier affichage.
   useEffect(() => {
     let arreter = null;
@@ -49,7 +49,26 @@ export default function App() {
         <Contact />
       </main>
 
+      {/* Entrée dans l'atmosphère : éclair, puis onde de choc. */}
       <div className="eclat" aria-hidden="true" />
+      <div className="onde" aria-hidden="true" />
+
+      {/* Visite guidée : bandeaux de cinéma, chapitre en cours, arrêt. */}
+      <div className="visite" role="status">
+        <span className="visite__bande visite__bande--haut" aria-hidden="true" />
+        <span className="visite__bande visite__bande--bas" aria-hidden="true" />
+        <p className="visite__legende mono">
+          <span className="visite__etiquette">Visite guidée</span>
+          <span className="visite__titre">Départ</span>
+        </p>
+        <button type="button" className="visite__arret mono" data-arreter-visite>
+          Arrêter la visite
+          <span className="visite__touche" aria-hidden="true">
+            Échap
+          </span>
+        </button>
+      </div>
+
       <div className="parcours" aria-hidden="true" />
     </>
   );

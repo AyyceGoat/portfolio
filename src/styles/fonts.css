@@ -47,3 +47,23 @@
   descent-override: 21%;
   line-gap-override: 0%;
 }
+
+/* Archivo en largeur étendue (125 %), graisses 500 à 900 : la voix des
+   grands titres. Sous-ensemble latin, 18 Ko. */
+@font-face {
+  font-family: 'Archivo Etendu';
+  font-style: normal;
+  font-weight: 500 900;
+  font-display: swap;
+  src: url('/fonts/archivo-etendu.woff2') format('woff2');
+}
+
+/* Secours aux métriques de la largeur étendue : Arial élargi. */
+@font-face {
+  font-family: 'Archivo Etendu secours';
+  src: local('Arial Black'), local('Arial');
+  size-adjust: 118%;
+  ascent-override: 74%;
+  descent-override: 18%;
+  line-gap-override: 0%;
+}

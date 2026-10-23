@@ -1,15 +1,17 @@
 /**
  * Le monde : ciel, planète, soleil, chemin de lumière et poussière.
  *
- * WebGL 1 brut, trois appels de dessin par image :
- *   1. un triangle plein écran — ciel, planète lancée en rayons, soleil,
- *      reflets d'objectif, grain et vignettage ;
- *   2. une bande de triangles — la lueur continue du chemin ;
- *   3. un nuage de points — étoiles sur deux plans, poussière proche
+ * WebGL 1 brut, cinq appels de dessin par image :
+ *   1. un triangle plein écran — ciel, planète lancée en rayons (sol,
+ *      nuages et leurs ombres, villes, atmosphère), soleil, reflets
+ *      d'objectif, effets de plongée, grain et vignettage ;
+ *   2. quelques grands voiles de nébuleuse, en parallaxe ;
+ *   3. et 4. la lueur du chemin, en halo puis en cœur ;
+ *   5. un nuage de points — étoiles sur deux plans, poussière proche
  *      et grains du chemin.
- * La surface de la planète et la Voie lactée sont cuites une seule fois
- * au démarrage dans deux textures : par image, il ne reste que des
- * lectures de texture et quelques produits scalaires.
+ * La surface de la planète, ses nuages et la Voie lactée sont cuits une
+ * seule fois au démarrage dans trois textures : par image, il ne reste
+ * que des lectures de texture et quelques produits scalaires.
  *
  * Le module ne connaît ni GSAP ni le DOM : il lit son objet `etat`, que
  * la chronologie fait évoluer, et dessine quand on appelle `rendre`.
@@ -17,7 +19,10 @@
 import {
   PLEIN_ECRAN,
   CUISSON_SURFACE,
+  CUISSON_NUAGES,
   CUISSON_CIEL,
+  NUEES_V,
+  NUEES_F,
   CIEL,
   RUBAN_V,
   RUBAN_F,
@@ -40,9 +45,9 @@ const G = {
 };
 
 const QUALITES = {
-  haute: { dpr: 1.75, lointaines: 4000, tunnel: 4200, poussiere: 90, grains: 26000, grainsLoin: 9000, surface: 2048 },
-  moyenne: { dpr: 1.35, lointaines: 1500, tunnel: 2200, poussiere: 50, grains: 12000, grainsLoin: 4500, surface: 1024 },
-  basse: { dpr: 1, lointaines: 900, tunnel: 1100, poussiere: 30, grains: 6000, grainsLoin: 2200, surface: 512 },
+  haute: { dpr: 1.75, lointaines: 4000, tunnel: 4200, poussiere: 90, grains: 26000, grainsLoin: 15000, surface: 2048 },
+  moyenne: { dpr: 1.35, lointaines: 1500, tunnel: 2200, poussiere: 50, grains: 12000, grainsLoin: 7500, surface: 1024 },
+  basse: { dpr: 1, lointaines: 900, tunnel: 1100, poussiere: 30, grains: 6000, grainsLoin: 3800, surface: 512 },
 };
 
 /* ---------- petite algèbre ---------- */
@@ -129,6 +134,7 @@ export function creerMonde(
     derive: 0, // lente dérive de la scène finale
     chemin: 1, // visibilité du chemin
     expo: 1.15,
+    regard: 0, // inclinaison du regard dans la scène finale, en degrés
   };
 
   const souris = { x: 0, y: 0, cx: 0, cy: 0 };
@@ -259,13 +265,39 @@ export function creerMonde(
           const ecart = r() < 0.12 ? gauss() * 1.6 : gauss() * 0.75;
           A[o + 1] = Math.max(-1.9, Math.min(1.9, ecart));
           A[o + 2] = r() * 0.04;
-          B[o] = loin ? 0.06 + r() * 0.1 : 0.010 + Math.pow(r(), 3) * 0.035;
+          B[o] = loin ? 0.1 + r() * 0.2 : 0.010 + Math.pow(r(), 3) * 0.035;
           B[o + 1] = 0.25 + Math.pow(r(), 1.8) * 1.05;
           B[o + 3] = r() < 0.18 ? 1 : 0;
         }
       }
     }
     return { A, B, total };
+  }
+
+  /* Huit grands voiles de nébuleuse : deux triangles chacun, orientés
+     face à la caméra dans le shader. */
+  function construireNuees() {
+    const r = alea(7031);
+    const N = 8;
+    const A = new Float32Array(N * 6 * 4);
+    const B = new Float32Array(N * 6 * 4);
+    const coins = [[-1, -1], [1, -1], [1, 1], [-1, -1], [1, 1], [-1, 1]];
+    for (let i = 0; i < N; i += 1) {
+      const t = r() * Math.PI * 2;
+      const rayon = 260 + r() * 700;
+      const x = Math.cos(t) * rayon;
+      const y = Math.sin(t) * rayon * 0.55 + 120;
+      const z = (i / N) * 2600 + r() * 200;
+      const taille = 260 + r() * 360;
+      const teinte = i % 3;
+      const graine = r();
+      for (let k = 0; k < 6; k += 1) {
+        const o = (i * 6 + k) * 4;
+        A.set([x, y, z, taille], o);
+        B.set([coins[k][0], coins[k][1], teinte, graine], o);
+      }
+    }
+    return { A, B, n: N * 6 };
   }
 
   function construireRuban() {
@@ -297,6 +329,9 @@ export function creerMonde(
         textures.surface = cuire(CUISSON_SURFACE, Q.surface, Q.surface / 2);
       },
       () => {
+        textures.nuages = cuire(CUISSON_NUAGES, Q.surface, Q.surface / 2);
+      },
+      () => {
         textures.fond = cuire(CUISSON_CIEL, 1024, 512);
       },
       () => {
@@ -312,6 +347,17 @@ export function creerMonde(
       },
       () => {
         prets.points = programme(POINTS_V, POINTS_F);
+      },
+      () => {
+        prets.nuees = programme(NUEES_V, NUEES_F);
+        const nu = construireNuees();
+        tampons.nueesA = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, tampons.nueesA);
+        gl.bufferData(gl.ARRAY_BUFFER, nu.A, gl.STATIC_DRAW);
+        tampons.nueesB = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, tampons.nueesB);
+        gl.bufferData(gl.ARRAY_BUFFER, nu.B, gl.STATIC_DRAW);
+        tampons.nueesN = nu.n;
       },
       () => {
         const pts = construirePoints();
@@ -418,6 +464,16 @@ export function creerMonde(
         const vers = norm([cam.L[0] - pos[0], cam.L[1] - pos[1], cam.L[2] - pos[2]]);
         pos = melange(pos, cible, pe);
         avant = norm(melange(avant, vers, Math.min(1, p * 1.6) * 0.7));
+        // Secousse de rentrée atmosphérique, brève et amortie.
+        const force = lisse(0.35, 0.7, p) * (1 - lisse(0.85, 1, p)) * 0.006;
+        if (force > 0) {
+          const t = performance.now() / 1000;
+          avant = norm([
+            avant[0] + Math.sin(t * 37) * force,
+            avant[1] + Math.sin(t * 29 + 1.3) * force,
+            avant[2],
+          ]);
+        }
       }
 
       // Course du soleil : de face, puis derrière la planète, puis levant.
@@ -436,9 +492,9 @@ export function creerMonde(
       pos = [souris.cx * 0.8, souris.cy * 0.4, 0];
       C = [0, -(G.R + G.ORBITE_H), -30 - d * 20];
       const yaw = (souris.cx * 1.4 + (d - 0.5) * 3) * DEG;
-      const pitch = (-9.5 + souris.cy * 0.8 - (portrait ? 2.5 : 0)) * DEG;
+      const pitch = (-9.5 + souris.cy * 0.8 - (portrait ? 2.5 : 0) + (e.regard || 0)) * DEG;
       avant = orienter(yaw, pitch);
-      soleil = norm(orienter(0, -20.6 * DEG));
+      soleil = norm(orienter(0, (-21.6 - (e.regard || 0) * 0.15) * DEG));
     }
 
     const droite = norm(croix(avant, [0, 1, 0]));
@@ -539,6 +595,13 @@ export function creerMonde(
     const ct = Math.cos(0.41);
     const st = Math.sin(0.41);
     const rot = new Float32Array([ca, st * sa, -ct * sa, 0, ct, st, sa, -st * ca, ct * ca]);
+    const angN = ang * 1.18 + 0.35;
+    const cn = Math.cos(angN);
+    const sn = Math.sin(angN);
+    const rotN = new Float32Array([cn, st * sn, -ct * sn, 0, ct, st, sn, -st * cn, ct * cn]);
+    // Direction du point d'arrivée du chemin, pour sa lueur sur la planète.
+    const arrivee = norm([cam.L[0] - cam.pos[0], cam.L[1] - cam.pos[1], cam.L[2] - cam.pos[2]]);
+    const arriveeI = e.orbite < 0.5 ? (1 - lisse(0.2, 0.7, e.plongee)) * e.chemin : 0;
 
     gl.viewport(0, 0, largeur, hauteur);
     gl.disable(gl.BLEND);
@@ -554,6 +617,9 @@ export function creerMonde(
     gl.uniform1f(p.u.uR, G.R);
     gl.uniform3fv(p.u.uSoleil, cam.soleil);
     gl.uniformMatrix3fv(p.u.uRot, false, rot);
+    gl.uniformMatrix3fv(p.u.uRotN, false, rotN);
+    gl.uniform3fv(p.u.uArrivee, arrivee);
+    gl.uniform1f(p.u.uArriveeI, arriveeI);
     gl.uniform1f(p.u.uExpo, e.expo);
     gl.uniform1f(p.u.uTemps, temps);
     gl.uniform1f(p.u.uPlongee, e.orbite < 0.5 ? e.plongee : 0);
@@ -567,6 +633,9 @@ export function creerMonde(
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, textures.fond);
     gl.uniform1i(p.u.uFond, 1);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, textures.nuages);
+    gl.uniform1i(p.u.uNuages, 2);
     gl.bindBuffer(gl.ARRAY_BUFFER, tampons.plein);
     gl.enableVertexAttribArray(p.a.aP);
     gl.vertexAttribPointer(p.a.aP, 2, gl.FLOAT, false, 0, 0);
@@ -576,7 +645,30 @@ export function creerMonde(
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE);
 
-    // 2. Lueur du chemin.
+    // 2. Voiles de nébuleuse.
+    p = programmes.nuees;
+    gl.useProgram(p.p);
+    gl.uniformMatrix4fv(p.u.uVP, false, cam.vp);
+    gl.uniform3fv(p.u.uDroite, cam.droite);
+    gl.uniform3fv(p.u.uHaut, cam.haut);
+    gl.uniform1f(p.u.uVol, e.vol);
+    gl.uniform3fv(p.u.uC, C);
+    gl.uniform1f(p.u.uR, G.R);
+    gl.uniform1f(p.u.uNuees, 1 - e.plongee * (e.orbite < 0.5 ? 1 : 0) * 0.9);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, textures.fond);
+    gl.uniform1i(p.u.uFond, 1);
+    gl.bindBuffer(gl.ARRAY_BUFFER, tampons.nueesA);
+    gl.enableVertexAttribArray(p.a.aN);
+    gl.vertexAttribPointer(p.a.aN, 4, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, tampons.nueesB);
+    gl.enableVertexAttribArray(p.a.aC);
+    gl.vertexAttribPointer(p.a.aC, 4, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, tampons.nueesN);
+    gl.disableVertexAttribArray(p.a.aN);
+    gl.disableVertexAttribArray(p.a.aC);
+
+    // 3. et 4. Lueur du chemin : halo large, puis cœur.
     if (chemin > 0.001) {
       p = programmes.ruban;
       gl.useProgram(p.p);
@@ -589,15 +681,23 @@ export function creerMonde(
       gl.uniform3fv(p.u.uC, C);
       gl.uniform1f(p.u.uR, G.R);
       gl.uniform1f(p.u.uChemin, chemin);
+      gl.uniform1f(p.u.uTemps, temps);
       gl.uniform3fv(p.u.uTeinte, teinte);
       gl.bindBuffer(gl.ARRAY_BUFFER, tampons.ruban);
       gl.enableVertexAttribArray(p.a.aR);
       gl.vertexAttribPointer(p.a.aR, 2, gl.FLOAT, false, 0, 0);
+      gl.uniform1f(p.u.uLarge, 2.5);
+      gl.uniform1f(p.u.uNettete, 2.2);
+      gl.uniform1f(p.u.uIntensite, 0.2);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, tampons.rubanN);
+      gl.uniform1f(p.u.uLarge, 1.6);
+      gl.uniform1f(p.u.uNettete, 4.5);
+      gl.uniform1f(p.u.uIntensite, 1.05);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, tampons.rubanN);
       gl.disableVertexAttribArray(p.a.aR);
     }
 
-    // 3. Étoiles, poussière et grains.
+    // 5. Étoiles, poussière et grains.
     p = programmes.points;
     gl.useProgram(p.p);
     gl.uniformMatrix4fv(p.u.uVP, false, cam.vp);
@@ -612,7 +712,7 @@ export function creerMonde(
     gl.uniform1f(p.u.uChemin, chemin);
     gl.uniform1f(p.u.uEtoiles, 1 - e.plongee * 0.8 * (e.orbite < 0.5 ? 1 : 0));
     gl.uniform1f(p.u.uVirage, cam.virage);
-      gl.uniform1f(p.u.uMontee, cam.montee);
+    gl.uniform1f(p.u.uMontee, cam.montee);
     gl.uniform1f(p.u.uFin, cam.fin);
     gl.uniform3fv(p.u.uTeinte, teinte);
     gl.bindBuffer(gl.ARRAY_BUFFER, tampons.A);

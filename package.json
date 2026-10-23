@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && vite build --ssr src/entry-server.jsx --outDir dist-serveur && node scripts/prerendu.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "apercu": "node scripts/apercu.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",

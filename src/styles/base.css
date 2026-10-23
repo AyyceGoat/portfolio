@@ -18,6 +18,8 @@
   --verre: rgba(6, 11, 24, 0.72);
 
   --titre: 'Archivo', 'Archivo secours', system-ui, sans-serif;
+  --etendu: 'Archivo Etendu', 'Archivo Etendu secours', 'Archivo', system-ui, sans-serif;
+  --lueur: rgba(110, 164, 255, 0.55);
   --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --gouttiere: clamp(1rem, 4vw, 3rem);

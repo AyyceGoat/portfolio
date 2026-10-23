@@ -30,3 +30,6 @@ globe-still.png
 
 # Local Netlify folder
 .netlify
+
+# Aperçu hébergé (npm run apercu)
+apercu/

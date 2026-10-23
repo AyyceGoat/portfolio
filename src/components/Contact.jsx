@@ -6,6 +6,12 @@ import { Coche, FlecheBas, FlecheOblique } from './Icones.jsx';
 
 const inverser = (s) => s.split('').reverse().join('');
 
+// Tant que l'adresse du profil n'est pas renseignée dans les données, le
+// lien ouvre la recherche LinkedIn sur le nom complet.
+const LINKEDIN =
+  LIENS.linkedin ||
+  `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(IDENTITE.complet)}`;
+
 const LIBELLES = {
   repos: 'Télécharger mon CV',
   prepa: 'Préparation…',
@@ -58,7 +64,7 @@ export default function Contact() {
         </h2>
         <p className="contact__texte">
           {typo(
-            "Disponible pour un CDI, un CDD ou un stage en développement d'applications, à Abidjan ou à distance. Réponse sous 24 heures."
+            "Disponible pour un CDI, un CDD ou un stage en développement d'applications, à Abidjan ou à distance."
           )}
         </p>
 
@@ -94,18 +100,16 @@ export default function Contact() {
               <span className="visuellement-cache"> (nouvel onglet)</span>
             </a>
           </li>
-          {LIENS.linkedin && (
-            <li>
-              <a className="lien-contact" href={LIENS.linkedin} target="_blank" rel="noreferrer noopener">
-                <span className="lien-contact__nom mono">LinkedIn</span>
-                <span className="lien-contact__valeur">Profil professionnel</span>
-                <span className="lien-contact__fleche">
-                  <FlecheOblique />
-                </span>
-                <span className="visuellement-cache"> (nouvel onglet)</span>
-              </a>
-            </li>
-          )}
+          <li>
+            <a className="lien-contact" href={LINKEDIN} target="_blank" rel="noreferrer noopener">
+              <span className="lien-contact__nom mono">LinkedIn</span>
+              <span className="lien-contact__valeur">{LIENS.linkedin ? 'Profil professionnel' : IDENTITE.complet}</span>
+              <span className="lien-contact__fleche">
+                <FlecheOblique />
+              </span>
+              <span className="visuellement-cache"> (nouvel onglet)</span>
+            </a>
+          </li>
         </ul>
 
         <footer className="pied">

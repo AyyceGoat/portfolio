@@ -1,4 +1,5 @@
 import { FAITS, PORTRAIT, PRESENTATION } from '../data/profil.js';
+import { media } from '../lib/media.js';
 import { typo } from '../lib/typo.js';
 
 export default function Profil() {
@@ -7,16 +8,23 @@ export default function Profil() {
       <div className="plan__corps">
         <div className="plan__defile profil">
           <figure className="profil__portrait">
-            <img
-              src={PORTRAIT.src}
-              srcSet={PORTRAIT.srcSet}
-              sizes="(min-width: 60rem) 20rem, 11rem"
+            <span className="profil__cadre">
+              <span className="profil__anneau" aria-hidden="true" />
+              <img
+              src={media(PORTRAIT.src)}
+              srcSet={`${media(PORTRAIT.src)} 400w, ${media(PORTRAIT.grand)} 800w`}
+              sizes="(min-width: 60rem) 19rem, 9rem"
               width="400"
               height="500"
               decoding="async"
-              loading="lazy"
+              fetchPriority="low"
               alt={PORTRAIT.alt}
-            />
+              />
+            </span>
+            <figcaption className="profil__legende mono" aria-hidden="true">
+              <span>Abidjan</span>
+              <span>UTC+0</span>
+            </figcaption>
           </figure>
 
           <div className="profil__texte">

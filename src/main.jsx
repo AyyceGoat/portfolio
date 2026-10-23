@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, startTransition } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import App from './App.jsx';
 
@@ -13,7 +13,11 @@ const arbre = (
   </StrictMode>
 );
 
-// Le HTML a ete rendu au build : React se contente de s'y raccrocher,
-// sans rien redessiner. En developpement, la racine est vide.
-if (racine.hasChildNodes()) hydrateRoot(racine, arbre);
+// Le HTML a été rendu au build : React se contente de s'y raccrocher,
+// sans rien redessiner. On attend que la première image soit peinte
+// (rAF, puis une tâche), et l'hydratation se fait en transition : elle
+// rend la main au navigateur par tranches au lieu d'une longue tâche.
+// En développement, la racine est vide.
+const hydrater = () => startTransition(() => hydrateRoot(racine, arbre));
+if (racine.hasChildNodes()) requestAnimationFrame(() => window.setTimeout(hydrater, 0));
 else createRoot(racine).render(arbre);

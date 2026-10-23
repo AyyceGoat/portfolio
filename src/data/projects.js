@@ -9,7 +9,8 @@
  *  - tag       nature du projet (« Projet personnel », « Mission en
  *              entreprise »…) ;
  *  - shot      capture d'écran : `src` en 1400 px de large, `small`
- *              en 700 px, toutes deux en WebP au format 16:10 ;
+ *              en 700 px, toutes deux en WebP au format 16:10, chemins
+ *              écrits sans barre initiale (« captures/mon-projet.webp ») ;
  *  - links     `site` et `repo`, facultatifs l'un comme l'autre ;
  *  - schema    à la place de `shot` pour un projet sous
  *              confidentialité : les couches du système, sans
@@ -27,8 +28,8 @@ export const projects = [
     title: 'Babi Games',
     tag: 'Projet personnel',
     shot: {
-      src: '/captures/babi-games.webp',
-      small: '/captures/babi-games-700.webp',
+      src: 'captures/babi-games.webp',
+      small: 'captures/babi-games-700.webp',
       alt: "Le Versus de Babi Games : un duel entre deux footballeurs ivoiriens à départager, en huitièmes de finale.",
     },
     desc:
@@ -48,8 +49,8 @@ export const projects = [
     title: 'Échiquier',
     tag: 'Projet personnel',
     shot: {
-      src: '/captures/echiquier.webp',
-      small: '/captures/echiquier-700.webp',
+      src: 'captures/echiquier.webp',
+      small: 'captures/echiquier-700.webp',
       alt: "Jeu assisté de l'Échiquier : après 1.e4 e5, le professeur Ephraim commente le coup joué et laisse le choix de le reprendre ou de le garder.",
     },
     desc:
@@ -70,8 +71,8 @@ export const projects = [
     title: 'NEXUS',
     tag: 'Projet personnel',
     shot: {
-      src: '/captures/nexus.webp',
-      small: '/captures/nexus-700.webp',
+      src: 'captures/nexus.webp',
+      small: 'captures/nexus-700.webp',
       alt: "Page d'accueil de NEXUS : « Mesurez vos aptitudes cognitives. », avec le robot en trois dimensions qui suit le curseur.",
     },
     desc:
@@ -89,7 +90,7 @@ export const projects = [
   },
   {
     id: 'erp',
-    title: 'ERP de gestion industrielle multi-sites',
+    title: 'ERP de gestion industrielle pour une entreprise de carrières multisites',
     tag: 'Mission en entreprise',
     // Pas de capture ni de lien : code propriétaire, données confidentielles.
     schema: [
@@ -99,7 +100,7 @@ export const projects = [
       { couche: 'Données', titre: 'Google Sheets', detail: 'Source unique de données' },
     ],
     desc:
-      "Système de gestion complet pour une entreprise de carrières en Côte d'Ivoire, conçu et développé en développeur unique, de l'analyse du besoin au déploiement. Il couvre la production, le suivi terrain et le pilotage de la direction sur plusieurs sites.",
+      "Système de gestion complet pour une entreprise de carrières en Côte d'Ivoire, conçu et développé en tant que développeur unique, de l'analyse du besoin au déploiement. Il couvre la production, le suivi terrain et le pilotage de la direction sur plusieurs sites.",
     points: [
       "Backend Google Apps Script d'environ 4 500 lignes, adossé à Google Sheets comme source unique de données.",
       "Interface mobile pour les conducteurs : scan de QR code et authentification par code PIN, pensée pour rester lisible en plein soleil.",

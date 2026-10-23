@@ -1,22 +1,25 @@
 /**
  * Identité, présentation, compétences et liens de contact.
- * Les textes sont mis en forme automatiquement à l'affichage
- * (apostrophes et espaces insécables) : voir src/lib/typo.js.
+ *
+ * Les chemins de fichiers s'écrivent sans barre initiale : ils sont
+ * résolus par src/lib/media.js. Les textes sont mis en forme à
+ * l'affichage (apostrophes et espaces insécables) par src/lib/typo.js.
  */
 
 export const IDENTITE = {
-  prenoms: 'Yao Yann Christ Emmanuel',
-  nom: 'Ahouet',
   complet: 'Ahouet Yao Yann Christ Emmanuel',
   // Le nom est composé sur trois lignes dans la scène d'ouverture.
   lignes: ['Ahouet Yao', 'Yann Christ', 'Emmanuel'],
   titre: "Développeur d'applications full-stack",
+  sousTitre: 'Software Engineer',
   lieu: "Abidjan, Côte d'Ivoire",
+  // Coordonnées d'Abidjan, affichées comme sur un instrument de bord.
+  coordonnees: '5° 19′ N · 4° 02′ O',
 };
 
 export const PORTRAIT = {
-  src: '/portrait-400.webp',
-  srcSet: '/portrait-400.webp 400w, /portrait-800.webp 800w',
+  src: 'portrait-400.webp',
+  grand: 'portrait-800.webp',
   alt: 'Portrait de Ahouet Yao Yann Christ Emmanuel.',
 };
 
@@ -46,22 +49,25 @@ export const COMPETENCES = [
 ];
 
 /**
- * Liens de contact. L'adresse e-mail est stockée à l'envers et en
- * morceaux : la chaîne complète n'existe ni dans le HTML servi ni dans
- * le JavaScript livré, ce qui met en échec les moissonneurs d'adresses.
- * Elle n'est reconstituée qu'une fois la page ouverte.
+ * Liens de contact.
  *
- * `linkedin` : adresse complète du profil. Laissée vide, la ligne
- * LinkedIn n'est pas affichée.
+ * L'adresse e-mail est stockée à l'envers et en morceaux : la chaîne
+ * complète n'existe ni dans le HTML servi ni dans le JavaScript livré, ce
+ * qui met en échec les moissonneurs d'adresses. Elle n'est reconstituée
+ * qu'une fois la page ouverte.
  */
 export const LIENS = {
   courriel: ['7tsirhcnnaY', 'liamg', 'moc'],
   github: 'https://github.com/AyyceGoat',
+
+  // ▼ À RENSEIGNER : l'adresse complète du profil LinkedIn, par exemple
+  //   'https://www.linkedin.com/in/votre-identifiant/'.
+  //   Tant qu'elle est vide, le lien ouvre la recherche LinkedIn sur le nom.
   linkedin: '',
 };
 
 export const CV = {
-  fichier: '/CV-Ahouet-Yann-Christ-Emmanuel.pdf',
+  fichier: 'CV-Ahouet-Yann-Christ-Emmanuel.pdf',
   nom: 'CV-Ahouet-Yao-Yann-Christ-Emmanuel.pdf',
-  poids: 'PDF · 2 pages · 58 Ko',
+  poids: 'PDF · 2 pages · 87 Ko',
 };

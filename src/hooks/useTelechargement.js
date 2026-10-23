@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CV as FICHE } from '../data/profil.js';
+import { media } from '../lib/media.js';
 
 /**
  * Telechargement du CV, instantane et a l'abri des doubles clics.
@@ -16,7 +17,7 @@ import { CV as FICHE } from '../data/profil.js';
  * clic est ignore. Sans JavaScript, le lien reste un lien `download`.
  */
 
-export const CV = FICHE.fichier;
+export const CV = media(FICHE.fichier);
 const NOM = FICHE.nom;
 const REPOS = 4000;
 
