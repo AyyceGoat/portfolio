@@ -135,6 +135,12 @@ export function creerMonde(
     chemin: 1, // visibilité du chemin
     expo: 1.15,
     regard: 0, // inclinaison du regard dans la scène finale, en degrés
+    // Caméra de cinéma, ajoutée au parcours :
+    zoom: 1, // champ : < 1 resserre, > 1 ouvre
+    roulis: 0, // en degrés
+    lacet: 0, // panoramique horizontal, en degrés
+    tangage: 0, // panoramique vertical, en degrés
+    vitesse: 0, // traits de vitesse : > 0 en avant, < 0 en arrière
   };
 
   const souris = { x: 0, y: 0, cx: 0, cy: 0 };
@@ -418,7 +424,8 @@ export function creerMonde(
     const e = etat;
     const aspect = largeur / hauteur;
     const portrait = aspect < 1;
-    const fov = (portrait ? 64 : 50) * DEG;
+    // Le zoom de la caméra de cinéma resserre ou ouvre le champ.
+    const demi = Math.tan(((portrait ? 64 : 50) * DEG) / 2) * (e.zoom || 1);
 
     const a = e.approche;
     const ae = a * a * (3 - 2 * a);
@@ -497,18 +504,40 @@ export function creerMonde(
       soleil = norm(orienter(0, (-21.6 - (e.regard || 0) * 0.15) * DEG));
     }
 
-    const droite = norm(croix(avant, [0, 1, 0]));
-    const haut = croix(droite, avant);
+    let droite = norm(croix(avant, [0, 1, 0]));
+    let haut = croix(droite, avant);
+
+    // Caméra de cinéma (visite guidée, retour au départ) : panoramique,
+    // inclinaison et roulis ajoutés au mouvement du parcours.
+    const lacet = Math.tan((e.lacet || 0) * DEG);
+    const tangage = Math.tan((e.tangage || 0) * DEG);
+    if (lacet || tangage) {
+      avant = norm([
+        avant[0] + droite[0] * lacet + haut[0] * tangage,
+        avant[1] + droite[1] * lacet + haut[1] * tangage,
+        avant[2] + droite[2] * lacet + haut[2] * tangage,
+      ]);
+      droite = norm(croix(avant, [0, 1, 0]));
+      haut = croix(droite, avant);
+    }
+    const roulis = (e.roulis || 0) * DEG;
+    if (roulis) {
+      const c = Math.cos(roulis);
+      const s = Math.sin(roulis);
+      const d = droite;
+      droite = [d[0] * c + haut[0] * s, d[1] * c + haut[1] * s, d[2] * c + haut[2] * s];
+      haut = [haut[0] * c - d[0] * s, haut[1] * c - d[1] * s, haut[2] * c - d[2] * s];
+    }
     cam.pos = pos;
     cam.avant = avant;
     cam.droite = droite;
     cam.haut = haut;
     cam.C = [C[0] - pos[0], C[1] - pos[1], C[2] - pos[2]];
     cam.soleil = soleil;
-    cam.tan = [Math.tan(fov / 2) * aspect, Math.tan(fov / 2)];
+    cam.tan = [demi * aspect, demi];
 
     // Projection × vue (rotation seule : tout est relatif à la caméra).
-    const f = 1 / Math.tan(fov / 2);
+    const f = 1 / demi;
     const pres = 0.05;
     const loin = 6000;
     const P = [f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (loin + pres) / (pres - loin), -1, 0, 0, (2 * loin * pres) / (pres - loin), 0];
@@ -623,6 +652,7 @@ export function creerMonde(
     gl.uniform1f(p.u.uExpo, e.expo);
     gl.uniform1f(p.u.uTemps, temps);
     gl.uniform1f(p.u.uPlongee, e.orbite < 0.5 ? e.plongee : 0);
+    gl.uniform1f(p.u.uVitesse, e.vitesse || 0);
     gl.uniform1f(p.u.uSoleilVis, vis);
     gl.uniform1f(p.u.uGrain, 0.028);
     gl.uniform2fv(p.u.uSoleilEcran, soleilEcran);

@@ -53,8 +53,12 @@ export default function App() {
       <div className="eclat" aria-hidden="true" />
       <div className="onde" aria-hidden="true" />
 
-      {/* Visite guidée : bandeaux de cinéma, chapitre en cours, arrêt. */}
+      {/* Visite guidée et retour au départ : voile et éclair des cartons
+          (les cartons et les balises sont ajoutés par la mise en scène),
+          bandeaux de cinéma, chapitre en cours, arrêt. */}
       <div className="visite" role="status">
+        <span className="visite__voile" aria-hidden="true" />
+        <span className="visite__flash" aria-hidden="true" />
         <span className="visite__bande visite__bande--haut" aria-hidden="true" />
         <span className="visite__bande visite__bande--bas" aria-hidden="true" />
         <p className="visite__legende mono">
@@ -68,8 +72,6 @@ export default function App() {
           </span>
         </button>
       </div>
-
-      <div className="parcours" aria-hidden="true" />
     </>
   );
 }

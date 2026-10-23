@@ -11,11 +11,14 @@ spatial piloté par le défilement.
 
 ## Le parcours
 
-Un astronaute marche sur un chemin de lumière vers une planète. Chaque
-geste — un cran de molette, un glissement du doigt, une flèche du
-clavier — mène au chapitre suivant par une transition animée : il
-avance, la caméra avance avec lui, les contenus arrivent du fond de la
-scène puis passent derrière nous. En sens inverse, tout recule exactement.
+Un astronaute marche sur un chemin de lumière vers une planète. Le
+parcours avance par paliers : un geste — un cran de molette, un
+glissement sur le pavé tactile, un balayage du doigt, une flèche du
+clavier — mène au palier suivant par une transition animée ; le geste
+inverse ramène au précédent, à tout instant, même en pleine transition.
+L'astronaute avance, la caméra avance avec lui, les contenus arrivent du
+fond de la scène puis passent derrière nous. En sens inverse, tout
+recule exactement.
 
 1. **Ouverture** — le nom en capitales étendues, gravé dans la lumière de
    la planète (lueur, reflet qui balaie le métal, profondeur qui suit la
@@ -31,16 +34,25 @@ scène puis passent derrière nous. En sens inverse, tout recule exactement.
    de rentrée, nuages qui défilent, éclair, onde de choc.
 5. **L'atelier** — en orbite, le développeur à son bureau noir mat, sur
    une plateforme flottante. Il respire, bouge la tête, cligne des yeux,
-   frappe au clavier ; la lumière de l'écran varie sur son visage. Ses
-   compétences flottent autour de lui, reliées au bureau par des liaisons
-   où circulent des impulsions.
+   frappe au clavier ; la lumière de l'écran varie sur son visage.
+   Derrière lui, un contre-jour bleuté, deux faisceaux et un anneau
+   gradué qui tourne lentement. Ses compétences flottent autour de lui,
+   reliées au bureau par des liaisons où circulent des impulsions.
 6. **Contact** — le regard se lève vers les étoiles ; CV, e-mail (rédaction
-   dans Gmail), GitHub et LinkedIn. « Revenir au départ » rembobine tout
-   le voyage.
+   dans Gmail), GitHub et LinkedIn.
 
-La **visite guidée** enchaîne tous les chapitres avec des bandeaux de
-cinéma ; Échap, la molette, le doigt ou le bouton l'arrêtent à tout
-moment.
+La **visite guidée** est une bande-annonce : bandeaux de cinéma, cartons
+de chapitre qui arrivent du fond puis passent derrière la caméra, plans
+où la caméra fond en avant, roule et balaie avant de se poser, travelling
+lent pendant la lecture, éclairs de coupe. Échap, la molette, le doigt
+ou le bouton l'arrêtent à tout moment ; la caméra revient alors en
+douceur à sa place.
+
+**Revenir au départ** (lien du contact, logo, touche Début) fait repartir
+la caméra en arrière à travers le parcours : elle prend son élan, file à
+reculons en traversant le poste de travail, la planète, le chemin, les
+projets et le profil — leur nom passe à l'écran au moment où on les
+croise — puis se pose sur l'accueil.
 
 ## Ajouter un projet
 
@@ -62,7 +74,7 @@ recherche LinkedIn sur le nom.
 ## Démarrer
 
 ```bash
-npm install     # React, Vite, GSAP, Lenis
+npm install     # React, Vite, GSAP
 npm run dev     # serveur de développement
 npm run build   # build client, rendu serveur, injection dans dist/
 npm run preview # sert le résultat du build
@@ -73,12 +85,26 @@ Node 20.11 ou plus récent.
 
 ## Technique
 
-**Une chronologie, des chapitres.** Toute la mise en scène est une seule
-chronologie GSAP ([`src/scene/parcours.js`](src/scene/parcours.js)),
-attachée au défilement par ScrollTrigger. La position de la page est
-animée par Lenis, de chapitre en chapitre ; la chronologie suit, ce qui
-rend le retour en arrière exact. Une seule boucle d'images : Lenis, puis
-la chronologie, puis le monde.
+**Une chronologie, des paliers.** Toute la mise en scène est une seule
+chronologie GSAP ([`src/scene/parcours.js`](src/scene/parcours.js)). La
+page ne défile pas : sa tête de lecture est animée de palier en palier,
+ce qui rend le retour en arrière exact et supprime tout conflit avec le
+défilement du navigateur. Une seule boucle d'images : la chronologie,
+puis la caméra, puis le monde.
+
+**Un geste, un palier.** La molette et le pavé tactile sont lus geste par
+geste : un geste commence après un silence, quand le sens change, ou
+quand le mouvement réaccélère nettement au milieu de l'inertie. Chaque
+geste déclenche un seul palier ; l'inertie qui suit est ignorée, et rien
+ne reste jamais verrouillé. Le geste inverse fait demi-tour sur-le-champ.
+Les cartes tiennent toujours à l'écran (réduites au besoin) : aucun
+défilement intérieur ne peut retenir le geste.
+
+**Une caméra de cinéma.** Zoom, roulis et panoramiques s'ajoutent au
+mouvement du parcours, dans le monde WebGL comme sur les contenus, et des
+traits de vitesse marquent les vols (vers l'avant ou à reculons). La
+visite guidée et le retour au départ sont des chronologies GSAP qui
+animent ensemble la tête de lecture et cette caméra.
 
 **Le monde en WebGL brut, sans bibliothèque**
 ([`src/scene/monde.js`](src/scene/monde.js), [`glsl.js`](src/scene/glsl.js)).
@@ -105,7 +131,7 @@ lancé : une affiche rendue par le même moteur joue le voyage par un zoom.
 
 **Premier affichage immédiat.** Page rendue au build, affiche de la scène
 préchargée, hydratation React après la première image et par tranches,
-GSAP, Lenis et la scène chargés ensuite, calques du personnage demandés
+GSAP et la scène chargés ensuite, calques du personnage demandés
 une fois la page chargée.
 
 **On n'anime que `transform` et `opacity`.** Mouvement réduit ou absence
@@ -118,21 +144,26 @@ Lighthouse 13.5, build de production servi compressé avec les en-têtes de
 
 | | Performance | Accessibilité | Bonnes pratiques | SEO |
 |---|---|---|---|---|
-| Mobile (5 passages) | 94 à 96 | 100 | 100 | 100 |
-| Ordinateur (3 passages) | 100 | 100 | 100 | 100 |
+| Mobile (4 passages) | 97 à 98 | 100 | 100 | 100 |
+| Ordinateur (2 passages) | 100 | 100 | 100 | 100 |
 
 Mobile : premier affichage 1,5 s, plus grand affichage 2,4 s, blocage
-total 130 à 210 ms, décalage cumulé 0.
+total 40 à 60 ms, décalage cumulé 0.
 
-Coût du fil principal par image pendant les transitions de chapitres :
-orchestration seule (chronologie, Lenis, DOM), 95ᵉ centile 0,5 ms, et
-2,6 ms processeur bridé quatre fois. Le budget d'une image à 60 i/s est de
-16,7 ms.
+Coût du fil principal par image pendant les transitions de paliers
+(chronologie, caméra, DOM) : 95ᵉ centile 1,1 ms, et 4 ms processeur bridé
+quatre fois. Le budget d'une image à 60 i/s est de 16,7 ms.
+
+La navigation est vérifiée par un parcours automatisé de tous les
+paliers, dans les deux sens, à la molette, au pavé tactile (inertie
+simulée), au clavier, au toucher et par le menu.
 
 ## Accessibilité
 
 - Navigation complète au clavier (flèches, Page suivante, Début, Fin,
   Échap) ; un élément qui reçoit le focus amène sa scène à l'écran.
+- Un lien direct vers un chapitre (`#projets`, `#contact`…) y mène dès
+  l'arrivée.
 - Lien d'évitement, focus visible, titres découpés en lettres qui gardent
   leur texte entier pour les lecteurs d'écran.
 - Préférence de mouvement réduit respectée.

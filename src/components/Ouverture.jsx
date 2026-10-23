@@ -49,11 +49,23 @@ export default function Ouverture() {
         <p className="ouverture__sous-titre mono">{IDENTITE.sousTitre}</p>
 
         <div className="ouverture__actions">
-          <button type="button" className="bouton bouton--visite" data-visite>
-            <svg className="icone" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-              <path d="M3 1.8 L10 6 L3 10.2 Z" fill="currentColor" />
-            </svg>
-            Visite guidée
+          <button type="button" className="visite-bouton" data-visite>
+            <span className="visite-bouton__cadran" aria-hidden="true">
+              <span className="visite-bouton__orbite">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <circle className="visite-bouton__arc" cx="24" cy="24" r="22.5" pathLength="100" />
+                </svg>
+              </span>
+              <svg className="visite-bouton__lecture" viewBox="0 0 48 48" focusable="false">
+                <circle className="visite-bouton__piste" cx="24" cy="24" r="22.5" />
+                <path d="M20 16.6 L31.4 24 L20 31.4 Z" />
+              </svg>
+            </span>
+            <span className="visite-bouton__texte">
+              <span className="visite-bouton__label">Visite guidée</span>
+              <span className="visite-bouton__info mono" aria-hidden="true" data-visite-duree />
+            </span>
+            <span className="visite-bouton__reflet" aria-hidden="true" />
           </button>
           <p className="ouverture__invite mono" aria-hidden="true">
             <span className="ouverture__molette" />

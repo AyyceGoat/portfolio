@@ -77,7 +77,6 @@
 
 .eclat,
 .onde,
-.parcours,
 .hud,
 .visite {
   display: none;
@@ -240,18 +239,33 @@
   display: block;
   perspective: 900px;
 }
+/* Métal gravé de fines lignes, comme un affichage d'instrument ; la
+   dernière ligne n'est qu'un tracé de lumière. */
 .nom__texte .lettre {
-  background: linear-gradient(176deg, #ffffff 4%, #eef1f8 34%, #c5d3ee 56%, #8aa5d8 78%, #c4d5f6 100%);
+  background:
+    repeating-linear-gradient(180deg, rgba(4, 10, 26, 0.16) 0 1px, transparent 1px 4px),
+    linear-gradient(176deg, #ffffff 4%, #eef1f8 34%, #c5d3ee 56%, #8aa5d8 78%, #c4d5f6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
+.nom__ligne:nth-child(3) .nom__texte .lettre {
+  background: linear-gradient(176deg, rgba(150, 196, 255, 0.16), rgba(110, 164, 255, 0.04));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 0.022em rgba(205, 226, 255, 0.92);
+}
+/* La lumière de la planète, à droite, borde les lettres d'un liseré bleu. */
 .nom__lueur {
   position: absolute;
   inset: 0;
   color: #3f7bff;
   filter: blur(0.3em);
   opacity: 0.5;
+  transform: translate(0.05em, 0.04em);
+}
+.nom__ligne:nth-child(3) .nom__lueur {
+  opacity: 0.32;
 }
 .nom__reflet {
   position: absolute;
@@ -273,6 +287,10 @@
   color: #ffffff;
   text-shadow: 0 0 0.25em rgba(170, 210, 255, 0.9);
   transform: translateX(100%);
+}
+.nom__ligne:nth-child(3) .nom__reflet-texte {
+  color: transparent;
+  -webkit-text-stroke: 0.03em #ffffff;
 }
 .nom__trait {
   position: relative;
@@ -315,22 +333,109 @@
   gap: 0.9rem 1.6rem;
   margin-top: clamp(1.4rem, 3.4vh, 2.3rem);
 }
-.bouton--visite {
-  gap: 0.75rem;
-  padding: 0.7rem 1.25rem 0.7rem 0.75rem;
-  border: 1px solid rgba(156, 195, 255, 0.45);
-  background: linear-gradient(120deg, rgba(40, 70, 140, 0.55), rgba(8, 14, 30, 0.7));
+/* Visite guidée : un cadran de lecture en orbite, un libellé en capitales
+   étendues, un liseré de lumière qui court sur le bord. */
+.visite-bouton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.95rem;
+  padding: 0.42rem 1.5rem 0.42rem 0.42rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(115deg, rgba(14, 24, 50, 0.9), rgba(5, 9, 20, 0.82)) padding-box,
+    linear-gradient(110deg, rgba(190, 220, 255, 0.85), rgba(110, 164, 255, 0.18) 38%, rgba(110, 164, 255, 0.1) 62%, rgba(150, 196, 255, 0.7)) border-box;
   box-shadow:
-    inset 0 1px 0 rgba(220, 235, 255, 0.25),
-    0 10px 40px -12px rgba(110, 164, 255, 0.7);
+    inset 0 1px 0 rgba(220, 235, 255, 0.12),
+    0 0 0 6px rgba(110, 164, 255, 0.04),
+    0 18px 50px -18px rgba(90, 150, 255, 0.75);
   color: var(--encre);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 0.4s var(--sortie),
+    box-shadow 0.4s ease;
 }
-.bouton--visite .icone {
-  box-sizing: content-box;
-  padding: 0.45rem;
-  border-radius: 50%;
-  background: var(--encre);
-  color: #0a1020;
+.visite-bouton:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(220, 235, 255, 0.18),
+    0 0 0 6px rgba(110, 164, 255, 0.08),
+    0 22px 60px -16px rgba(110, 170, 255, 0.95);
+}
+.visite-bouton:active {
+  transform: translateY(0) scale(0.985);
+}
+.visite-bouton__cadran {
+  position: relative;
+  flex: none;
+  width: 2.9rem;
+  height: 2.9rem;
+}
+.visite-bouton__cadran svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.visite-bouton__lecture {
+  fill: #eaf3ff;
+}
+.visite-bouton__lecture path {
+  transition: transform 0.4s var(--sortie);
+  transform-origin: 24px 24px;
+}
+.visite-bouton:hover .visite-bouton__lecture path {
+  transform: scale(1.12) translateX(0.6px);
+}
+.visite-bouton__piste {
+  fill: rgba(110, 164, 255, 0.16);
+  stroke: rgba(156, 195, 255, 0.3);
+  stroke-width: 1;
+}
+.visite-bouton__orbite {
+  position: absolute;
+  inset: 0;
+}
+.visite-bouton__arc {
+  fill: none;
+  stroke: #cfe3ff;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 22 78;
+  filter: drop-shadow(0 0 3px rgba(140, 190, 255, 0.9));
+}
+.visite-bouton__texte {
+  display: grid;
+  gap: 0.28rem;
+}
+.visite-bouton__label {
+  font-family: var(--etendu);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.visite-bouton__info {
+  color: var(--atmo);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+.visite-bouton__info:empty {
+  display: none;
+}
+.visite-bouton__reflet {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent 30%, rgba(170, 205, 255, 0.16) 48%, transparent 66%);
+  transform: translateX(-100%);
+  pointer-events: none;
 }
 .ouverture__invite {
   display: none;
@@ -485,20 +590,46 @@
   line-height: 1.4;
 }
 
+/* Sur un téléphone, le portrait se glisse dans le texte, à droite du
+   titre : la carte tient sur un écran, sans rien retrancher. */
 @media (max-width: 47.99rem) {
   .profil {
-    grid-template-columns: 1fr;
-    gap: 1.2rem;
+    display: block;
+    padding: 1.2rem 1.15rem 1.25rem;
   }
   .profil__portrait {
-    width: 7rem;
-    margin: 0.6rem 0 0 0.6rem;
+    float: right;
+    width: 5.4rem;
+    margin: 0.35rem 0.35rem 0.5rem 1rem;
+    shape-outside: circle(56%);
   }
   .profil__legende {
     display: none;
   }
+  .profil__texte {
+    display: block;
+  }
+  .profil__texte > * + * {
+    margin-top: 0.75rem;
+  }
+  .profil__titre {
+    font-size: 1.24rem;
+    margin: 0.55rem 0 0;
+  }
+  .profil__paragraphe {
+    font-size: 0.875rem;
+    line-height: 1.52;
+  }
   .faits {
-    grid-template-columns: 1fr;
+    gap: 0.65rem 1rem;
+    padding-top: 0.85rem;
+  }
+  .faits dt {
+    font-size: 0.6rem;
+  }
+  .faits dd {
+    font-size: 0.8rem;
+    line-height: 1.35;
   }
 }
 
@@ -984,6 +1115,101 @@
   background: linear-gradient(0deg, transparent 55%, rgba(156, 205, 255, 0.4) 80%, #e8f4ff);
 }
 
+/* Le décor derrière le développeur. Le centre de l'anneau est à hauteur
+   de son buste, dans les deux mises en page. */
+.decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --decor-taille: 44%;
+}
+.decor__contre-jour {
+  position: absolute;
+  left: 50%;
+  top: 39%;
+  width: calc(var(--decor-taille) * 1.7);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(90, 150, 255, 0.3), rgba(60, 110, 230, 0.12) 45%, rgba(40, 80, 200, 0) 100%);
+}
+.decor__faisceau {
+  position: absolute;
+  top: -8%;
+  width: 9%;
+  height: 92%;
+  background: linear-gradient(180deg, rgba(170, 205, 255, 0.2), rgba(120, 170, 255, 0.06) 55%, rgba(120, 170, 255, 0));
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 50%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 50%, transparent);
+  transform-origin: 50% 0;
+}
+.decor__faisceau--g {
+  left: 33%;
+  transform: rotate(9deg);
+}
+.decor__faisceau--d {
+  right: 33%;
+  transform: rotate(-9deg);
+}
+.decor__anneau {
+  position: absolute;
+  left: 50%;
+  top: 39%;
+  width: var(--decor-taille);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent 82%);
+  mask-image: linear-gradient(180deg, #000 50%, transparent 82%);
+}
+.decor__anneau svg,
+.decor__rotor {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.decor__anneau svg {
+  overflow: visible;
+}
+.decor__trait {
+  fill: none;
+  stroke: rgba(156, 195, 255, 0.22);
+  stroke-width: 0.5;
+}
+.decor__trait--fin {
+  stroke: rgba(156, 195, 255, 0.12);
+  stroke-dasharray: 1 3;
+}
+.decor__graduation {
+  fill: none;
+  stroke: rgba(156, 195, 255, 0.3);
+  stroke-width: 3;
+  stroke-dasharray: 0.35 4.65;
+}
+.decor__arc {
+  fill: none;
+  stroke: rgba(200, 225, 255, 0.75);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-dasharray: 9 41;
+  filter: drop-shadow(0 0 2px rgba(140, 190, 255, 0.9));
+}
+@media (max-aspect-ratio: 4 / 5) {
+  .decor {
+    --decor-taille: 64%;
+  }
+  .decor__faisceau {
+    width: 14%;
+    height: 70%;
+  }
+  .decor__faisceau--g {
+    left: 26%;
+  }
+  .decor__faisceau--d {
+    right: 26%;
+  }
+}
+
 /* La plateforme, sous le poste de travail. */
 .plateforme {
   position: absolute;
@@ -1341,6 +1567,11 @@
    ================================================================== */
 
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  html,
+  body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   html {
     touch-action: pinch-zoom;
     scrollbar-width: none;
@@ -1353,8 +1584,14 @@
     inset: 0 0 auto;
     height: 100lvh;
     overflow: hidden;
+    overflow: clip;
     perspective: 1000px;
     perspective-origin: 50% 45%;
+  }
+  .en-film .scene,
+  .en-film .carton,
+  .en-film .balise {
+    will-change: transform;
   }
   .plan {
     position: absolute;
@@ -1374,14 +1611,6 @@
   }
   .plan.est-actif .plan__corps {
     pointer-events: auto;
-  }
-  .plan__defile {
-    max-height: calc(100svh - 8.6rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    touch-action: pan-y pinch-zoom;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(156, 195, 255, 0.35) transparent;
   }
   .plan--ouverture {
     padding-top: clamp(5.8rem, 13vh, 9rem);
@@ -1504,12 +1733,6 @@
     opacity: 0;
   }
 
-  .parcours {
-    display: block;
-    height: 1600vh;
-    height: 1600svh;
-  }
-
   .hud {
     display: block;
   }
@@ -1597,7 +1820,7 @@
     background: var(--atmo-vif);
     color: #050912;
   }
-  .en-retour .visite__etiquette {
+  [data-film='retour'] .visite__etiquette {
     display: none;
   }
   .visite__arret {
@@ -1618,7 +1841,7 @@
     opacity: 0;
     transition: opacity 0.5s ease;
   }
-  .en-retour .visite__arret {
+  [data-film='retour'] .visite__arret {
     display: none;
   }
   .visite__touche {
@@ -1635,6 +1858,92 @@
   .en-visite .hud__chapitre,
   .en-retour .hud__chapitre {
     opacity: 0;
+  }
+
+  /* Cartons de la bande-annonce, éclair de coupe et balises du retour. */
+  .visite__voile,
+  .visite__flash {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .visite__voile {
+    background: radial-gradient(80% 70% at 50% 50%, rgba(2, 4, 10, 0.72), rgba(2, 4, 10, 0.96));
+  }
+  .visite__flash {
+    background: radial-gradient(85% 75% at 50% 50%, rgba(225, 238, 255, 0.95), rgba(110, 164, 255, 0.4) 60%, rgba(110, 164, 255, 0) 100%);
+  }
+  .carton {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: clamp(0.9rem, 2.4vh, 1.4rem);
+    opacity: 0;
+    perspective: 900px;
+  }
+  .carton__num {
+    color: var(--atmo);
+    font-size: 0.7rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+  }
+  .carton__titre {
+    display: flex;
+    font-family: var(--etendu);
+    font-size: clamp(2rem, min(7.4vw, 14vh), 7rem);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform-style: preserve-3d;
+  }
+  .carton__lettre {
+    display: inline-block;
+    padding: 0 0.06em;
+    margin: 0 -0.06em;
+    background: linear-gradient(176deg, #ffffff 8%, #e3ebf8 40%, #9fb8e6 72%, #d3e2fa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .carton__lettre--espace {
+    width: 0.34em;
+  }
+  .carton__trait {
+    width: min(24rem, 62vw);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--atmo-vif) 50%, transparent);
+  }
+  .balise {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    margin-top: -0.6em;
+    font-family: var(--etendu);
+    font-size: clamp(1.8rem, min(6.4vw, 12vh), 6rem);
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgba(150, 196, 255, 0.06);
+    -webkit-text-stroke: 1px rgba(200, 225, 255, 0.85);
+    opacity: 0;
+  }
+
+  /* Le bouton de visite : l'arc tourne autour du cadran, un reflet passe. */
+  .visite-bouton__orbite {
+    animation: tourne 5.5s linear infinite;
+  }
+  .visite-bouton__reflet {
+    animation: reflet-bouton 6s cubic-bezier(0.45, 0, 0.2, 1) infinite 2.2s;
+  }
+  .plan--ouverture:not(.est-actif) .visite-bouton__orbite,
+  .plan--ouverture:not(.est-actif) .visite-bouton__reflet {
+    animation-play-state: paused;
   }
 
   /* Atelier : respiration, regard, clignement, frappe, lumière de l'écran,
@@ -1666,6 +1975,15 @@
   }
   .competence__anneau {
     animation: tourne 16s linear infinite;
+  }
+  .decor__rotor {
+    animation: tourne 38s linear infinite;
+  }
+  .decor__faisceau {
+    animation: faisceau 7s ease-in-out infinite;
+  }
+  .decor__faisceau--d {
+    animation-delay: -3.5s;
   }
   .competence--1 .competence__flotte { animation-duration: 6.1s; animation-delay: -1.3s; }
   .competence--2 .competence__flotte { animation-duration: 5.6s; animation-delay: -2.6s; }
@@ -1703,7 +2021,9 @@
       .plateforme__anneau,
       .competence__flotte,
       .competence__anneau,
-      .flux__comete
+      .flux__comete,
+      .decor__rotor,
+      .decor__faisceau
     ) {
     animation-play-state: paused;
   }
@@ -1712,9 +2032,6 @@
     .plan {
       padding-top: 4.6rem;
       padding-bottom: 2.8rem;
-    }
-    .plan__defile {
-      max-height: calc(100svh - 7.4rem);
     }
   }
 }
@@ -1755,6 +2072,24 @@
   32%,
   100% {
     transform: translateX(-100%);
+  }
+}
+@keyframes faisceau {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes reflet-bouton {
+  0% {
+    transform: translateX(-100%);
+  }
+  28%,
+  100% {
+    transform: translateX(100%);
   }
 }
 @keyframes molette {

@@ -201,7 +201,7 @@ uniform float uR;
 uniform vec3 uSoleil;
 uniform mat3 uRot, uRotN;
 uniform sampler2D uSurf, uNuages, uFond;
-uniform float uExpo, uTemps, uPlongee, uSoleilVis, uGrain, uArriveeI;
+uniform float uExpo, uTemps, uPlongee, uVitesse, uSoleilVis, uGrain, uArriveeI;
 uniform vec3 uArrivee;
 uniform vec2 uSoleilEcran;
 uniform vec2 uRes;
@@ -293,18 +293,26 @@ void main() {
     }
   }
 
-  // Plongée : traits de vitesse, plasma de rentrée, nuages qui défilent.
-  if (uPlongee > 0.001) {
+  // Traits de vitesse : pendant la plongée, et pendant les vols de la
+  // caméra de cinéma (vers l'avant, ils fuient vers les bords ; en
+  // arrière, ils convergent vers le centre).
+  float vitesse = smoothstep(0.08, 0.5, uPlongee) * (1.0 - smoothstep(0.9, 1.0, uPlongee));
+  float vol = abs(uVitesse);
+  if (max(vitesse, vol) > 0.001) {
     float r = length(p);
     float ang = atan(p.y, p.x);
     float secteur = floor(ang * 57.2958 * 1.6);
     float tirage = h12(vec2(secteur, 3.7));
-    float trait = step(0.86, tirage) * smoothstep(0.15, 0.9, r);
-    float avance = fract(r * 1.4 - uTemps * (2.2 + tirage * 2.0) - tirage * 7.0);
+    float trait = step(0.86 - vol * 0.06, tirage) * smoothstep(0.15, 0.9, r);
+    float sens = uVitesse < 0.0 && vol > vitesse ? -1.0 : 1.0;
+    float avance = fract(r * 1.4 - sens * uTemps * (2.2 + tirage * 2.0 + vol * 2.5) - tirage * 7.0);
     trait *= smoothstep(0.0, 0.15, avance) * (1.0 - smoothstep(0.15, 0.6, avance));
-    float vitesse = smoothstep(0.08, 0.5, uPlongee) * (1.0 - smoothstep(0.9, 1.0, uPlongee));
-    col += vec3(0.75, 0.88, 1.0) * trait * vitesse * 1.3;
+    col += vec3(0.75, 0.88, 1.0) * trait * max(vitesse, vol) * 1.3;
+  }
 
+  // Plongée : plasma de rentrée, nuages qui défilent.
+  if (uPlongee > 0.001) {
+    float ang = atan(p.y, p.x);
     float rentree = smoothstep(0.4, 0.8, uPlongee);
     float bord = smoothstep(0.55, 1.45, length(vP * vec2(0.9, 1.0)));
     float flamme = 0.6 + 0.4 * sin(ang * 9.0 + uTemps * 13.0) * sin(ang * 5.0 - uTemps * 7.0);

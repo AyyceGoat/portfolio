@@ -9,7 +9,7 @@
  * Son ombre s'allonge vers nous.
  *
  * Repère : 120 × 200, pieds en (60, 196), 186 unités pour 1,80 m.
- * La marche est pilotée par le défilement (voir parcours.js) : seuls les
+ * La marche est pilotée par la tête de lecture (voir parcours.js) : seuls les
  * attributs `transform` et `opacity` des membres changent.
  */
 

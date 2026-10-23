@@ -126,6 +126,30 @@ function Plateforme() {
   );
 }
 
+/** Le décor derrière le développeur : un contre-jour bleuté, deux faisceaux
+    venus d'en haut et un anneau gradué qui tourne lentement. */
+function Decor() {
+  return (
+    <div className="decor" aria-hidden="true">
+      <span className="decor__contre-jour" />
+      <span className="decor__faisceau decor__faisceau--g" />
+      <span className="decor__faisceau decor__faisceau--d" />
+      <span className="decor__anneau">
+        <svg viewBox="0 0 200 200" focusable="false">
+          <circle cx="100" cy="100" r="98" className="decor__trait" />
+          <circle cx="100" cy="100" r="91" className="decor__graduation" pathLength="360" />
+          <circle cx="100" cy="100" r="84" className="decor__trait decor__trait--fin" />
+        </svg>
+        <span className="decor__rotor">
+          <svg viewBox="0 0 200 200" focusable="false">
+            <circle cx="100" cy="100" r="98" className="decor__arc" pathLength="100" />
+          </svg>
+        </span>
+      </span>
+    </div>
+  );
+}
+
 export default function Atelier() {
   const [client, setClient] = useState(false);
   useEffect(() => setClient(true), []);
@@ -143,6 +167,7 @@ export default function Atelier() {
         </header>
 
         <div className="atelier__scene">
+          <Decor />
           <Liaisons forme="paysage" />
           <Liaisons forme="portrait" />
           {client && <Flux forme="paysage" />}

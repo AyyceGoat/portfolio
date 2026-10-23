@@ -35,7 +35,7 @@ export const projects = [
     desc:
       "Plateforme de mini-jeux au contenu ivoirien, installable depuis le navigateur et jouable hors ligne. Trois jeux autour de la culture du pays : duels de personnalités, classements et estimation des prix du quotidien.",
     points: [
-      "Chaîne d'approvisionnement en images juridiquement conforme, automatisée en Python à partir de Wikidata, Wikimedia Commons et Openverse.",
+      "Images libres de droits, collectées et vérifiées automatiquement pour illustrer chaque jeu.",
       "Interface d'administration éditoriale pour gérer les contenus sans toucher au code.",
     ],
     stack: ['React', 'Vite', 'PWA', 'Python'],
@@ -58,7 +58,7 @@ export const projects = [
     points: [
       "Quatre façons de travailler : partie libre, jeu assisté commenté, analyse de position et exercices tirés de ses propres erreurs.",
       "Jeu assisté : quatre professeurs aux styles distincts commentent chaque coup, l'évaluent et proposent de le reprendre avant de le valider.",
-      "Import d'une position par photo, en notation FEN ou par fichier PGN, sans saisie pièce par pièce.",
+      "Import d'une position par photo ou depuis un fichier de partie, sans saisie pièce par pièce.",
     ],
     stack: ['React', 'Stockfish', 'WebAssembly', 'Netlify'],
     links: {
@@ -78,9 +78,8 @@ export const projects = [
     desc:
       "Plateforme d'évaluation des aptitudes cognitives : 35 questions, environ 25 minutes, puis un indice, un rang sur cent personnes et un profil détaillé sur cinq aptitudes (matrices logiques, séries numériques, analogies verbales, rotation spatiale et mémoire de travail).",
     points: [
-      "Questions tirées d'une banque de 770 items pour ne jamais repasser la même épreuve, et moteur de score conçu pour être statistiquement défendable plutôt qu'arbitraire.",
-      "Section Apprendre : cinquante sujets de culture générale lus à voix haute par synthèse vocale, fiches des 195 pays et quiz de 464 questions répartis en neuf domaines.",
-      "Classement public des meilleurs résultats, page d'entrée allégée de 577 Ko à 3,3 Ko et navigation entièrement utilisable au clavier.",
+      "Une épreuve différente à chaque passage, et un score calculé selon une méthode rigoureuse plutôt qu'arbitraire.",
+      "Section Apprendre : cinquante sujets de culture générale lus à voix haute, fiches des 195 pays et quiz répartis en neuf domaines.",
     ],
     stack: ['React', 'Vite', 'TypeScript', 'Netlify'],
     links: {
@@ -102,10 +101,9 @@ export const projects = [
     desc:
       "Système de gestion complet pour une entreprise de carrières en Côte d'Ivoire, conçu et développé en tant que développeur unique, de l'analyse du besoin au déploiement. Il couvre la production, le suivi terrain et le pilotage de la direction sur plusieurs sites.",
     points: [
-      "Backend Google Apps Script d'environ 4 500 lignes, adossé à Google Sheets comme source unique de données.",
       "Interface mobile pour les conducteurs : scan de QR code et authentification par code PIN, pensée pour rester lisible en plein soleil.",
-      "Tableau de bord administrateur en React : visualisations Recharts, rapports générés par IA et export CSV.",
-      "Module de comptabilité analytique bâti sur le cahier des charges d'un contrôleur de gestion, structuré en dix-neuf centres de coûts.",
+      "Tableau de bord de la direction : indicateurs visuels, rapports générés par IA et export des données.",
+      "Comptabilité analytique conçue avec un contrôleur de gestion, pour suivre les coûts de chaque activité.",
     ],
     stack: ['Google Apps Script', 'Google Sheets', 'React', 'Recharts'],
     sealed:
