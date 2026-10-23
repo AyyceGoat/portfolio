@@ -1,14 +1,13 @@
 /**
- * Le monde : ciel, planète, soleil, chemin de lumière et poussière.
+ * Le monde : ciel, planète, soleil et chemin de lumière.
  *
  * WebGL 1 brut, cinq appels de dessin par image :
  *   1. un triangle plein écran — ciel, planète lancée en rayons (sol,
- *      nuages et leurs ombres, villes, atmosphère), soleil, reflets
- *      d'objectif, effets de plongée, grain et vignettage ;
+ *      nuages et leurs ombres, villes, atmosphère), soleil, voile de
+ *      nuages de la descente, grain et vignettage ;
  *   2. quelques grands voiles de nébuleuse, en parallaxe ;
  *   3. et 4. la lueur du chemin, en halo puis en cœur ;
- *   5. un nuage de points — étoiles sur deux plans, poussière proche
- *      et grains du chemin.
+ *   5. un nuage de points — étoiles sur deux plans et grains du chemin.
  * La surface de la planète, ses nuages et la Voie lactée sont cuits une
  * seule fois au démarrage dans trois textures : par image, il ne reste
  * que des lectures de texture et quelques produits scalaires.
@@ -45,9 +44,9 @@ const G = {
 };
 
 const QUALITES = {
-  haute: { dpr: 1.75, lointaines: 4000, tunnel: 4200, poussiere: 90, grains: 26000, grainsLoin: 15000, surface: 2048 },
-  moyenne: { dpr: 1.35, lointaines: 1500, tunnel: 2200, poussiere: 50, grains: 12000, grainsLoin: 7500, surface: 1024 },
-  basse: { dpr: 1, lointaines: 900, tunnel: 1100, poussiere: 30, grains: 6000, grainsLoin: 3800, surface: 512 },
+  haute: { dpr: 1.75, lointaines: 4000, tunnel: 1600, poussiere: 0, grains: 14000, grainsLoin: 0, surface: 2048 },
+  moyenne: { dpr: 1.35, lointaines: 1500, tunnel: 900, poussiere: 0, grains: 7000, grainsLoin: 0, surface: 1024 },
+  basse: { dpr: 1, lointaines: 900, tunnel: 500, poussiere: 0, grains: 3500, grainsLoin: 0, surface: 512 },
 };
 
 /* ---------- petite algèbre ---------- */
@@ -135,12 +134,9 @@ export function creerMonde(
     chemin: 1, // visibilité du chemin
     expo: 1.15,
     regard: 0, // inclinaison du regard dans la scène finale, en degrés
-    // Caméra de cinéma, ajoutée au parcours :
-    zoom: 1, // champ : < 1 resserre, > 1 ouvre
-    roulis: 0, // en degrés
+    // Caméra de la visite guidée, ajoutée au parcours :
+    zoom: 1, // champ : < 1 resserre
     lacet: 0, // panoramique horizontal, en degrés
-    tangage: 0, // panoramique vertical, en degrés
-    vitesse: 0, // traits de vitesse : > 0 en avant, < 0 en arrière
   };
 
   const souris = { x: 0, y: 0, cx: 0, cy: 0 };
@@ -424,7 +420,7 @@ export function creerMonde(
     const e = etat;
     const aspect = largeur / hauteur;
     const portrait = aspect < 1;
-    // Le zoom de la caméra de cinéma resserre ou ouvre le champ.
+    // Le zoom de la caméra de la visite resserre légèrement le champ.
     const demi = Math.tan(((portrait ? 64 : 50) * DEG) / 2) * (e.zoom || 1);
 
     const a = e.approche;
@@ -471,16 +467,6 @@ export function creerMonde(
         const vers = norm([cam.L[0] - pos[0], cam.L[1] - pos[1], cam.L[2] - pos[2]]);
         pos = melange(pos, cible, pe);
         avant = norm(melange(avant, vers, Math.min(1, p * 1.6) * 0.7));
-        // Secousse de rentrée atmosphérique, brève et amortie.
-        const force = lisse(0.35, 0.7, p) * (1 - lisse(0.85, 1, p)) * 0.006;
-        if (force > 0) {
-          const t = performance.now() / 1000;
-          avant = norm([
-            avant[0] + Math.sin(t * 37) * force,
-            avant[1] + Math.sin(t * 29 + 1.3) * force,
-            avant[2],
-          ]);
-        }
       }
 
       // Course du soleil : de face, puis derrière la planète, puis levant.
@@ -501,32 +487,19 @@ export function creerMonde(
       const yaw = (souris.cx * 1.4 + (d - 0.5) * 3) * DEG;
       const pitch = (-9.5 + souris.cy * 0.8 - (portrait ? 2.5 : 0) + (e.regard || 0)) * DEG;
       avant = orienter(yaw, pitch);
-      soleil = norm(orienter(0, (-21.6 - (e.regard || 0) * 0.15) * DEG));
+      // Le soleil reste juste sous l'horizon : une aube douce, sans éblouir.
+      soleil = norm(orienter(0, (-23.6 - (e.regard || 0) * 0.15) * DEG));
     }
 
     let droite = norm(croix(avant, [0, 1, 0]));
     let haut = croix(droite, avant);
 
-    // Caméra de cinéma (visite guidée, retour au départ) : panoramique,
-    // inclinaison et roulis ajoutés au mouvement du parcours.
+    // Caméra de la visite guidée : un léger panoramique horizontal.
     const lacet = Math.tan((e.lacet || 0) * DEG);
-    const tangage = Math.tan((e.tangage || 0) * DEG);
-    if (lacet || tangage) {
-      avant = norm([
-        avant[0] + droite[0] * lacet + haut[0] * tangage,
-        avant[1] + droite[1] * lacet + haut[1] * tangage,
-        avant[2] + droite[2] * lacet + haut[2] * tangage,
-      ]);
+    if (lacet) {
+      avant = norm([avant[0] + droite[0] * lacet, avant[1] + droite[1] * lacet, avant[2] + droite[2] * lacet]);
       droite = norm(croix(avant, [0, 1, 0]));
       haut = croix(droite, avant);
-    }
-    const roulis = (e.roulis || 0) * DEG;
-    if (roulis) {
-      const c = Math.cos(roulis);
-      const s = Math.sin(roulis);
-      const d = droite;
-      droite = [d[0] * c + haut[0] * s, d[1] * c + haut[1] * s, d[2] * c + haut[2] * s];
-      haut = [haut[0] * c - d[0] * s, haut[1] * c - d[1] * s, haut[2] * c - d[2] * s];
     }
     cam.pos = pos;
     cam.avant = avant;
@@ -609,8 +582,6 @@ export function creerMonde(
     const ecart = Math.acos(Math.min(Math.max(scal(cam.soleil, norm(C)), -1), 1));
     const face = lisse(0.05, 0.35, scal(cam.soleil, cam.avant));
     const vis = lisse(angR - 0.004, angR + 0.03, ecart) * face;
-    const ps = projeter([cam.soleil[0] * 1000, cam.soleil[1] * 1000, cam.soleil[2] * 1000]);
-    const soleilEcran = ps ? [ps.x * 2 - 1, 1 - ps.y * 2] : [0, 0];
 
     // Teinte du chemin : blanc froid, réchauffé par le lever du soleil.
     const chaud = lisse(0.55, 1, e.soleil) * (1 - e.orbite);
@@ -628,9 +599,6 @@ export function creerMonde(
     const cn = Math.cos(angN);
     const sn = Math.sin(angN);
     const rotN = new Float32Array([cn, st * sn, -ct * sn, 0, ct, st, sn, -st * cn, ct * cn]);
-    // Direction du point d'arrivée du chemin, pour sa lueur sur la planète.
-    const arrivee = norm([cam.L[0] - cam.pos[0], cam.L[1] - cam.pos[1], cam.L[2] - cam.pos[2]]);
-    const arriveeI = e.orbite < 0.5 ? (1 - lisse(0.2, 0.7, e.plongee)) * e.chemin : 0;
 
     gl.viewport(0, 0, largeur, hauteur);
     gl.disable(gl.BLEND);
@@ -647,15 +615,11 @@ export function creerMonde(
     gl.uniform3fv(p.u.uSoleil, cam.soleil);
     gl.uniformMatrix3fv(p.u.uRot, false, rot);
     gl.uniformMatrix3fv(p.u.uRotN, false, rotN);
-    gl.uniform3fv(p.u.uArrivee, arrivee);
-    gl.uniform1f(p.u.uArriveeI, arriveeI);
     gl.uniform1f(p.u.uExpo, e.expo);
     gl.uniform1f(p.u.uTemps, temps);
     gl.uniform1f(p.u.uPlongee, e.orbite < 0.5 ? e.plongee : 0);
-    gl.uniform1f(p.u.uVitesse, e.vitesse || 0);
     gl.uniform1f(p.u.uSoleilVis, vis);
-    gl.uniform1f(p.u.uGrain, 0.028);
-    gl.uniform2fv(p.u.uSoleilEcran, soleilEcran);
+    gl.uniform1f(p.u.uGrain, 0.016);
     gl.uniform2f(p.u.uRes, largeur, hauteur);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, textures.surface);
@@ -711,18 +675,17 @@ export function creerMonde(
       gl.uniform3fv(p.u.uC, C);
       gl.uniform1f(p.u.uR, G.R);
       gl.uniform1f(p.u.uChemin, chemin);
-      gl.uniform1f(p.u.uTemps, temps);
       gl.uniform3fv(p.u.uTeinte, teinte);
       gl.bindBuffer(gl.ARRAY_BUFFER, tampons.ruban);
       gl.enableVertexAttribArray(p.a.aR);
       gl.vertexAttribPointer(p.a.aR, 2, gl.FLOAT, false, 0, 0);
       gl.uniform1f(p.u.uLarge, 2.5);
       gl.uniform1f(p.u.uNettete, 2.2);
-      gl.uniform1f(p.u.uIntensite, 0.2);
+      gl.uniform1f(p.u.uIntensite, 0.1);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, tampons.rubanN);
       gl.uniform1f(p.u.uLarge, 1.6);
       gl.uniform1f(p.u.uNettete, 4.5);
-      gl.uniform1f(p.u.uIntensite, 1.05);
+      gl.uniform1f(p.u.uIntensite, 0.7);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, tampons.rubanN);
       gl.disableVertexAttribArray(p.a.aR);
     }

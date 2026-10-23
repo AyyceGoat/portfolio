@@ -11,8 +11,9 @@ Produit, dans public/atelier/ :
 
 Le plateau en bois et les pieds métalliques d'origine sont retirés : le
 bureau noir mat est dessiné en SVG entre les deux calques, à la même
-échelle. Un liseré bleu (contre-jour de l'horizon) est cuit dans les
-images, ce qui évite tout filtre CSS au moment de l'affichage.
+échelle. Un fin liseré clair (contre-jour de l'horizon) est cuit dans
+les images, ce qui évite tout filtre CSS au moment de l'affichage ;
+aucun halo ne déborde de la silhouette.
 
 Les coordonnées citées ici sont celles de l'image source ; la feuille de
 style (.perso) reprend les mêmes, en pourcentages.
@@ -78,25 +79,19 @@ couleur = np.array([0.42, 0.62, 1.0], dtype=np.float32)
 eclaire = 1.0 - (1.0 - base) * (1.0 - np.clip(lumiere, 0, 1)[..., None] * couleur * 0.85)
 base_lum = 1.0 - (1.0 - base) * (1.0 - np.clip(lumiere, 0, 1)[..., None] * couleur * 0.28)
 
-# 4. Liseré : un bord intérieur clair et un halo extérieur, cuits dans
-#    l'image (le contre-jour vient de l'horizon, derrière le personnage).
+# 4. Liseré : un bord intérieur clair, cuit dans l'image (le contre-jour
+#    vient de l'horizon, derrière le personnage). Rien à l'extérieur.
 masque = Image.fromarray((al * 255).astype(np.uint8))
 erode = np.asarray(masque.filter(ImageFilter.MinFilter(5))).astype(np.float32) / 255.0
 bord = np.clip(al - erode, 0, 1)
 haut_du_corps = np.clip(1.2 - ys / 1100.0, 0.25, 1.0)
 lisere = bord * haut_du_corps * 0.55
-halo = np.asarray(masque.filter(ImageFilter.GaussianBlur(9))).astype(np.float32) / 255.0
-halo = np.clip(halo - al, 0, 1) * 0.55 * haut_du_corps
 teinte_lisere = np.array([0.72, 0.84, 1.0], dtype=np.float32)
-teinte_halo = np.array([0.36, 0.58, 1.0], dtype=np.float32)
 
 
 def composer(c):
     c = c * (1 - lisere[..., None]) + teinte_lisere * lisere[..., None]
-    # Halo sous la figure : composition « par-dessous » en alpha prémultiplié.
-    a_tot = al + halo * (1 - al)
-    c_tot = (c * al[..., None] + teinte_halo * (halo * (1 - al))[..., None]) / np.maximum(a_tot, 1e-4)[..., None]
-    return np.dstack([np.clip(c_tot, 0, 1), a_tot])
+    return np.dstack([np.clip(c, 0, 1), al])
 
 
 def exporter(arr, y0, y1, nom):

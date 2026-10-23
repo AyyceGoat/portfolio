@@ -80,14 +80,7 @@ export function Projet({ projet, rang, total }) {
                   />
                 </figure>
               )}
-              <span className="projet__vitre" aria-hidden="true" />
-              <span className="projet__balayage" aria-hidden="true" />
-              <span className="projet__coin projet__coin--hg" aria-hidden="true" />
-              <span className="projet__coin projet__coin--hd" aria-hidden="true" />
-              <span className="projet__coin projet__coin--bg" aria-hidden="true" />
-              <span className="projet__coin projet__coin--bd" aria-hidden="true" />
             </div>
-            <span className="projet__socle" aria-hidden="true" />
           </div>
 
           <div className="projet__texte">

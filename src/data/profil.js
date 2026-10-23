@@ -13,8 +13,6 @@ export const IDENTITE = {
   titre: "Développeur d'applications full-stack",
   sousTitre: 'Software Engineer',
   lieu: "Abidjan, Côte d'Ivoire",
-  // Coordonnées d'Abidjan, affichées comme sur un instrument de bord.
-  coordonnees: '5° 19′ N · 4° 02′ O',
 };
 
 export const PORTRAIT = {

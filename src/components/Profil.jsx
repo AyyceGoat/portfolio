@@ -9,16 +9,15 @@ export default function Profil() {
         <div className="plan__defile profil">
           <figure className="profil__portrait">
             <span className="profil__cadre">
-              <span className="profil__anneau" aria-hidden="true" />
               <img
-              src={media(PORTRAIT.src)}
-              srcSet={`${media(PORTRAIT.src)} 400w, ${media(PORTRAIT.grand)} 800w`}
-              sizes="(min-width: 60rem) 19rem, 9rem"
-              width="400"
-              height="500"
-              decoding="async"
-              fetchPriority="low"
-              alt={PORTRAIT.alt}
+                src={media(PORTRAIT.src)}
+                srcSet={`${media(PORTRAIT.src)} 400w, ${media(PORTRAIT.grand)} 800w`}
+                sizes="(min-width: 60rem) 19rem, 9rem"
+                width="400"
+                height="500"
+                decoding="async"
+                fetchPriority="low"
+                alt={PORTRAIT.alt}
               />
             </span>
             <figcaption className="profil__legende mono" aria-hidden="true">

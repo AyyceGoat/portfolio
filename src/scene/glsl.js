@@ -201,9 +201,7 @@ uniform float uR;
 uniform vec3 uSoleil;
 uniform mat3 uRot, uRotN;
 uniform sampler2D uSurf, uNuages, uFond;
-uniform float uExpo, uTemps, uPlongee, uVitesse, uSoleilVis, uGrain, uArriveeI;
-uniform vec3 uArrivee;
-uniform vec2 uSoleilEcran;
+uniform float uExpo, uTemps, uPlongee, uSoleilVis, uGrain;
 uniform vec2 uRes;
 ${SPHERE}
 
@@ -255,9 +253,6 @@ void main() {
     col += vec3(0.18, 0.38, 1.0) * pow(1.0 - mu, 1.3) * 0.14 * eclaire;
     col += vec3(0.5, 0.75, 1.0) * pow(1.0 - mu, 6.0) * pow(sd, 3.0) * 1.6;
 
-    // Le point d'arrivée du chemin : une lueur posée sur la planète.
-    float a = max(dot(rd, uArrivee), 0.0);
-    col += vec3(1.0, 0.86, 0.62) * (pow(a, 9000.0) * 2.2 + pow(a, 900.0) * 0.5) * uArriveeI;
   } else {
     col += vec3(1.0, 0.9, 0.78) * (pow(sd, 3000.0) * 60.0 + pow(sd, 260.0) * 1.6 + pow(sd, 14.0) * 0.14) * uSoleilVis;
   }
@@ -276,56 +271,14 @@ void main() {
     col += vec3(1.0, 0.82, 0.62) * exp(-hd * 40.0) * pow(sd, 40.0) * 3.0;
   }
 
-  vec2 asp = vec2(uRes.x / uRes.y, 1.0);
-  vec2 p = vP * asp;
-
-  // Objectif : traînée horizontale et reflets, quand le soleil se montre.
-  if (uSoleilVis > 0.001) {
-    vec2 so = uSoleilEcran * asp;
-    vec2 dd = p - so;
-    col += vec3(0.55, 0.7, 1.0) * exp(-abs(dd.y) * 70.0) * exp(-abs(dd.x) * 1.1) * 0.35 * uSoleilVis;
-    for (int i = 1; i <= 3; i++) {
-      float f = float(i);
-      vec2 g = so * (1.0 - f * 0.55);
-      float r = 0.05 + f * 0.035;
-      float disque = smoothstep(r, r * 0.55, length(p - g));
-      col += mix(vec3(0.3, 0.5, 1.0), vec3(1.0, 0.6, 0.35), f / 3.0) * disque * 0.035 * uSoleilVis;
-    }
-  }
-
-  // Traits de vitesse : pendant la plongée, et pendant les vols de la
-  // caméra de cinéma (vers l'avant, ils fuient vers les bords ; en
-  // arrière, ils convergent vers le centre).
-  float vitesse = smoothstep(0.08, 0.5, uPlongee) * (1.0 - smoothstep(0.9, 1.0, uPlongee));
-  float vol = abs(uVitesse);
-  if (max(vitesse, vol) > 0.001) {
-    float r = length(p);
-    float ang = atan(p.y, p.x);
-    float secteur = floor(ang * 57.2958 * 1.6);
-    float tirage = h12(vec2(secteur, 3.7));
-    float trait = step(0.86 - vol * 0.06, tirage) * smoothstep(0.15, 0.9, r);
-    float sens = uVitesse < 0.0 && vol > vitesse ? -1.0 : 1.0;
-    float avance = fract(r * 1.4 - sens * uTemps * (2.2 + tirage * 2.0 + vol * 2.5) - tirage * 7.0);
-    trait *= smoothstep(0.0, 0.15, avance) * (1.0 - smoothstep(0.15, 0.6, avance));
-    col += vec3(0.75, 0.88, 1.0) * trait * max(vitesse, vol) * 1.3;
-  }
-
-  // Plongée : plasma de rentrée, nuages qui défilent.
+  // Entrée dans l'atmosphère : un voile de nuages qui se lève, puis la
+  // lumière du jour. Ni traits de vitesse, ni flammes.
   if (uPlongee > 0.001) {
-    float ang = atan(p.y, p.x);
-    float rentree = smoothstep(0.4, 0.8, uPlongee);
-    float bord = smoothstep(0.55, 1.45, length(vP * vec2(0.9, 1.0)));
-    float flamme = 0.6 + 0.4 * sin(ang * 9.0 + uTemps * 13.0) * sin(ang * 5.0 - uTemps * 7.0);
-    col += mix(vec3(1.0, 0.45, 0.15), vec3(0.4, 0.75, 1.0), 0.5 + 0.5 * sin(ang * 3.0 + uTemps * 2.0)) * bord * flamme * rentree * 1.4;
-
-    float couche = smoothstep(0.55, 0.92, uPlongee);
-    float z1 = fract(uTemps * 0.55);
-    float z2 = fract(uTemps * 0.55 + 0.5);
-    float n1 = texture2D(uNuages, vec2(0.5) + p * 0.22 / (0.25 + z1 * 1.6)).r;
-    float n2 = texture2D(uNuages, vec2(0.3, 0.6) + p * 0.22 / (0.25 + z2 * 1.6)).r;
-    float voile = n1 * sin(z1 * 3.1416) + n2 * sin(z2 * 3.1416);
-    col = mix(col, vec3(0.86, 0.93, 1.0) * 1.3, clamp(voile * couche * 0.75, 0.0, 1.0));
-    col = mix(col, vec3(0.6, 0.8, 1.0) * 1.5, pow(uPlongee, 3.0) * 0.6);
+    vec2 p = vP * vec2(uRes.x / uRes.y, 1.0);
+    float couche = smoothstep(0.45, 0.95, uPlongee);
+    float n1 = texture2D(uNuages, vec2(0.5) + p * 0.2 / (0.6 + uPlongee)).r;
+    col = mix(col, vec3(0.86, 0.92, 1.0) * 1.2, clamp(n1 * couche * 0.8, 0.0, 1.0));
+    col = mix(col, vec3(0.78, 0.86, 1.0) * 1.3, pow(uPlongee, 3.0) * 0.55);
   }
 
   col = vec3(1.0) - exp(-col * uExpo);
@@ -362,15 +315,14 @@ precision highp float;
 varying float vU, vDs;
 varying vec3 vRel;
 uniform vec3 uC;
-uniform float uR, uChemin, uFin, uTemps, uIntensite, uNettete;
+uniform float uR, uChemin, uFin, uIntensite, uNettete;
 uniform vec3 uTeinte;
 void main() {
   float a = exp(-vU * vU * uNettete) * 0.34 + exp(-vU * vU * uNettete * 8.0) * 0.42;
+  // Le chemin s'efface dans la distance, bien avant la planète : il
+  // indique la direction, sans traîner de queue lumineuse dans le ciel.
   float loin = vDs / max(uFin, 1.0);
-  a *= smoothstep(-4.0, 10.0, vDs) * (1.0 - smoothstep(0.985, 1.0, loin));
-  a *= 0.8 + 0.6 * smoothstep(0.55, 1.0, loin);
-  float impulsion = pow(0.5 + 0.5 * sin(vDs * 0.045 - uTemps * 2.2), 10.0);
-  a *= 1.0 + impulsion * 0.9 * smoothstep(5.0, 40.0, vDs);
+  a *= smoothstep(-4.0, 10.0, vDs) * (1.0 - smoothstep(0.03, 0.18, loin));
   float L = length(vRel);
   vec3 rd = vRel / L;
   float b = dot(-uC, rd);

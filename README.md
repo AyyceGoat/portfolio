@@ -14,45 +14,36 @@ spatial piloté par le défilement.
 Un astronaute marche sur un chemin de lumière vers une planète. Le
 parcours avance par paliers : un geste — un cran de molette, un
 glissement sur le pavé tactile, un balayage du doigt, une flèche du
-clavier — mène au palier suivant par une transition animée ; le geste
-inverse ramène au précédent, à tout instant, même en pleine transition.
-L'astronaute avance, la caméra avance avec lui, les contenus arrivent du
-fond de la scène puis passent derrière nous. En sens inverse, tout
-recule exactement.
+clavier — mène au palier suivant, le geste inverse au précédent. Les
+contenus arrivent du fond de la scène, se laissent lire, puis s'effacent.
+La mise en scène reste sobre : des mouvements précis, au service du
+contenu, sans effet décoratif.
 
-1. **Ouverture** — le nom en capitales étendues, gravé dans la lumière de
-   la planète (lueur, reflet qui balaie le métal, profondeur qui suit la
-   souris), le titre et « Software Engineer ». Bouton **Visite guidée**.
-2. **Profil** — portrait en orbite, présentation, formation et recherche.
-3. **Projets** — « Mes réalisations. », puis chaque projet sur un écran
-   holographique incliné, projeté par un socle, avec ses lignes qui
-   arrivent une à une. Le projet sous confidentialité est présenté par un
-   schéma de ses couches, sans nom de client ni donnée.
+1. **Ouverture** — le nom en capitales étendues, d'un blanc plein, le
+   titre et « Software Engineer ». Bouton **Visite guidée**.
+2. **Profil** — portrait, présentation, formation et recherche.
+3. **Projets** — « Mes réalisations. », puis chaque projet : sa capture,
+   et ses lignes qui arrivent une à une. Le projet sous confidentialité
+   est présenté par un schéma de ses couches, sans nom de client ni
+   donnée.
 4. **Arrivée** — l'éclairage a tourné pendant le voyage : planète éclairée
-   de face, éclipse, puis lever de soleil sur le limbe ; le chemin aboutit
-   à un point lumineux sur la planète. Plongée : traits de vitesse, plasma
-   de rentrée, nuages qui défilent, éclair, onde de choc.
-5. **L'atelier** — en orbite, le développeur à son bureau noir mat, sur
-   une plateforme flottante. Il respire, bouge la tête, cligne des yeux,
-   frappe au clavier ; la lumière de l'écran varie sur son visage.
-   Derrière lui, un contre-jour bleuté, deux faisceaux et un anneau
-   gradué qui tourne lentement. Ses compétences flottent autour de lui,
-   reliées au bureau par des liaisons où circulent des impulsions.
+   de face, puis lever de soleil sur le limbe. La caméra descend, traverse
+   les nuages, et la lumière du jour fond l'image vers l'atelier.
+5. **L'atelier** — en orbite, devant l'horizon de la planète, le
+   développeur à son bureau noir mat. Il respire, bouge la tête, cligne
+   des yeux, frappe au clavier ; la lumière de l'écran varie sur son
+   visage. Ses compétences l'entourent, chacune une icône et son nom,
+   reliées au bureau par un filet.
 6. **Contact** — le regard se lève vers les étoiles ; CV, e-mail (rédaction
    dans Gmail), GitHub et LinkedIn.
 
-La **visite guidée** est une bande-annonce : bandeaux de cinéma, cartons
-de chapitre qui arrivent du fond puis passent derrière la caméra, plans
-où la caméra fond en avant, roule et balaie avant de se poser, travelling
-lent pendant la lecture, éclairs de coupe. Échap, la molette, le doigt
-ou le bouton l'arrêtent à tout moment ; la caméra revient alors en
-douceur à sa place.
+La **visite guidée** enchaîne les paliers d'un rythme posé : déplacements
+feutrés, puis, pendant la lecture, un travelling avant et un panoramique
+à peine perceptibles. Échap, la molette, le doigt ou le bouton l'arrêtent
+à tout moment.
 
-**Revenir au départ** (lien du contact, logo, touche Début) fait repartir
-la caméra en arrière à travers le parcours : elle prend son élan, file à
-reculons en traversant le poste de travail, la planète, le chemin, les
-projets et le profil — leur nom passe à l'écran au moment où on les
-croise — puis se pose sur l'accueil.
+**Revenir au départ** (lien du contact, logo, touche Début) ramène à
+l'accueil en traversant les paliers en sens inverse, d'un seul mouvement.
 
 ## Ajouter un projet
 
@@ -93,34 +84,35 @@ défilement du navigateur. Une seule boucle d'images : la chronologie,
 puis la caméra, puis le monde.
 
 **Un geste, un palier.** La molette et le pavé tactile sont lus geste par
-geste : un geste commence après un silence, quand le sens change, ou
-quand le mouvement réaccélère nettement au milieu de l'inertie. Chaque
-geste déclenche un seul palier ; l'inertie qui suit est ignorée, et rien
-ne reste jamais verrouillé. Le geste inverse fait demi-tour sur-le-champ.
-Les cartes tiennent toujours à l'écran (réduites au besoin) : aucun
-défilement intérieur ne peut retenir le geste.
+geste : un geste est une suite d'événements sans silence de plus de
+150 ms. Il déclenche exactement un palier, quelle que soit sa force.
+Pendant une transition (0,85 à 1 s), tout nouvel événement est ignoré ;
+un geste commencé pendant la transition reste ignoré jusqu'à ce que son
+inertie soit retombée. Rien ne reste jamais verrouillé : seul compte le
+silence entre deux gestes. Les cartes tiennent toujours à l'écran
+(réduites au besoin) : aucun défilement intérieur ne peut retenir le
+geste.
 
-**Une caméra de cinéma.** Zoom, roulis et panoramiques s'ajoutent au
-mouvement du parcours, dans le monde WebGL comme sur les contenus, et des
-traits de vitesse marquent les vols (vers l'avant ou à reculons). La
-visite guidée et le retour au départ sont des chronologies GSAP qui
-animent ensemble la tête de lecture et cette caméra.
+**La caméra de la visite.** Un léger zoom et un panoramique horizontal
+s'ajoutent au mouvement du parcours, dans le monde WebGL comme sur les
+contenus. La visite guidée et le retour au départ sont des chronologies
+GSAP qui animent ensemble la tête de lecture et cette caméra.
 
 **Le monde en WebGL brut, sans bibliothèque**
 ([`src/scene/monde.js`](src/scene/monde.js), [`glsl.js`](src/scene/glsl.js)).
 Cinq appels de dessin par image : ciel et planète lancée en rayons (sol,
 nuages et leurs ombres, villes, atmosphère bleue et crépusculaire, soleil,
-reflets d'objectif, effets de plongée), voiles de nébuleuse en parallaxe,
-halo et cœur du chemin, et un nuage de points (étoiles sur deux plans,
-poussière, grains du chemin). Surface, nuages et Voie lactée sont calculés
+voile de nuages de la descente), voiles de nébuleuse en parallaxe, halo et
+cœur du chemin, qui s'efface dans la distance, et un nuage de points
+(étoiles sur deux plans, grains du chemin). Surface, nuages et Voie lactée sont calculés
 une seule fois au démarrage ; l'initialisation est découpée en étapes, une
 par image.
 
 **Le personnage** est l'illustration fournie, préparée par
 [`scripts/preparer-personnage.py`](scripts/preparer-personnage.py) : plateau
 en bois et pieds d'origine retirés (le bureau noir mat est dessiné en SVG),
-découpe haut / bas, liseré bleu et version éclairée par l'écran cuits dans
-les images. L'animation superpose des copies de la même image (tête,
+découpe haut / bas, fin liseré clair et version éclairée par l'écran cuits
+dans les images. L'animation superpose des copies de la même image (tête,
 paupières, main), comme les professeurs de l'Échiquier : transformations
 et opacité seulement, en pause hors de l'écran.
 
@@ -144,11 +136,11 @@ Lighthouse 13.5, build de production servi compressé avec les en-têtes de
 
 | | Performance | Accessibilité | Bonnes pratiques | SEO |
 |---|---|---|---|---|
-| Mobile (4 passages) | 97 à 98 | 100 | 100 | 100 |
+| Mobile (4 passages) | 95 à 98 | 100 | 100 | 100 |
 | Ordinateur (2 passages) | 100 | 100 | 100 | 100 |
 
-Mobile : premier affichage 1,5 s, plus grand affichage 2,4 s, blocage
-total 40 à 60 ms, décalage cumulé 0.
+Mobile : premier affichage 1,4 s, plus grand affichage 2,2 s, blocage
+total 20 à 200 ms, décalage cumulé 0.
 
 Coût du fil principal par image pendant les transitions de paliers
 (chronologie, caméra, DOM) : 95ᵉ centile 1,1 ms, et 4 ms processeur bridé

@@ -19,7 +19,6 @@
 
   --titre: 'Archivo', 'Archivo secours', system-ui, sans-serif;
   --etendu: 'Archivo Etendu', 'Archivo Etendu secours', 'Archivo', system-ui, sans-serif;
-  --lueur: rgba(110, 164, 255, 0.55);
   --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --gouttiere: clamp(1rem, 4vw, 3rem);
@@ -165,7 +164,6 @@ a {
 .bouton--plein {
   background: var(--encre);
   color: #05070d;
-  box-shadow: 0 10px 40px -10px rgba(255, 236, 203, 0.55);
 }
 .bouton--clair {
   background: rgba(238, 230, 212, 0.94);
