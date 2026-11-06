@@ -1,8 +1,8 @@
 # Portfolio — Ahouet Yao Yann Christ Emmanuel
 
 Portfolio de développeur d'applications full-stack basé à Abidjan, en Côte
-d'Ivoire. Page unique en React et Vite, mise en scène comme un plan-séquence
-spatial piloté par le défilement.
+d'Ivoire. Page unique en React et Vite : un voyage dans l'espace, piloté
+par le défilement.
 
 **Le site :** [christ-ahouet.netlify.app](https://christ-ahouet.netlify.app)
 **Me contacter :** [github.com/AyyceGoat](https://github.com/AyyceGoat)
@@ -11,61 +11,50 @@ spatial piloté par le défilement.
 
 ## Le parcours
 
-Un astronaute marche sur un chemin de lumière vers une planète. Le
-parcours avance par paliers : un geste — un cran de molette, un
-glissement sur le pavé tactile, un balayage du doigt, une flèche du
-clavier — mène au palier suivant, le geste inverse au précédent. Les
-contenus arrivent du fond de la scène, se laissent lire, puis s'effacent.
-La mise en scène reste sobre : des mouvements précis, au service du
-contenu, sans effet décoratif.
-
-1. **Ouverture** — le nom en capitales étendues, d'un blanc plein, le
-   titre et « Software Engineer ». Bouton **Visite guidée**.
-2. **Profil** — portrait, présentation, formation et recherche.
-3. **Projets** — « Mes réalisations. », puis chaque projet : sa capture,
-   et ses lignes qui arrivent une à une. Le projet sous confidentialité
-   est présenté par un schéma de ses couches, sans nom de client ni
-   donnée.
-4. **Arrivée** — l'éclairage a tourné pendant le voyage : planète éclairée
-   de face, puis lever de soleil sur le limbe. La caméra descend, traverse
-   les nuages, et la lumière du jour fond l'image vers l'atelier.
-5. **L'atelier** — en orbite, devant l'horizon de la planète, le
-   développeur à son bureau noir mat. Il respire, bouge la tête, cligne
-   des yeux, frappe au clavier ; la lumière de l'écran varie sur son
-   visage. Ses compétences l'entourent, chacune une icône et son nom,
-   reliées au bureau par un filet.
-6. **Contact** — le regard se lève vers les étoiles ; CV, e-mail (rédaction
-   dans Gmail), GitHub et LinkedIn.
-
-La **visite guidée** enchaîne les paliers d'un rythme posé : déplacements
-feutrés, puis, pendant la lecture, un travelling avant et un panoramique
-à peine perceptibles. Échap, la molette, le doigt ou le bouton l'arrêtent
-à tout moment.
-
-**Revenir au départ** (lien du contact, logo, touche Début) ramène à
-l'accueil en traversant les paliers en sens inverse, d'un seul mouvement.
+1. **Introduction** — un astronaute, vu de dos, se tient sur une passerelle
+   suspendue dans l'espace, face à une planète. Le titre « Portfolio —
+   Christ Emmanuel » et deux chevrons qui invitent à défiler. Le décor vit
+   discrètement : étoiles qui scintillent, nébuleuses qui ondulent,
+   astéroïdes qui dérivent, rares météores, reflets sur la passerelle.
+2. **Le voyage** — le défilement pilote tout, en continu : l'astronaute
+   marche, la caméra le suit, la passerelle défile sous ses pieds. Il
+   s'arrête quand on s'arrête ; quand on remonte, tout repart en sens
+   inverse. Le menu (Profil, Projets, Compétences, Contact, CV) apparaît
+   dès le premier geste.
+3. **Les projets** — pendant la marche, chaque projet arrive dans un
+   panneau de verre sombre, depuis la gauche ou la droite en alternance :
+   nom, aperçu, une phrase, technologies, lien. Un clic ouvre la
+   présentation détaillée, sans quitter le voyage.
+4. **L'arrivée** — au bout de la passerelle, sur la plateforme, la caméra
+   s'élève et se tourne vers la planète. Puis la présentation : photo, nom,
+   titre, présentation, parcours académique, domaines d'expertise et
+   ambitions.
+5. **Le poste de travail** — le développeur à son bureau, sur la
+   plateforme, la planète derrière lui ; ses compétences l'entourent, logos
+   dans leurs couleurs officielles, reliés au bureau par des filets.
+6. **Contact** — CV, e-mail (rédaction dans Gmail), GitHub et LinkedIn.
 
 ## Ajouter un projet
 
 Un seul fichier : [`src/data/projects.js`](src/data/projects.js). Copier un
 bloc, le compléter, déposer les deux captures (1400 et 700 px de large, WebP,
 format 16:10) dans `public/captures/` et écrire leurs chemins sans barre
-initiale. La scène, la navigation, les chapitres, la jauge et les étiquettes
-s'adaptent seuls.
+initiale. La longueur du voyage et de la passerelle, l'ordre et le côté des
+panneaux s'adaptent seuls au nombre de projets.
 
 Les textes s'écrivent avec des apostrophes droites : l'apostrophe
 typographique et les espaces insécables de la typographie française sont
 posées à l'affichage ([`src/lib/typo.js`](src/lib/typo.js)).
 
-Le reste du contenu (présentation, compétences, liens, CV) est dans
-[`src/data/profil.js`](src/data/profil.js). **LinkedIn** : renseigner
+Le reste du contenu (présentation, expertise, compétences, liens, CV) est
+dans [`src/data/profil.js`](src/data/profil.js). **LinkedIn** : renseigner
 `linkedin` avec l'adresse du profil ; tant qu'il est vide, le lien ouvre la
 recherche LinkedIn sur le nom.
 
 ## Démarrer
 
 ```bash
-npm install     # React, Vite, GSAP
+npm install     # React, Vite, GSAP, Lenis
 npm run dev     # serveur de développement
 npm run build   # build client, rendu serveur, injection dans dist/
 npm run preview # sert le résultat du build
@@ -76,58 +65,49 @@ Node 20.11 ou plus récent.
 
 ## Technique
 
-**Une chronologie, des paliers.** Toute la mise en scène est une seule
-chronologie GSAP ([`src/scene/parcours.js`](src/scene/parcours.js)). La
-page ne défile pas : sa tête de lecture est animée de palier en palier,
-ce qui rend le retour en arrière exact et supprime tout conflit avec le
-défilement du navigateur. Une seule boucle d'images : la chronologie,
-puis la caméra, puis le monde.
+**L'image de référence, découpée en plans.** Le ciel, la planète et les
+astéroïdes viennent de l'image de référence
+([`sources/reference.webp`](sources/reference.webp)), découpée par
+[`scripts/asteroides.py`](scripts/asteroides.py) et
+[`scripts/plans.py`](scripts/plans.py) : un ciel vide (sans planète, sans
+astéroïdes, sans passerelle ni astronaute), la planète détourée avec son
+atmosphère, et un atlas d'astéroïdes. Ils sont posés sur une sphère à
+l'infini, dans [`src/scene/monde.js`](src/scene/monde.js).
 
-**Un geste, un palier.** La molette et le pavé tactile sont lus geste par
-geste : un geste est une suite d'événements sans silence de plus de
-150 ms. Il déclenche exactement un palier, quelle que soit sa force.
-Pendant une transition (0,85 à 1 s), tout nouvel événement est ignoré ;
-un geste commencé pendant la transition reste ignoré jusqu'à ce que son
-inertie soit retombée. Rien ne reste jamais verrouillé : seul compte le
-silence entre deux gestes. Les cartes tiennent toujours à l'écran
-(réduites au besoin) : aucun défilement intérieur ne peut retenir le
-geste.
+**Ce qui doit bouger est calculé.** Une image ne permet pas d'avancer :
+la passerelle est donc reconstruite en 3D le long de son tracé (plancher de
+métal réfléchissant, joints, tranches, lisses, montants, vitres, bandeaux
+lumineux, plateforme d'arrivée). L'astronaute est un modèle articulé : ses
+pieds se posent sur le plancher et n'en bougent plus pendant l'appui ; les
+genoux suivent (cinématique inverse) ; la foulée est liée à la distance
+parcourue, donc rien ne glisse ni ne se déforme. Son reflet et son ombre
+de contact le posent sur la passerelle.
 
-**La caméra de la visite.** Un léger zoom et un panoramique horizontal
-s'ajoutent au mouvement du parcours, dans le monde WebGL comme sur les
-contenus. La visite guidée et le retour au départ sont des chronologies
-GSAP qui animent ensemble la tête de lecture et cette caméra.
+**WebGL brut, sans bibliothèque** ([`monde.js`](src/scene/monde.js),
+[`glsl.js`](src/scene/glsl.js)) : un ciel plein écran (nébuleuses qui
+ondulent, étoiles qui scintillent, planète qui grandit à l'approche,
+météores rares), la passerelle en un seul maillage, les étoiles proches en
+parallaxe, les astéroïdes, l'astronaute. Les textures sont chargées une
+fois ; l'initialisation est découpée en étapes, une par image.
 
-**Le monde en WebGL brut, sans bibliothèque**
-([`src/scene/monde.js`](src/scene/monde.js), [`glsl.js`](src/scene/glsl.js)).
-Cinq appels de dessin par image : ciel et planète lancée en rayons (sol,
-nuages et leurs ombres, villes, atmosphère bleue et crépusculaire, soleil,
-voile de nuages de la descente), voiles de nébuleuse en parallaxe, halo et
-cœur du chemin, qui s'efface dans la distance, et un nuage de points
-(étoiles sur deux plans, grains du chemin). Surface, nuages et Voie lactée sont calculés
-une seule fois au démarrage ; l'initialisation est découpée en étapes, une
-par image.
+**Le défilement** ([`src/scene/voyage.js`](src/scene/voyage.js)) : Lenis
+adoucit le défilement, une chronologie GSAP attachée à ScrollTrigger fait
+avancer l'astronaute et entrer les panneaux ; après le voyage, trois plans
+de caméra accompagnent la présentation, le poste de travail et le contact.
+Les liens du menu y mènent en douceur.
 
-**Le personnage** est l'illustration fournie, préparée par
-[`scripts/preparer-personnage.py`](scripts/preparer-personnage.py) : plateau
-en bois et pieds d'origine retirés (le bureau noir mat est dessiné en SVG),
-découpe haut / bas, fin liseré clair et version éclairée par l'écran cuits
-dans les images. L'animation superpose des copies de la même image (tête,
-paupières, main), comme les professeurs de l'Échiquier : transformations
-et opacité seulement, en pause hors de l'écran.
+**Le personnage** du poste de travail est l'illustration fournie, préparée
+par [`scripts/preparer-personnage.py`](scripts/preparer-personnage.py) ;
+son animation superpose des copies de la même image (tête, paupières,
+main), en transformations et opacité seulement, en pause hors de l'écran.
 
-**Qualité adaptative.** Trois niveaux de détail selon l'appareil ; en
-cours de route, si la cadence faiblit, la résolution baisse par paliers,
-puis le nombre de grains. Sans processeur graphique, le WebGL n'est pas
-lancé : une affiche rendue par le même moteur joue le voyage par un zoom.
+**Qualité adaptative.** Trois niveaux de détail selon l'appareil ; si la
+cadence faiblit, la résolution baisse. Sans processeur graphique, le WebGL
+n'est pas lancé : une affiche rendue par le même moteur reste en place.
 
-**Premier affichage immédiat.** Page rendue au build, affiche de la scène
-préchargée, hydratation React après la première image et par tranches,
-GSAP et la scène chargés ensuite, calques du personnage demandés
-une fois la page chargée.
-
-**On n'anime que `transform` et `opacity`.** Mouvement réduit ou absence
-de JavaScript : la page redevient une suite de sections ordinaires.
+**Mouvement réduit ou absence de JavaScript :** la page redevient une suite
+de sections ordinaires devant l'affiche du voyage ; les projets sont
+présentés en cartes.
 
 ## Mesures
 
@@ -136,36 +116,31 @@ Lighthouse 13.5, build de production servi compressé avec les en-têtes de
 
 | | Performance | Accessibilité | Bonnes pratiques | SEO |
 |---|---|---|---|---|
-| Mobile (4 passages) | 95 à 98 | 100 | 100 | 100 |
+| Mobile (3 passages) | 98 à 99 | 100 | 100 | 100 |
 | Ordinateur (2 passages) | 100 | 100 | 100 | 100 |
 
-Mobile : premier affichage 1,4 s, plus grand affichage 2,2 s, blocage
-total 20 à 200 ms, décalage cumulé 0.
+Mobile : premier affichage 1,2 s, plus grand affichage 2,2 à 2,3 s,
+blocage total 0 ms, décalage cumulé 0.
 
-Coût du fil principal par image pendant les transitions de paliers
-(chronologie, caméra, DOM) : 95ᵉ centile 1,1 ms, et 4 ms processeur bridé
-quatre fois. Le budget d'une image à 60 i/s est de 16,7 ms.
-
-La navigation est vérifiée par un parcours automatisé de tous les
-paliers, dans les deux sens, à la molette, au pavé tactile (inertie
-simulée), au clavier, au toucher et par le menu.
+Le défilement est vérifié par un parcours automatisé : mêmes états à
+l'aller et au retour, un seul panneau lisible à la fois, liens du menu
+qui partent dès le clic et mènent à la bonne étape, fiche de projet qui
+suspend le voyage puis le rend.
 
 ## Accessibilité
 
-- Navigation complète au clavier (flèches, Page suivante, Début, Fin,
-  Échap) ; un élément qui reçoit le focus amène sa scène à l'écran.
-- Un lien direct vers un chapitre (`#projets`, `#contact`…) y mène dès
-  l'arrivée.
-- Lien d'évitement, focus visible, titres découpés en lettres qui gardent
-  leur texte entier pour les lecteurs d'écran.
+- Navigation complète au clavier ; un panneau qui reçoit le focus vient à
+  l'écran ; la fiche d'un projet est une fenêtre modale (Échap la ferme).
+- Lien d'évitement, focus visible, textes sur fonds sombres pour rester
+  lisibles quelle que soit la lumière du décor.
 - Préférence de mouvement réduit respectée.
 
 ## Sécurité
 
 - Site entièrement statique : aucune clé, aucun secret.
 - Politique de sécurité stricte (`netlify.toml`), sans `unsafe-inline` ni
-  `unsafe-eval`, vérifiée sur le site construit. Le build échoue si le
-  rendu serveur contient un attribut `style`.
+  `unsafe-eval`. Le build échoue si le rendu serveur contient un attribut
+  `style`.
 - Aucune ressource externe : polices et visuels sont servis par le site.
 - L'adresse e-mail n'apparaît pas en clair dans les fichiers servis.
 
@@ -173,18 +148,20 @@ simulée), au clavier, au toucher et par le menu.
 
 ```
 public/
-  scene/       affiches de la scène, rendues par le moteur WebGL (WebP)
+  espace/      ciel, planète, astéroïdes (plans de l'image de référence),
+               affiches du voyage (WebP)
   atelier/     calques du personnage (WebP), produits par le script
   captures/    captures des projets
   fonts/       Archivo, Archivo étendue et IBM Plex Mono (WOFF2)
-sources/       illustration d'origine du personnage
+sources/       image de référence, masques des astéroïdes, illustration
+               du personnage
 src/
   data/        projets, profil, compétences, logos — le contenu
-  scene/       chronologie, navigation, monde WebGL, shaders, astronaute
-  components/  sections de la page, personnage de l'atelier
+  scene/       défilement et mise en scène, monde WebGL, shaders
+  components/  sections de la page, personnage du poste de travail
   lib/         typographie française, chemins des médias
   hooks/       téléchargement du CV
-scripts/       rendu au build, aperçu, préparation du personnage
+scripts/       rendu au build, aperçu, découpage de l'image, personnage
 ```
 
 ## Licences
@@ -192,13 +169,12 @@ scripts/       rendu au build, aperçu, préparation du personnage
 Le code de ce dépôt est publié sous licence MIT (voir [LICENSE](LICENSE)).
 
 Ne sont **pas** couverts par cette licence : le contenu rédactionnel, le
-CV, le portrait, l'illustration du personnage et les captures d'écran des
-projets, qui restent la propriété de leur auteur.
+CV, le portrait, l'illustration du personnage, l'image de référence du
+décor et les captures d'écran des projets, qui restent la propriété de
+leur auteur.
 
-Les visuels de la scène (planète, ciel, astronaute, bureau, plateforme)
-sont créés pour ce site, en code ; le personnage de l'atelier est
-l'illustration fournie par l'auteur. Les logos des compétences
-proviennent de [Simple Icons](https://simpleicons.org) (CC0 1.0) ; les
-marques restent la propriété de leurs détenteurs. Les fontes Archivo et
-IBM Plex Mono sont distribuées sous
-[SIL Open Font License 1.1](https://scripts.sil.org/OFL).
+La passerelle, l'astronaute et les effets du décor sont créés en code pour
+ce site. Les logos des compétences proviennent de
+[Simple Icons](https://simpleicons.org) (CC0 1.0) ; les marques restent la
+propriété de leurs détenteurs. Les fontes Archivo et IBM Plex Mono sont
+distribuées sous [SIL Open Font License 1.1](https://scripts.sil.org/OFL).

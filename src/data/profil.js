@@ -8,8 +8,8 @@
 
 export const IDENTITE = {
   complet: 'Ahouet Yao Yann Christ Emmanuel',
-  // Le nom est composé sur trois lignes dans la scène d'ouverture.
-  lignes: ['Ahouet Yao', 'Yann Christ', 'Emmanuel'],
+  // Le nom affiché en grand sur la première scène.
+  court: 'Christ Emmanuel',
   titre: "Développeur d'applications full-stack",
   sousTitre: 'Software Engineer',
   lieu: "Abidjan, Côte d'Ivoire",
@@ -25,6 +25,14 @@ export const PRESENTATION = [
   "Développeur d'applications full-stack basé à Abidjan, je conçois et développe des applications web et des systèmes de gestion complets, de l'analyse du besoin jusqu'au déploiement.",
   "Habitué à mener seul un projet face à un besoin métier réel, j'ai notamment traduit le cahier des charges d'un contrôleur de gestion en un ERP industriel déployé et utilisé chaque jour sur plusieurs sites.",
   "Côté interface, JavaScript et React ; côté serveur et données, Python, MySQL et PostgreSQL. Les bases sont modélisées en UML et Merise avant d'être écrites : un schéma juste au départ coûte toujours moins cher qu'une correction en production.",
+];
+
+/** Les domaines d'expertise, tirés de la présentation. */
+export const EXPERTISE = [
+  { titre: 'Applications web', detail: "De l'analyse du besoin au déploiement." },
+  { titre: 'Systèmes de gestion', detail: 'ERP, suivi terrain et pilotage de la direction.' },
+  { titre: 'Interfaces', detail: 'JavaScript et React.' },
+  { titre: 'Serveur et données', detail: 'Python, MySQL et PostgreSQL ; modélisation UML et Merise.' },
 ];
 
 export const FAITS = [

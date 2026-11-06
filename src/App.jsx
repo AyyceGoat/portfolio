@@ -1,20 +1,19 @@
 import { useEffect } from 'react';
 
 import Nav from './components/Nav.jsx';
-import Ouverture from './components/Ouverture.jsx';
-import Profil from './components/Profil.jsx';
+import Intro from './components/Intro.jsx';
 import Projets from './components/Projets.jsx';
+import Profil from './components/Profil.jsx';
 import Atelier from './components/Atelier.jsx';
 import Contact from './components/Contact.jsx';
-import Astronaute from './scene/Astronaute.jsx';
 
 export default function App() {
-  // La mise en scène (chronologie, navigation, monde WebGL) arrive dans
-  // un second fichier, chargé après le premier affichage.
+  // La mise en scène (défilement, panneaux, monde WebGL) arrive dans un
+  // second fichier, chargé après le premier affichage.
   useEffect(() => {
     let arreter = null;
     let annule = false;
-    import('./scene/parcours.js').then(({ lancer }) => {
+    import('./scene/voyage.js').then(({ lancer }) => {
       if (!annule) arreter = lancer();
     });
     return () => {
@@ -29,42 +28,28 @@ export default function App() {
         Aller au contenu
       </a>
 
-      {/* Le monde : deux affiches rendues par le même moteur (affichées
-          dès le premier octet, et seules sans processeur graphique), puis
-          la scène calculée en temps réel par-dessus. */}
+      {/* Le monde : une affiche rendue par le même moteur (affichée dès le
+          premier octet, et seule sans processeur graphique), puis la scène
+          calculée en temps réel par-dessus ; un voile pour la lecture. */}
       <div className="monde" aria-hidden="true">
-        <div className="monde__affiche monde__affiche--depart" />
-        <div className="monde__affiche monde__affiche--orbite" />
+        <div className="monde__affiche" />
         <canvas className="monde__toile" />
+        <div className="monde__voile" />
       </div>
-      <Astronaute />
 
       <Nav />
 
-      <main className="scene" id="contenu">
-        <Ouverture />
+      <main id="contenu">
+        <div className="voyage">
+          <div className="voyage__scene">
+            <Intro />
+            <Projets />
+          </div>
+        </div>
         <Profil />
-        <Projets />
         <Atelier />
         <Contact />
       </main>
-
-      {/* Entrée dans l'atmosphère : la lumière du jour, en fondu. */}
-      <div className="eclat" aria-hidden="true" />
-
-      {/* Visite guidée et retour au départ : palier en cours, arrêt. */}
-      <div className="visite" role="status">
-        <p className="visite__legende mono">
-          <span className="visite__etiquette">Visite guidée</span>
-          <span className="visite__titre">Départ</span>
-        </p>
-        <button type="button" className="visite__arret mono" data-arreter-visite>
-          Arrêter la visite
-          <span className="visite__touche" aria-hidden="true">
-            Échap
-          </span>
-        </button>
-      </div>
     </>
   );
 }

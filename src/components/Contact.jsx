@@ -54,11 +54,9 @@ export default function Contact() {
   }, []);
 
   return (
-    <section className="plan plan--contact" id="contact" aria-labelledby="titre-contact">
-      <div className="plan__corps contact">
-        <p className="entete mono">
-          <span className="entete__num">04</span> Contact
-        </p>
+    <section className="section contact" id="contact" aria-labelledby="titre-contact">
+      <div className="carte contact__carte">
+        <p className="rubrique mono">Contact</p>
         <h2 className="contact__titre" id="titre-contact">
           Construisons la suite.
         </h2>
@@ -116,9 +114,6 @@ export default function Contact() {
           <p>
             © {IDENTITE.complet} — {typo(IDENTITE.lieu)}
           </p>
-          <a className="pied__haut" href="#haut">
-            Revenir au départ <span aria-hidden="true">↑</span>
-          </a>
         </footer>
       </div>
     </section>

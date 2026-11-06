@@ -57,16 +57,32 @@ function Liaisons({ forme }) {
   );
 }
 
+/** Un logo, dans ses couleurs officielles (un ou plusieurs tracés). */
+function Logo({ id }) {
+  const logo = LOGOS[id];
+  const traces = logo.traces || [{ couleur: logo.couleur, trace: logo.trace }];
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      {traces.map((t) => (
+        <path key={t.couleur} d={t.trace} fill={t.couleur} />
+      ))}
+    </svg>
+  );
+}
+
+/**
+ * Le poste de travail, posé sur la plateforme d'arrivée. La scène reste
+ * immobile le temps de la lecture (elle est collée à l'écran) ; le monde
+ * WebGL cadre la plateforme derrière elle.
+ */
 export default function Atelier() {
   return (
-    <section className="plan plan--atelier" id="competences" aria-labelledby="titre-competences">
-      <div className="plan__corps atelier">
+    <section className="section atelier" id="competences" aria-labelledby="titre-competences">
+      <div className="atelier__scene-fixe">
         <header className="atelier__entete">
-          <p className="entete mono">
-            <span className="entete__num">03</span> Compétences
-          </p>
+          <p className="rubrique mono">Le poste de travail</p>
           <h2 className="atelier__titre" id="titre-competences">
-            Le poste de travail
+            Compétences
           </h2>
         </header>
 
@@ -78,9 +94,7 @@ export default function Atelier() {
             {COMPETENCES.map((c, i) => (
               <li className={`competence competence--${i}`} key={c.id}>
                 <span className="competence__icone">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d={LOGOS[c.id].trace} />
-                  </svg>
+                  <Logo id={c.id} />
                 </span>
                 <span className="competence__nom">{c.nom}</span>
               </li>
