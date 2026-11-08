@@ -1,19 +1,36 @@
 import { IDENTITE } from '../data/profil.js';
+import { typo } from '../lib/typo.js';
+
+/** Les lettres d'un mot, chacune dans sa propre boîte (apparition). */
+function Lettres({ mot }) {
+  return (
+    <span className="intro__mot">
+      {Array.from(mot).map((c, i) => (
+        <span className="intro__lettre" key={i}>
+          {c}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /**
- * Première scène : le titre, et deux chevrons qui invitent à défiler.
- * Chaque ligne se révèle en montant derrière son propre masque.
+ * Première scène : le titre, posé dans le ciel au-dessus de l'astronaute,
+ * et deux chevrons qui invitent à défiler.
  */
 export default function Intro() {
+  const mots = IDENTITE.court.split(' ');
   return (
     <header className="intro" id="haut">
       <h1 className="intro__titre">
-        <span className="intro__ligne intro__ligne--sur">
-          <span className="intro__texte">Portfolio</span>
+        <span className="intro__sur mono">Portfolio</span>
+        <span className="visuellement-cache">{IDENTITE.court}</span>
+        <span className="intro__nom" aria-hidden="true">
+          {mots.map((m) => (
+            <Lettres mot={m} key={m} />
+          ))}
         </span>
-        <span className="intro__ligne">
-          <span className="intro__texte">{IDENTITE.court}</span>
-        </span>
+        <span className="intro__metier">{typo(IDENTITE.titre)}</span>
       </h1>
       <span className="intro__chevrons" aria-hidden="true">
         <svg viewBox="0 0 24 24" focusable="false">

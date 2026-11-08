@@ -8,10 +8,10 @@
  *   - la passerelle est un maillage calculé une fois le long de son tracé :
  *     plancher de métal réfléchissant, tranches, lisses, montants, vitres
  *     et bandeaux lumineux, jusqu'à la plateforme d'arrivée ;
- *   - l'astronaute est fait de volumes simples, articulés : ses pieds se
- *     posent sur le plancher et y restent pendant l'appui (cinématique
- *     inverse des jambes), rien ne glisse ni ne se déforme ;
- *   - astéroïdes (images de l'atlas), étoiles proches et météores rares.
+ *   - astéroïdes (images de l'atlas), étoiles et poussière en parallaxe,
+ *     météores ;
+ *   - l'astronaute, lui, est une suite d'images posée par-dessus (voir
+ *     voyage.js) : le monde calcule seulement où se trouvent ses pieds.
  *
  * Le module ne connaît ni GSAP ni le DOM : il lit son objet `etat`, que la
  * mise en scène fait évoluer, et dessine quand on appelle `rendre`.
@@ -21,10 +21,6 @@ import {
   CIEL_F,
   PONT_V,
   PONT_F,
-  ASTRO_V,
-  ASTRO_F,
-  OMBRE_V,
-  OMBRE_F,
   SPRITE_V,
   SPRITE_F,
   POINTS_V,
@@ -40,21 +36,23 @@ const PLANETE = { lacet: 29.1 * DEG, tangage: 7.2 * DEG };
 /* Les mesures de la passerelle, en mètres. */
 const PONT = { demi: 2.8, rail: 2.88, haut: 1.02, epaisseur: 0.32, montants: 3, plateforme: 7 };
 
-/* Rectangles de l'atlas d'astéroïdes : u, v, largeur, hauteur (en
-   fractions), puis taille d'origine en pixels. Voir scripts/plans.py. */
+/* Rectangles de l'atlas d'astéroïdes (2048 × 512) : u, v, largeur,
+   hauteur, en fractions. Voir scripts/plans.py. */
 const ATLAS = [
-  [0.0, 0, 0.4012, 1.0],
-  [0.40719, 0, 0.15269, 0.34646],
-  [0.56587, 0, 0.13174, 0.28346],
-  [0.70359, 0, 0.1018, 0.24409],
-  [0.81138, 0, 0.09581, 0.24409],
-  [0.91317, 0, 0.08084, 0.2126],
+  [0.0, 0, 0.20898, 0.70312],
+  [0.21289, 0, 0.09082, 0.31836],
+  [0.30762, 0, 0.07373, 0.25586],
+  [0.38525, 0, 0.06201, 0.22852],
+  [0.45117, 0, 0.05957, 0.23242],
+  [0.51465, 0, 0.03809, 0.16211],
 ];
 
+// Le ciel et la planète arrivent d'abord en définition moyenne, puis,
+// sur les écrans qui en profitent, en haute définition.
 const QUALITES = {
-  haute: { dpr: 1.75, etoiles: 900, asteroides: 12, reflet: true, ciel: 'espace/ciel-1920.webp' },
-  moyenne: { dpr: 1.4, etoiles: 600, asteroides: 10, reflet: true, ciel: 'espace/ciel-1920.webp' },
-  basse: { dpr: 1.1, etoiles: 380, asteroides: 8, reflet: false, ciel: 'espace/ciel-1280.webp' },
+  haute: { dpr: 2, etoiles: 900, poussiere: 260, asteroides: 16, ciel: ['espace/ciel-2048.webp', 'espace/ciel-4096.webp'], planete: ['espace/planete-1024.webp', 'espace/planete-2048.webp'] },
+  moyenne: { dpr: 2, etoiles: 650, poussiere: 180, asteroides: 12, ciel: ['espace/ciel-2048.webp'], planete: ['espace/planete-1024.webp', 'espace/planete-2048.webp'] },
+  basse: { dpr: 1.5, etoiles: 420, poussiere: 110, asteroides: 9, ciel: ['espace/ciel-2048.webp'], planete: ['espace/planete-1024.webp'] },
 };
 
 /** Longueur de la passerelle, en mètres, selon le nombre de projets. */
@@ -374,114 +372,6 @@ function construirePont(trace) {
   return { opaque: opaque.tableaux(), vitres: vitres.tableaux(), centre: C, sortie: f, droite: r };
 }
 
-/* L'astronaute : volumes générés une fois, dans leur propre repère. */
-function construireAstronaute() {
-  const tableaux = (pos, nrm) => ({ pos: new Float32Array(pos), nrm: new Float32Array(nrm), n: pos.length / 3 });
-  const grille = (fonction, nu, nv) => {
-    // fonction(u, v) → point ; normales par différences finies
-    const pos = [];
-    const nrm = [];
-    const pt = (u, v) => fonction(u, v);
-    const normale = (u, v) => {
-      const e = 1e-3;
-      const du = sub(pt(Math.min(u + e, 1), v), pt(Math.max(u - e, 0), v));
-      const dv = sub(pt(u, v + e), pt(u, v - e));
-      return norm(croix(dv, du));
-    };
-    for (let i = 0; i < nu; i += 1) {
-      for (let j = 0; j < nv; j += 1) {
-        const u0 = i / nu;
-        const u1 = (i + 1) / nu;
-        const v0 = j / nv;
-        const v1 = (j + 1) / nv;
-        for (const [u, v] of [
-          [u0, v0],
-          [u1, v0],
-          [u1, v1],
-          [u0, v0],
-          [u1, v1],
-          [u0, v1],
-        ]) {
-          const q = pt(u, v);
-          pos.push(q[0], q[1], q[2]);
-          const n = normale(Math.min(Math.max(u, 0.002), 0.998), v);
-          nrm.push(n[0], n[1], n[2]);
-        }
-      }
-    }
-    return tableaux(pos, nrm);
-  };
-  const sg = (w, e) => Math.sign(w) * Math.pow(Math.abs(w), e);
-  /** Superellipsoïde : de l'ellipsoïde (p = 2) au cube arrondi (p grand). */
-  const volume = (rx, ry, rz, p = 2) =>
-    grille(
-      (u, v) => {
-        const th = (u - 0.5) * Math.PI;
-        const ph = v * Math.PI * 2;
-        const e = 2 / p;
-        return [rx * sg(Math.cos(th), e) * sg(Math.cos(ph), e), ry * sg(Math.sin(th), e), rz * sg(Math.cos(th), e) * sg(Math.sin(ph), e)];
-      },
-      18,
-      24
-    );
-  /** Capsule effilée, de y = 0 à y = l, rayons r0 puis r1. */
-  const capsule = (r0, r1, l, sx = 1, sz = 1) =>
-    grille(
-      (u, v) => {
-        const ph = v * Math.PI * 2;
-        let y;
-        let r;
-        if (u < 0.25) {
-          const a = (u / 0.25 - 1) * (Math.PI / 2);
-          y = Math.sin(a) * r0;
-          r = Math.cos(a) * r0;
-        } else if (u > 0.75) {
-          const a = ((u - 0.75) / 0.25) * (Math.PI / 2);
-          y = l + Math.sin(a) * r1;
-          r = Math.cos(a) * r1;
-        } else {
-          const t = (u - 0.25) / 0.5;
-          y = l * t;
-          r = r0 + (r1 - r0) * t;
-        }
-        return [Math.cos(ph) * r * sx, y, Math.sin(ph) * r * sz];
-      },
-      20,
-      18
-    );
-  /** Tronc : section arrondie, plus large à la poitrine qu'à la taille. */
-  const tronc = grille(
-    (u, v) => {
-      const y = (u - 0.5) * 0.56;
-      const t = u;
-      let r = 0.17 + 0.06 * Math.sin(Math.min(t * 1.35, 1) * Math.PI * 0.5);
-      if (t > 0.82) r *= Math.cos(((t - 0.82) / 0.18) * Math.PI * 0.5) * 0.55 + 0.45;
-      if (t < 0.06) r *= 0.75 + 0.25 * (t / 0.06);
-      const ph = v * Math.PI * 2;
-      return [sg(Math.cos(ph), 0.8) * r, y, sg(Math.sin(ph), 0.8) * r * 0.7];
-    },
-    20,
-    28
-  );
-  return {
-    bassin: volume(0.165, 0.12, 0.125, 2.4),
-    torse: tronc,
-    epaule: volume(0.1, 0.095, 0.1),
-    bras: capsule(0.083, 0.072, 0.28),
-    avantBras: capsule(0.073, 0.062, 0.24),
-    anneau: capsule(0.08, 0.08, 0.025),
-    gant: volume(0.052, 0.08, 0.04, 2.4),
-    cuisse: capsule(0.108, 0.088, 0.43),
-    tibia: capsule(0.087, 0.074, 0.41),
-    genou: capsule(0.094, 0.094, 0.035),
-    botte: volume(0.08, 0.07, 0.15, 3),
-    col: capsule(0.115, 0.115, 0.045),
-    casque: volume(0.178, 0.182, 0.178),
-    oreille: capsule(0.045, 0.045, 0.04),
-    sac: volume(0.235, 0.29, 0.1, 4),
-  };
-}
-
 export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logiciel = false, etat, surPret = null, longueur = 150 } = {}) {
   const Q = QUALITES[qualite] || QUALITES.haute;
   const gl = toile.getContext('webgl', {
@@ -514,7 +404,9 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
   let perdu = false;
   let prets = null;
   let pont = null;
-  let astro = null;
+  // Où se trouve l'astronaute à l'écran : ses pieds, et la hauteur d'un
+  // corps de 1,8 m à cet endroit (en pixels CSS).
+  const astro = { x: 0, y: 0, echelle: 1, visible: false, marche: 0 };
   const textures = {};
 
   /* ---------- compilation ---------- */
@@ -567,21 +459,22 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
   /* ---------- textures ---------- */
   // Les images sont redimensionnées en puissances de deux : WebGL 1 peut
   // alors en calculer les niveaux de flou (reflets du plancher).
-  function televerser(img, l, h, premultiplie = false) {
-    const c = document.createElement('canvas');
-    c.width = l;
-    c.height = h;
-    c.getContext('2d').drawImage(img, 0, 0, l, h);
+  // Les images sont fournies en puissances de deux : WebGL 1 en calcule
+  // alors les niveaux de détail (reflets du plancher, lointains).
+  function televerser(img, premultiplie = false, ancienne = null) {
     const tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplie);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+    const aniso = gl.getExtension('EXT_texture_filter_anisotropic');
+    if (aniso) gl.texParameterf(gl.TEXTURE_2D, aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, gl.getParameter(aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+    if (ancienne) gl.deleteTexture(ancienne);
     return tex;
   }
   const charger = (chemin) =>
@@ -592,12 +485,19 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       img.onerror = ko;
       img.src = media(chemin);
     });
-  const images = Promise.all([charger(Q.ciel), charger('espace/planete.webp'), charger('espace/asteroides.webp')]);
+  const images = Promise.all([charger(Q.ciel[0]), charger(Q.planete[0]), charger('espace/asteroides.webp')]);
+  /** La haute définition, une fois la scène en route et le réseau libre. */
+  function affiner() {
+    const suite = [];
+    if (Q.ciel[1]) suite.push(charger(Q.ciel[1]).then((img) => etapes.push(() => (textures.ciel = televerser(img, false, textures.ciel)))));
+    if (Q.planete[1]) suite.push(charger(Q.planete[1]).then((img) => etapes.push(() => (textures.planete = televerser(img, true, textures.planete)))));
+    return Promise.all(suite).catch(() => {});
+  }
 
   /* ---------- décor : étoiles et astéroïdes ---------- */
   function construireEtoiles() {
     const r = alea(7);
-    const n = Q.etoiles;
+    const n = Q.etoiles + Q.poussiere;
     const A = new Float32Array(n * 4);
     const B = new Float32Array(n * 4);
     const teintes = [
@@ -607,19 +507,30 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       [0.8, 1.0, 0.97],
     ];
     for (let i = 0; i < n; i += 1) {
-      const proche = i < n * 0.3;
+      // Trois plans : poussière tout près de la passerelle, étoiles
+      // proches, étoiles lointaines. Chacun défile à sa vitesse.
+      const poussiere = i >= Q.etoiles;
+      const proche = i < Q.etoiles * 0.3;
       const s = r() * (longueur + 60) - 20;
       const base = trace.point(s);
       const cote = r() < 0.5 ? -1 : 1;
-      const d = proche ? 30 + r() * 80 : 220 + r() * 500;
-      const ang = (r() - 0.35) * Math.PI;
       const dr = trace.droite(s);
-      A[i * 4] = base[0] + dr[0] * Math.cos(ang) * d * cote;
-      A[i * 4 + 1] = Math.sin(ang) * d * 0.8 + 5;
-      A[i * 4 + 2] = base[2] + dr[2] * Math.cos(ang) * d * cote - (proche ? 0 : r() * 200);
-      A[i * 4 + 3] = proche ? 1.4 + r() * 1.6 : 1.1 + r() * 1.3;
+      if (poussiere) {
+        const lat = 4.5 + r() * 26;
+        A[i * 4] = base[0] + dr[0] * lat * cote;
+        A[i * 4 + 1] = -4 + r() * 12;
+        A[i * 4 + 2] = base[2] + dr[2] * lat * cote;
+        A[i * 4 + 3] = 1.2 + r() * 1.4;
+      } else {
+        const d = proche ? 30 + r() * 80 : 220 + r() * 500;
+        const ang = (r() - 0.35) * Math.PI;
+        A[i * 4] = base[0] + dr[0] * Math.cos(ang) * d * cote;
+        A[i * 4 + 1] = Math.sin(ang) * d * 0.8 + 5;
+        A[i * 4 + 2] = base[2] + dr[2] * Math.cos(ang) * d * cote - (proche ? 0 : r() * 200);
+        A[i * 4 + 3] = proche ? 1.4 + r() * 1.6 : 1.1 + r() * 1.3;
+      }
       const t = teintes[Math.floor(r() * teintes.length)];
-      const lum = 0.35 + r() * 0.55;
+      const lum = poussiere ? 0.18 + r() * 0.3 : 0.35 + r() * 0.55;
       B[i * 4] = t[0] * lum;
       B[i * 4 + 1] = t[1] * lum;
       B[i * 4 + 2] = t[2] * lum;
@@ -647,10 +558,10 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       liste.push({
         centre,
         derive: norm([r() - 0.5, (r() - 0.5) * 0.4, r() - 0.5]),
-        vitesse: 0.04 + r() * 0.08,
+        vitesse: 0.1 + r() * 0.18,
         taille,
         angle: r() * Math.PI * 2,
-        rotation: (r() - 0.5) * 0.06,
+        rotation: (r() < 0.5 ? -1 : 1) * (0.04 + r() * 0.1),
         image: Math.floor(r() * ATLAS.length),
         miroir: r() < 0.5,
       });
@@ -672,10 +583,8 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       },
       () => {
         progs.pont = programme(PONT_V, PONT_F);
-        progs.astro = programme(ASTRO_V, ASTRO_F);
       },
       () => {
-        progs.ombre = programme(OMBRE_V, OMBRE_F);
         progs.sprite = programme(SPRITE_V, SPRITE_F);
         progs.points = programme(POINTS_V, POINTS_F);
       },
@@ -699,11 +608,6 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
         };
       },
       () => {
-        const formes = construireAstronaute();
-        geo.astro = {};
-        for (const [nom, f] of Object.entries(formes)) geo.astro[nom] = { pos: tampon(f.pos), nrm: tampon(f.nrm), n: f.n };
-      },
-      () => {
         geo.etoiles = construireEtoiles();
         geo.asteroides = construireAsteroides();
       },
@@ -711,12 +615,13 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
     images
       .then(([ciel, planete, atlas]) => {
         etapes.push(() => {
-          textures.ciel = televerser(ciel, 2048, 1024);
+          textures.ciel = televerser(ciel);
         });
         etapes.push(() => {
-          textures.planete = televerser(planete, 1024, 1024, true);
-          textures.atlas = televerser(atlas, 1024, 256, true);
+          textures.planete = televerser(planete, true);
+          textures.atlas = televerser(atlas, true);
           prets = { progs, geo };
+          if (!logiciel) window.setTimeout(affiner, 1500);
         });
       })
       .catch(() => {
@@ -740,131 +645,6 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       toile.width = largeur;
       toile.height = hauteur;
     }
-  }
-
-  /* ---------- l'astronaute : la marche ----------
-     Les pieds se posent à intervalles réguliers le long du chemin et n'en
-     bougent plus pendant l'appui ; pendant le balancement, ils passent d'un
-     appui au suivant en se soulevant. Les genoux suivent (cinématique
-     inverse à deux segments). La foulée est liée à la distance parcourue :
-     l'astronaute avance exactement de ce que le chemin défile sous lui. */
-  const FOULEE = 1.05;
-  const CUISSE = 0.45;
-  const TIBIA = 0.43;
-  const CHEVILLE = 0.085;
-
-  function pied(d, decalage, ampleur) {
-    const c = (d - decalage) / FOULEE;
-    const u = c - Math.floor(c);
-    let avance;
-    let lev = 0;
-    let angle;
-    if (u < 0.62) {
-      avance = 0.31 * FOULEE - u * FOULEE;
-      angle = 12 * DEG * (1 - lisse(0, 0.1, u)) - 24 * DEG * lisse(0.42, 0.62, u);
-    } else {
-      const w = (u - 0.62) / 0.38;
-      avance = -0.31 * FOULEE + w * w * (3 - 2 * w) * 0.62 * FOULEE;
-      lev = Math.sin(Math.PI * w) * 0.11;
-      angle = -24 * DEG * (1 - w) * (1 - w) + 12 * DEG * w * w;
-    }
-    return { avance: avance * ampleur, lev: lev * ampleur, angle: angle * ampleur, u };
-  }
-
-  /** Genou par cinématique inverse, dans le plan qui contient l'avant. */
-  function genou(hanche, cheville, avant) {
-    const d = sub(cheville, hanche);
-    const l = Math.min(Math.hypot(d[0], d[1], d[2]), CUISSE + TIBIA - 1e-4);
-    const dir = norm(d);
-    const cosA = (CUISSE * CUISSE + l * l - TIBIA * TIBIA) / (2 * CUISSE * l);
-    const a = Math.acos(borne(cosA, -1, 1));
-    const perp = norm(sub(avant, mul(dir, dot(avant, dir))));
-    return add(hanche, mul(add(mul(dir, Math.cos(a)), mul(perp, Math.sin(a))), CUISSE));
-  }
-
-  /** Matrice d'un segment : l'axe y local va de `de` vers `vers`. */
-  const segment = (de, vers, avant) => {
-    const y = norm(sub(vers, de));
-    let x = croix(y, avant);
-    if (Math.hypot(x[0], x[1], x[2]) < 1e-4) x = [1, 0, 0];
-    x = norm(x);
-    const z = croix(x, y);
-    return matrice(x, y, z, de);
-  };
-
-  /** Toutes les pièces de l'astronaute, dans le monde, à la distance d. */
-  function poser(d, ampleur) {
-    const base = trace.point(d);
-    const F = trace.avant(d);
-    const R = trace.droite(d);
-    const H = [0, 1, 0];
-    const B = mul(F, -1);
-    const w = (x, y, z) => add(base, add(add(mul(R, x), mul(H, y)), mul(B, z)));
-    const corps = (x, y, z) => matrice(R, H, B, w(x, y, z));
-    const pg = pied(d, 0, ampleur);
-    const pd = pied(d, FOULEE / 2, ampleur);
-    const phase = (d / FOULEE) * Math.PI * 2;
-    const bob = 0.014 * Math.cos(2 * (phase - 0.31 * Math.PI * 2)) * ampleur;
-    const yH = 0.9 + bob;
-    const pieces = [];
-    const blanc = [0.88, 0.86, 0.82];
-    const gris = [0.46, 0.47, 0.5];
-    const sombre = [0.17, 0.17, 0.19];
-    const ajoute = (forme, m, couleur, brillance = 14, matiere = 0) => pieces.push({ forme, m, couleur, brillance, matiere });
-
-    // Jambes
-    for (const [cote, p] of [
-      [-1, pg],
-      [1, pd],
-    ]) {
-      const hanche = w(0.1 * cote, yH, 0);
-      const levee = Math.max(0, -p.angle) * 0.09;
-      const cheville = w(0.11 * cote, CHEVILLE + p.lev + levee, -p.avance);
-      const g = genou(hanche, cheville, F);
-      ajoute('cuisse', segment(hanche, g, F), blanc);
-      ajoute('genou', segment(add(g, mul(norm(sub(g, hanche)), -0.015)), g, F), gris, 30);
-      ajoute('tibia', segment(g, cheville, F), blanc);
-      // botte : inclinée selon le déroulé du pied
-      const ca = Math.cos(p.angle);
-      const sa = Math.sin(p.angle);
-      const fz = add(mul(B, ca), mul(H, -sa));
-      const fy = add(mul(H, ca), mul(B, sa));
-      ajoute('botte', matrice(R, fy, fz, add(cheville, add(mul(fy, -0.035), mul(fz, -0.045)))), sombre, 18);
-    }
-    // Bassin et torse, légèrement penchés vers l'avant
-    ajoute('bassin', corps(0, yH + 0.04, 0.0), blanc);
-    const pench = 3 * DEG;
-    const ty = add(mul(H, Math.cos(pench)), mul(F, Math.sin(pench)));
-    const tz = croix(R, ty);
-    const centreTorse = w(0, yH + 0.4, 0.01);
-    ajoute('torse', matrice(R, ty, tz, centreTorse), blanc, 14, 2);
-    ajoute('sac', matrice(R, ty, tz, add(centreTorse, add(mul(tz, 0.235), mul(ty, 0.04)))), [0.74, 0.74, 0.74], 20, 1);
-    const cou = add(centreTorse, mul(ty, 0.275));
-    ajoute('col', matrice(R, ty, tz, cou), gris, 30);
-    const tete = add(cou, mul(ty, 0.19));
-    ajoute('casque', matrice(R, H, B, tete), [0.86, 0.86, 0.86], 60);
-    for (const cote of [-1, 1]) ajoute('oreille', segment(add(tete, mul(R, 0.15 * cote)), add(tete, mul(R, 0.19 * cote)), F), gris, 30);
-    // Bras : balancement opposé aux jambes
-    for (const [cote, p] of [
-      [-1, pg],
-      [1, pd],
-    ]) {
-      const epaule = add(centreTorse, add(mul(R, 0.248 * cote), mul(ty, 0.165)));
-      ajoute('epaule', matrice(R, H, B, epaule), blanc);
-      // le bras gauche avance quand la jambe gauche recule
-      const balance = (-p.avance / (0.31 * FOULEE || 1)) * 0.3 * ampleur;
-      const ab = 0.05;
-      const desc = norm(add(add(mul(H, -Math.cos(balance)), mul(F, Math.sin(balance))), mul(R, Math.sin(ab) * cote)));
-      const coude = add(epaule, mul(desc, 0.3));
-      const flexion = 0.22 + Math.max(0, balance) * 0.5;
-      const av = norm(add(mul(desc, Math.cos(flexion)), mul(F, Math.sin(flexion))));
-      const poignet = add(coude, mul(av, 0.26));
-      ajoute('bras', segment(epaule, coude, F), blanc);
-      ajoute('anneau', segment(add(coude, mul(desc, -0.01)), coude, F), gris, 30);
-      ajoute('avantBras', segment(coude, poignet, F), blanc);
-      ajoute('gant', segment(add(poignet, mul(av, 0.055)), add(poignet, av), F), sombre, 18);
-    }
-    return { pieces, base, F };
   }
 
   /* ---------- caméra ---------- */
@@ -893,26 +673,24 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
     // L'arrivée : la caméra recule, s'élève et se tourne vers la planète.
     const a = lisse(0, 1, e.arrivee);
     lacet += (PLANETE.lacet * 0.72 - lacet) * a;
-    tangage += 5 * DEG * a;
+    tangage += 2 * DEG * a;
     dist += 2.4 * a;
-    h += 1.1 * a;
+    h += 0.8 * a;
     let dir = regard(lacet, 0);
     let pos = add(sub(A, mul(dir, dist)), [0, h, 0]);
     let vue = regard(lacet, tangage);
 
-    // Après le voyage : trois plans fixes, enchaînés par le défilement.
+    // Au bout du chemin : deux plans fixes, enchaînés par le défilement.
     if (e.apres > 0) {
       const C = pont.centre;
       const plans = [
         { pos, vue },
-        // présentation : en hauteur, face à la planète
-        { pos: add(C, add(mul(regard(PLANETE.lacet, 0), -12), [0, 4.2, 0])), vue: regard(PLANETE.lacet * 0.9, 9 * DEG) },
         // poste de travail : au ras de la plateforme, la planète derrière
         { pos: add(C, add(mul(regard(PLANETE.lacet * 0.85, 0), -10.5), [0, 1.55, 0])), vue: regard(PLANETE.lacet * 0.85, 2.5 * DEG) },
         // contact : le regard se lève vers les étoiles
         { pos: add(C, add(mul(regard(PLANETE.lacet * 0.85, 0), -10.5), [0, 1.7, 0])), vue: regard(PLANETE.lacet * 0.7, 22 * DEG) },
       ];
-      const k = Math.min(Math.floor(e.apres), 2);
+      const k = Math.min(Math.floor(e.apres), 1);
       const t = lisse(0, 1, e.apres - k);
       pos = melange(plans[k].pos, plans[k + 1].pos, t);
       vue = norm(melange(plans[k].vue, plans[k + 1].vue, t));
@@ -943,7 +721,7 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
   }
 
   /* ---------- météores : rares, rapides ---------- */
-  const meteore = { prochain: 6 + Math.random() * 6, debut: -1, x: 0, y: 0, angle: 0 };
+  const meteore = { prochain: 3 + Math.random() * 3, debut: -1, x: 0, y: 0, angle: 0 };
   function majMeteore(t) {
     if (meteore.debut < 0 && t > meteore.prochain) {
       meteore.debut = t;
@@ -955,7 +733,7 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       const p = (t - meteore.debut) / 0.75;
       if (p >= 1) {
         meteore.debut = -1;
-        meteore.prochain = t + 9 + Math.random() * 9;
+        meteore.prochain = t + 5 + Math.random() * 6;
         return [0, 0];
       }
       return [p, Math.sin(Math.PI * p) * 0.9];
@@ -981,7 +759,6 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
   }
 
   let annonce = false;
-  const MIROIR = new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
   function rendre(temps) {
     if (perdu) return;
@@ -1090,6 +867,7 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       const r = ATLAS[a.image];
       gl.uniform3fv(p.u.uCentre, c);
       gl.uniform1f(p.u.uTaille, a.taille);
+      gl.uniform1f(p.u.uAspect, (r[2] * 4) / r[3]);
       gl.uniform1f(p.u.uAngle, a.angle + a.rotation * temps);
       gl.uniform4f(p.u.uRect, a.miroir ? r[0] + r[2] : r[0], r[1], a.miroir ? -r[2] : r[2], r[3]);
       gl.uniform1f(p.u.uOpacite, lisse(8, 20, dist) * (1 - lisse(260, 340, dist)));
@@ -1097,56 +875,27 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
     }
     delier(p);
 
-    // 4. L'astronaute : ombre, reflet, puis lui-même.
-    const visibleAstro = e.astro * (1 - lisse(0.15, 0.6, e.apres));
-    if (visibleAstro > 0.01) {
-      const fin = L + PONT.plateforme - 2.5;
-      const ampleur = lisse(0, 1.2, d) * (1 - lisse(fin - 1.4, fin, d));
-      const pose = poser(d, ampleur);
-
-      p = progs.ombre;
-      gl.useProgram(p.p);
-      gl.uniformMatrix4fv(p.u.uVP, false, cam.vp);
-      gl.uniform3fv(p.u.uCentre, pose.base);
-      gl.uniform2f(p.u.uTaille, 0.42, 0.42);
-      gl.uniform1f(p.u.uForce, 0.42 * visibleAstro);
-      lier(p, 'aP', geo.coin, 2);
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-      delier(p);
-
-      p = progs.astro;
-      gl.useProgram(p.p);
-      gl.uniformMatrix4fv(p.u.uVP, false, cam.vp);
-      gl.uniform3fv(p.u.uCam, cam.pos);
-      gl.uniform3fv(p.u.uLumiere, lumiere);
-      gl.uniform3fv(p.u.uContre, versPlanete);
-      gl.uniform1f(p.u.uOpacite, visibleAstro);
-      const dessiner = (reflet) => {
-        gl.uniform1f(p.u.uReflet, reflet ? 1 : 0);
-        for (const piece of pose.pieces) {
-          const f = geo.astro[piece.forme];
-          const m = reflet ? multiplier(MIROIR, piece.m) : piece.m;
-          gl.uniformMatrix4fv(p.u.uModele, false, m);
-          gl.uniformMatrix3fv(p.u.uNormales, false, new Float32Array([piece.m[0], piece.m[1], piece.m[2], piece.m[4], piece.m[5], piece.m[6], piece.m[8], piece.m[9], piece.m[10]]));
-          gl.uniform3fv(p.u.uCouleur, piece.couleur);
-          gl.uniform1f(p.u.uBrillance, piece.brillance);
-          gl.uniform1f(p.u.uMatiere, piece.matiere);
-          lier(p, 'aPos', f.pos, 3);
-          lier(p, 'aNormale', f.nrm, 3);
-          gl.drawArrays(gl.TRIANGLES, 0, f.n);
-        }
-        delier(p);
+    // 4. L'astronaute : on calcule seulement la place de ses pieds.
+    {
+      const pied = trace.point(d);
+      const m = cam.vp;
+      const proj = (q) => {
+        const x = m[0] * q[0] + m[4] * q[1] + m[8] * q[2] + m[12];
+        const y = m[1] * q[0] + m[5] * q[1] + m[9] * q[2] + m[13];
+        const w = m[3] * q[0] + m[7] * q[1] + m[11] * q[2] + m[15];
+        return w > 0.05 ? [x / w, y / w] : null;
       };
-      if (Q.reflet) {
-        gl.disable(gl.DEPTH_TEST);
-        dessiner(true);
-        gl.enable(gl.DEPTH_TEST);
+      const bas = proj(pied);
+      const haut = proj([pied[0], 1.8, pied[2]]);
+      const lc = toile.clientWidth || window.innerWidth;
+      const hc = toile.clientHeight || window.innerHeight;
+      astro.visible = Boolean(bas && haut) && e.apres < 0.6;
+      if (astro.visible) {
+        astro.x = (bas[0] * 0.5 + 0.5) * lc;
+        astro.y = (0.5 - bas[1] * 0.5) * hc;
+        astro.echelle = (haut[1] - bas[1]) * 0.5 * hc;
       }
-      gl.disable(gl.BLEND);
-      gl.depthMask(true);
-      dessiner(false);
-      gl.enable(gl.BLEND);
-      gl.depthMask(false);
+      astro.marche = d;
     }
 
     // 5. Les vitres, en dernier.
@@ -1190,6 +939,7 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
     etat,
     rendre,
     redimensionner,
+    astro,
     /** La distance où l'astronaute s'arrête, sur la plateforme. */
     fin: longueur + PONT.plateforme - 2.5,
     /** Achève l'initialisation (affiche immobile, captures). */

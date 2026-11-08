@@ -157,36 +157,50 @@
 .intro__titre {
   display: grid;
   justify-items: center;
-  gap: 0.9rem;
+  gap: clamp(0.8rem, 1.8vh, 1.25rem);
   font-weight: 400;
 }
-.intro__ligne {
-  display: block;
-  overflow: hidden;
-  padding: 0.04em 0.1em;
-}
-.intro__texte {
-  display: block;
-}
-.intro__ligne--sur .intro__texte {
+.intro__sur {
   color: var(--encre-2);
-  font-family: var(--mono);
-  font-size: clamp(0.72rem, 1vw, 0.84rem);
-  letter-spacing: 0.56em;
+  font-size: clamp(0.7rem, 0.9vw, 0.84rem);
+  letter-spacing: 0.62em;
+  margin-right: -0.62em;
   text-transform: uppercase;
-  margin-right: -0.56em;
 }
-.intro__ligne:not(.intro__ligne--sur) .intro__texte {
-  color: var(--encre);
+.intro__nom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 0.3em;
+  color: #f6f1e6;
   font-family: var(--etendu);
-  font-size: clamp(2rem, min(5.2vw, 9vh), 4.6rem);
-  font-weight: 700;
-  line-height: 1.02;
-  letter-spacing: 0.015em;
+  font-size: clamp(2.3rem, min(6.4vw, 12vh), 7.4rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.012em;
   text-transform: uppercase;
-  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.45);
+  text-shadow:
+    0 0 42px rgba(110, 164, 255, 0.22),
+    0 4px 30px rgba(0, 0, 0, 0.5);
+}
+.intro__mot {
+  display: inline-flex;
+}
+.intro__lettre {
+  display: inline-block;
+}
+.intro__metier {
+  color: var(--encre-2);
+  font-size: clamp(0.95rem, 1.3vw, 1.18rem);
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
 }
 .intro__chevrons {
+  display: none;
+}
+
+/* L'astronaute n'existe que dans le voyage (voir plus bas). */
+.astronaute {
   display: none;
 }
 
@@ -202,28 +216,38 @@
   margin: 0 auto;
   padding: 2rem var(--gouttiere) 6rem;
 }
-.projets__titre {
+.projets__entete {
+  display: grid;
+  gap: 0.6rem;
   grid-column: 1 / -1;
+}
+.projets__titre {
   font-family: var(--etendu);
-  font-size: clamp(1.4rem, 3vw, 2.4rem);
-  font-weight: 700;
+  font-size: clamp(1.8rem, 4.4vw, 4.2rem);
+  font-weight: 800;
+  line-height: 1;
   text-transform: uppercase;
+  text-wrap: balance;
 }
 .panneau {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  background: rgba(7, 10, 18, 0.84);
-  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(176, 202, 255, 0.15);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(13, 19, 34, 0.94), rgba(5, 8, 16, 0.95));
+  box-shadow:
+    0 50px 120px -50px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   cursor: pointer;
 }
 .panneau__visuel {
   aspect-ratio: 16 / 10;
+  margin: 0.7rem 0.7rem 0;
   overflow: hidden;
+  border-radius: 13px;
   background: #0b0f19;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 .panneau__visuel img {
   width: 100%;
@@ -232,23 +256,25 @@
 }
 .panneau__texte {
   display: grid;
-  gap: 0.6rem;
-  padding: 1.05rem 1.2rem 1.2rem;
+  gap: 0.7rem;
+  padding: 1.15rem 1.45rem 1.4rem;
 }
 .panneau__tag {
-  color: var(--encre-3);
-  font-size: 0.64rem;
+  color: var(--atmo);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
 }
 .panneau__titre {
-  font-size: clamp(1.05rem, 1.35vw, 1.28rem);
-  font-weight: 650;
-  line-height: 1.2;
+  font-family: var(--etendu);
+  font-size: clamp(1.2rem, 1.65vw, 1.6rem);
+  font-weight: 700;
+  line-height: 1.12;
   text-wrap: balance;
 }
 .panneau__resume {
   color: var(--encre-2);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: clamp(0.95rem, 1.05vw, 1.04rem);
+  line-height: 1.55;
 }
 .panneau__actions {
   display: flex;
@@ -263,12 +289,12 @@
   gap: 0.35rem;
 }
 .pile li {
-  padding: 0.22rem 0.55rem;
+  padding: 0.26rem 0.62rem;
   border-radius: 999px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
   color: var(--encre-2);
   font-family: var(--mono);
-  font-size: 0.64rem;
+  font-size: 0.68rem;
   letter-spacing: 0.04em;
 }
 
@@ -415,6 +441,7 @@
   position: relative;
   z-index: 2;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   align-items: safe center;
   min-height: 100svh;
@@ -430,91 +457,73 @@
 /* ---------- 3. Présentation ---------- */
 
 .identite {
-  justify-items: start;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  min-height: 100svh;
+  padding: 6rem var(--gouttiere) 4rem;
 }
 .identite__carte {
   display: grid;
-  gap: clamp(1.4rem, 3vw, 2.2rem);
-  width: min(60rem, 100%);
-  padding: clamp(1.4rem, 3.5vw, 2.8rem);
+  gap: clamp(1rem, 2.2vh, 1.5rem);
+  width: min(40rem, 100%);
+  padding: clamp(1.3rem, 3vw, 2.2rem);
 }
 .identite__tete {
   display: flex;
   align-items: center;
-  gap: clamp(1rem, 2.5vw, 1.6rem);
+  gap: clamp(1rem, 2.2vw, 1.4rem);
 }
 .identite__portrait {
   flex: none;
-  width: clamp(4.6rem, 9vw, 6.6rem);
+  width: clamp(4.4rem, 7vw, 6.2rem);
   height: auto;
   aspect-ratio: 1;
   border-radius: 50%;
   object-fit: cover;
   object-position: 50% 30%;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 0 0 5px rgba(110, 164, 255, 0.08);
+}
+.identite__tete .rubrique {
+  margin-bottom: 0.4rem;
 }
 .identite__nom {
   font-family: var(--etendu);
-  font-size: clamp(1.25rem, 2.6vw, 2.2rem);
+  font-size: clamp(1.15rem, 2vw, 1.75rem);
   font-weight: 700;
-  line-height: 1.08;
+  line-height: 1.1;
   text-transform: uppercase;
   text-wrap: balance;
 }
 .identite__titre {
-  margin-top: 0.45rem;
-  font-size: clamp(1rem, 1.4vw, 1.15rem);
-  font-weight: 500;
+  margin-top: 0.4rem;
+  color: var(--encre-2);
+  font-size: clamp(0.95rem, 1.2vw, 1.08rem);
 }
-.identite__sous-titre {
-  margin-top: 0.25rem;
-  color: var(--encre-3);
-  font-size: 0.68rem;
-  letter-spacing: 0.26em;
-}
-.identite__colonnes {
+.identite__texte {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: clamp(1.4rem, 4vw, 3rem);
-  padding-top: clamp(1.2rem, 2.5vw, 1.8rem);
-  border-top: 1px solid var(--trait);
-}
-.identite__colonne {
-  display: grid;
-  align-content: start;
   gap: 0.7rem;
-}
-.identite__colonne .rubrique:not(:first-child) {
-  margin-top: 0.9rem;
+  padding-top: clamp(0.9rem, 2vh, 1.3rem);
+  border-top: 1px solid var(--trait);
 }
 .identite__paragraphe {
   color: var(--encre-2);
-  font-size: 0.95rem;
-  line-height: 1.62;
+  font-size: clamp(0.88rem, 1vw, 0.98rem);
+  line-height: 1.6;
+}
+.identite__parcours {
+  display: grid;
+  gap: 0.4rem;
+  padding-top: clamp(0.8rem, 1.8vh, 1.1rem);
+  border-top: 1px solid var(--trait);
 }
 .identite__fait {
-  font-size: 0.95rem;
+  font-size: clamp(0.9rem, 1vw, 0.98rem);
   line-height: 1.5;
-}
-.identite__fait--discret {
-  color: var(--encre-3);
-  font-size: 0.86rem;
-}
-.expertise {
-  display: grid;
-  gap: 0.55rem;
-}
-.expertise li {
-  display: grid;
-  gap: 0.05rem;
-}
-.expertise__titre {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-.expertise__detail {
-  color: var(--encre-3);
-  font-size: 0.86rem;
 }
 
 /* ---------- 4. Le poste de travail ---------- */
@@ -563,7 +572,7 @@
 }
 .liaison {
   fill: none;
-  stroke: rgba(205, 220, 245, 0.3);
+  stroke: rgba(205, 220, 245, 0.34);
   stroke-width: 1;
 }
 
@@ -697,10 +706,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
-  width: 5.2%;
-  margin-left: -2.6%;
-  margin-top: -2.6%;
+  gap: 0.6rem;
+  width: 7.5%;
+  margin-left: -3.75%;
+  margin-top: -3.75%;
 }
 .competence--0 { left: 13.5%; top: 17.6%; }
 .competence--1 { left: 7.5%; top: 38.4%; }
@@ -716,20 +725,23 @@
   place-items: center;
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 24%;
-  background: rgba(10, 13, 21, 0.92);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.13);
+  border-radius: 22%;
+  background: linear-gradient(180deg, rgba(16, 22, 38, 0.96), rgba(7, 10, 19, 0.96));
+  box-shadow:
+    inset 0 0 0 1px rgba(176, 202, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 18px 40px -18px rgba(0, 0, 0, 0.9);
 }
 .competence__icone svg {
-  width: 54%;
-  height: 54%;
+  width: 52%;
+  height: 52%;
 }
 .competence__nom {
-  padding: 0.1rem 0.45rem;
-  border-radius: 0.3rem;
-  background: rgba(7, 10, 18, 0.8);
+  padding: 0.16rem 0.55rem;
+  border-radius: 0.35rem;
+  background: rgba(7, 10, 18, 0.84);
   color: var(--encre);
-  font-size: clamp(0.62rem, 0.8vw, 0.76rem);
+  font-size: clamp(0.68rem, 0.9vw, 0.86rem);
   font-weight: 500;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -752,10 +764,10 @@
     width: 57.9%;
   }
   .competence {
-    gap: 0.35rem;
-    width: 10%;
-    margin-left: -5%;
-    margin-top: -5%;
+    gap: 0.4rem;
+    width: 13%;
+    margin-left: -6.5%;
+    margin-top: -6.5%;
   }
   .competence--0 { left: 9.5%; top: 18.46%; }
   .competence--1 { left: 9.5%; top: 36.92%; }
@@ -772,14 +784,28 @@
 .contact__carte {
   display: grid;
   justify-items: center;
-  gap: 1.05rem;
-  width: min(42rem, 100%);
-  padding: clamp(1.6rem, 4vw, 3rem);
+  gap: 1.1rem;
+  width: min(44rem, 100%);
+  padding: clamp(1.6rem, 4.5vw, 3.2rem);
   text-align: center;
+  container-type: inline-size;
+}
+.contact {
+  padding-block: 5rem 2.5rem;
+}
+@media (max-height: 47.5rem) {
+  .contact__carte {
+    gap: 0.75rem;
+    padding-block: 1.5rem;
+  }
+  .contact .lien-contact {
+    padding-block: 0.7rem;
+  }
 }
 .contact__titre {
+  max-width: 100%;
   font-family: var(--etendu);
-  font-size: clamp(1.8rem, 4.6vw, 3.6rem);
+  font-size: clamp(1.5rem, 7.6cqi, 3.3rem);
   font-weight: 700;
   line-height: 1.02;
   text-transform: uppercase;
@@ -852,9 +878,6 @@
 }
 
 @media (max-width: 47.99rem) {
-  .identite__colonnes {
-    grid-template-columns: 1fr;
-  }
   .nav__liens {
     gap: 0.4rem 0.9rem;
   }
@@ -900,20 +923,64 @@
     overflow: clip;
   }
 
-  /* Introduction : chaque ligne monte derrière son masque. */
+  /* Introduction : le titre se pose dans le ciel, au-dessus de
+     l'astronaute. Chaque lettre sort du flou en montant, l'une après
+     l'autre ; puis le métier, puis les chevrons. */
   .intro {
     position: absolute;
     inset: 0;
     min-height: 0;
     place-items: start center;
-    padding-top: clamp(5rem, 15svh, 9rem);
+    padding-top: clamp(5.2rem, 15svh, 9.5rem);
     pointer-events: none;
   }
-  .intro__texte {
-    animation: revele 1.15s var(--sortie) backwards 0.15s;
+  .intro__titre {
+    will-change: transform, opacity;
   }
-  .intro__ligne:not(.intro__ligne--sur) .intro__texte {
-    animation-delay: 0.32s;
+  .intro__sur {
+    animation: monte 1.2s var(--sortie) backwards 0.15s;
+  }
+  .intro__lettre {
+    animation: lettre 1.5s var(--sortie) backwards;
+  }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(1) { animation-delay: 0.320s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(2) { animation-delay: 0.362s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(3) { animation-delay: 0.404s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(4) { animation-delay: 0.446s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(5) { animation-delay: 0.488s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(6) { animation-delay: 0.530s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(7) { animation-delay: 0.572s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(8) { animation-delay: 0.614s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(9) { animation-delay: 0.656s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(10) { animation-delay: 0.698s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(11) { animation-delay: 0.740s; }
+  .intro__mot:nth-child(1) .intro__lettre:nth-child(12) { animation-delay: 0.782s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(1) { animation-delay: 0.620s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(2) { animation-delay: 0.662s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(3) { animation-delay: 0.704s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(4) { animation-delay: 0.746s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(5) { animation-delay: 0.788s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(6) { animation-delay: 0.830s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(7) { animation-delay: 0.872s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(8) { animation-delay: 0.914s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(9) { animation-delay: 0.956s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(10) { animation-delay: 0.998s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(11) { animation-delay: 1.040s; }
+  .intro__mot:nth-child(2) .intro__lettre:nth-child(12) { animation-delay: 1.082s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(1) { animation-delay: 0.920s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(2) { animation-delay: 0.962s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(3) { animation-delay: 1.004s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(4) { animation-delay: 1.046s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(5) { animation-delay: 1.088s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(6) { animation-delay: 1.130s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(7) { animation-delay: 1.172s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(8) { animation-delay: 1.214s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(9) { animation-delay: 1.256s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(10) { animation-delay: 1.298s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(11) { animation-delay: 1.340s; }
+  .intro__mot:nth-child(3) .intro__lettre:nth-child(12) { animation-delay: 1.382s; }
+  .intro__metier {
+    animation: monte 1.3s var(--sortie) backwards 1.15s;
   }
   .intro__chevrons {
     position: absolute;
@@ -923,7 +990,7 @@
     width: 1.75rem;
     height: 1.75rem;
     margin-left: -0.875rem;
-    animation: apparait 1s ease backwards 1s;
+    animation: apparait 1s ease backwards 1.8s;
   }
   .intro__chevrons svg {
     width: 100%;
@@ -936,7 +1003,95 @@
     animation: chevrons 2.4s ease-in-out infinite 2s;
   }
 
-  /* Les panneaux des projets flottent de part et d'autre de l'astronaute. */
+  /* L'astronaute : une bande de huit positions, dont une seule est
+     visible ; le monde lui donne sa place et sa taille. Les images ne
+     sont demandées qu'une fois le monde lancé. */
+  .astronaute {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+  }
+  .monde-pret .astronaute {
+    opacity: 1;
+  }
+  .astronaute__pose {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 320px;
+    height: 640px;
+    transform-origin: 50% 96.875%;
+    visibility: hidden;
+    will-change: transform, opacity;
+  }
+  .astronaute__corps,
+  .astronaute__reflet {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .astronaute__bande {
+    width: 800%;
+    height: 100%;
+    background: 0 0 / 100% 100% no-repeat;
+    will-change: transform;
+  }
+  .astro-charge .astronaute__bande {
+    background-image: url('/espace/astronaute-640.webp');
+  }
+  .astro-charge.astro-hd .astronaute__bande {
+    background-image: url('/espace/astronaute-1280.webp');
+  }
+  /* Le reflet sur le plancher de métal : la même position, retournée
+     au ras des semelles, voilée et estompée en s'éloignant des pieds. */
+  .astronaute__reflet {
+    transform-origin: 50% 96.875%;
+    transform: scaleY(-1);
+    opacity: 0.26;
+    filter: blur(1.5px);
+    -webkit-mask-image: linear-gradient(to top, #000 3%, transparent 40%);
+    mask-image: linear-gradient(to top, #000 3%, transparent 40%);
+  }
+  /* L'ombre de contact, douce, sous les semelles. */
+  .astronaute__ombre {
+    position: absolute;
+    left: 20%;
+    width: 60%;
+    top: 94.4%;
+    height: 5%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.28) 55%, transparent);
+  }
+
+  /* La présentation : une grande carte, à gauche de l'astronaute. */
+  .identite {
+    position: absolute;
+    inset: 0;
+    display: block;
+    min-height: 0;
+    padding: 0;
+    pointer-events: none;
+  }
+  .identite__carte {
+    position: absolute;
+    top: 3.6rem;
+    bottom: 0;
+    left: max(var(--gouttiere), 4vw);
+    width: min(38rem, max(calc(50vw - 9.5rem), 26rem));
+    height: fit-content;
+    max-height: calc(100% - 4.6rem);
+    margin-block: auto;
+    opacity: 0;
+    pointer-events: auto;
+    will-change: transform, opacity;
+  }
+
+  /* Les projets : d'abord leur titre, seul dans le ciel ; puis les
+     panneaux, de part et d'autre de l'astronaute. */
   .projets {
     position: absolute;
     inset: 0;
@@ -945,24 +1100,38 @@
     padding: 0;
     pointer-events: none;
   }
-  .projets__titre {
+  .projets__entete {
     position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
+    inset: 0 0 auto;
+    justify-items: center;
+    padding: clamp(5.2rem, 15svh, 9.5rem) var(--gouttiere) 0;
+    text-align: center;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .projets__entete .rubrique {
+    letter-spacing: 0.5em;
+    margin-right: -0.5em;
+  }
+  .projets__titre {
+    font-size: clamp(2.2rem, min(6vw, 11vh), 6.6rem);
+    text-shadow:
+      0 0 42px rgba(110, 164, 255, 0.2),
+      0 4px 30px rgba(0, 0, 0, 0.5);
   }
   .panneau {
     position: absolute;
-    top: 0;
+    top: 3.6rem;
     bottom: 0;
     height: fit-content;
     margin-block: auto;
-    width: min(25rem, 34vw);
+    width: min(40rem, max(calc(50vw - 9.5rem), 26rem), calc(160svh - 36rem));
     opacity: 0;
     pointer-events: auto;
-    will-change: transform, opacity, filter;
+    will-change: transform, opacity;
+  }
+  .panneau__visuel img {
+    will-change: transform;
   }
   .panneau--gauche {
     left: max(var(--gouttiere), 4vw);
@@ -974,10 +1143,22 @@
   .fiche[open] {
     animation: fiche 0.45s var(--sortie);
   }
+  /* Pendant la fiche, la page derrière ne défile plus (la place de la
+     barre de défilement reste réservée : rien ne bouge). */
+  html {
+    scrollbar-gutter: stable;
+  }
+  html.lenis-stopped {
+    overflow: hidden;
+  }
 
   /* Le poste de travail reste en place le temps de la lecture. */
   .atelier {
-    min-height: 175svh;
+    min-height: 130svh;
+    margin-top: -60svh;
+  }
+  .liaison {
+    stroke-dasharray: 1 1;
   }
   .atelier__scene-fixe {
     position: sticky;
@@ -1020,21 +1201,39 @@
   /* Téléphone, ou écran en hauteur : le panneau se pose en bas, compact,
      au-dessous de l'astronaute. */
   @media (max-width: 47.99rem), (max-aspect-ratio: 4 / 5) {
+    .identite__carte {
+      top: auto;
+      bottom: max(0.8rem, 2svh);
+      left: 3vw;
+      right: 3vw;
+      width: auto;
+      max-height: calc(100% - 5rem);
+      margin: 0;
+      overflow: auto;
+      padding: 1.1rem 1.15rem 1.2rem;
+    }
+    .identite__paragraphe {
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+    .identite__fait {
+      font-size: 0.86rem;
+    }
     .panneau {
       top: auto;
       bottom: max(1rem, 3svh);
-      left: 4vw;
-      right: 4vw;
+      left: 3vw;
+      right: 3vw;
       width: auto;
       margin: 0;
       display: grid;
-      grid-template-columns: 6.6rem minmax(0, 1fr);
+      grid-template-columns: 7.4rem minmax(0, 1fr);
     }
     .panneau__visuel {
       aspect-ratio: auto;
-      height: 100%;
-      border-bottom: 0;
-      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      height: auto;
+      margin: 0.55rem 0 0.55rem 0.55rem;
+      border-radius: 10px;
     }
     .panneau__visuel .schema {
       grid-template-columns: 1fr;
@@ -1051,15 +1250,15 @@
       font-size: 0.6rem;
     }
     .panneau__texte {
-      gap: 0.4rem;
-      padding: 0.8rem 0.9rem 0.85rem;
+      gap: 0.45rem;
+      padding: 0.85rem 0.95rem 0.95rem;
     }
     .panneau__resume {
-      font-size: 0.8rem;
+      font-size: 0.84rem;
       line-height: 1.45;
     }
     .panneau__titre {
-      font-size: 0.98rem;
+      font-size: 1.04rem;
     }
     .pile li {
       font-size: 0.58rem;
@@ -1068,10 +1267,22 @@
   }
 }
 
-@keyframes revele {
+@keyframes lettre {
   from {
-    transform: translate3d(0, 105%, 0);
-    opacity: 0.35;
+    opacity: 0.02;
+    transform: translate3d(0, 0.32em, 0) scale(0.94);
+    filter: blur(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@keyframes monte {
+  from {
+    opacity: 0.02;
+    transform: translate3d(0, 0.9rem, 0);
   }
 }
 @keyframes apparait {

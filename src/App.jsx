@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import Nav from './components/Nav.jsx';
 import Intro from './components/Intro.jsx';
+import Astronaute from './components/Astronaute.jsx';
 import Projets from './components/Projets.jsx';
 import Profil from './components/Profil.jsx';
 import Atelier from './components/Atelier.jsx';
@@ -42,11 +43,12 @@ export default function App() {
       <main id="contenu">
         <div className="voyage">
           <div className="voyage__scene">
+            <Astronaute />
             <Intro />
+            <Profil />
             <Projets />
           </div>
         </div>
-        <Profil />
         <Atelier />
         <Contact />
       </main>

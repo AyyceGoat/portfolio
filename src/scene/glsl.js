@@ -45,9 +45,14 @@ vec3 ciel(vec3 d, float flou) {
     voisinage = mix(voisinage, texture2D(uCiel, wd, flou + 3.0).rgb, t);
   }
   float etoile = clamp((dot(c - voisinage, vec3(0.333)) - 0.035) * 6.0, 0.0, 1.0);
-  float graine = hash(floor(w * vec2(640.0, 360.0)));
-  float sc = 0.72 + 0.28 * sin(uTemps * (0.9 + graine * 2.2) + graine * 50.0);
-  vec3 col = c * (1.0 - etoile * (1.0 - sc));
+  float graine = hash(floor(w * vec2(1280.0, 720.0)));
+  float sc = 0.55 + 0.45 * sin(uTemps * (0.8 + graine * 2.6) + graine * 50.0);
+  // Seul l'éclat de l'étoile varie, jamais en dessous de son voisinage.
+  vec3 col = c - max(c - voisinage, 0.0) * etoile * (1.0 - sc);
+  // Un voile de nébuleuse, flou, qui glisse lentement par-dessus.
+  vec2 derive = vec2(uTemps * 0.0016, sin(uTemps * 0.021) * 0.006);
+  vec3 voile = texture2D(uCiel, vec2(wc.x * 0.985 + derive.x, wc.y + derive.y), flou + 4.5).rgb;
+  col = col * 0.93 + voile * 0.16;
   // La planète, qui grandit à l'approche.
   vec2 p = PLANETE_C + (uv - PLANETE_C) / uPlaneteEchelle;
   vec2 pu = (p - PLANETE_BOITE.xy) / (PLANETE_BOITE.zw - PLANETE_BOITE.xy);
@@ -88,9 +93,9 @@ void main() {
     vec2 q = vP * vec2(uTan.x / uTan.y, 1.0) - tete;
     float le = dot(q, -dir);
     float lat = abs(dot(q, vec2(-dir.y, dir.x)));
-    float trainee = smoothstep(0.0, 0.01, le) * exp(-max(le, 0.0) * 9.0) * step(lat, 0.004);
-    trainee *= 1.0 - smoothstep(0.001, 0.004, lat);
-    col += vec3(0.85, 0.9, 1.0) * trainee * uMeteoreI;
+    float trainee = smoothstep(-0.004, 0.004, le) * exp(-max(le, 0.0) * 6.5);
+    trainee *= 1.0 - smoothstep(0.0006, 0.0028 * (1.0 - min(le, 1.0) * 0.6), lat);
+    col += vec3(0.82, 0.9, 1.0) * trainee * uMeteoreI * 1.2;
   }
   gl_FragColor = vec4(col, 1.0);
 }
@@ -122,11 +127,43 @@ varying float vType;
 uniform vec3 uCam, uLumiere;
 uniform float uBrume;
 ${CIEL_FN}
-const vec3 CHAUD = vec3(1.0, 0.72, 0.42);
+const vec3 CHAUD = vec3(1.0, 0.7, 0.4);
 
 float joint(float x, float pas, float largeur) {
   float f = abs(fract(x / pas + 0.5) - 0.5) * pas;
   return 1.0 - smoothstep(0.0, largeur, f);
+}
+
+/* Le plancher : dalles de métal sombre et poli, au léger relief, où se
+   reflètent le ciel et les lumières de la passerelle. */
+vec3 plancher(vec2 m, float bord, float dist, vec3 v, bool pont) {
+  vec2 dalle = floor(m / 1.4);
+  float teinte = 0.9 + 0.2 * hash(dalle);
+  vec3 base = vec3(0.022, 0.026, 0.042) * teinte;
+  // joints : un filet clair et une ombre fine, comme un chanfrein
+  float jx = joint(m.x, 1.4, 0.012), jy = joint(m.y, 1.4, 0.012);
+  float ombre = max(joint(m.x - 0.02, 1.4, 0.012), joint(m.y - 0.02, 1.4, 0.012));
+  base += vec3(0.07, 0.075, 0.09) * max(jx, jy) - vec3(0.012) * ombre;
+  vec3 r = reflect(v, vec3(0.0, 1.0, 0.0));
+  float fres = 0.28 + 0.66 * pow(1.0 - max(-v.y, 0.0), 3.5);
+  float flou = 0.6 + min(dist * 0.045, 3.2);
+  vec3 col = base + ciel(r, flou) * fres;
+  // éclat de la lumière principale
+  col += vec3(0.5, 0.48, 0.45) * pow(max(dot(r, uLumiere), 0.0), 60.0) * 0.4;
+  if (pont) {
+    // reflets étirés des bandeaux et des lampes des garde-corps
+    float lampe = fract(m.x / 3.0);
+    float trainee = exp(-(1.0 - lampe) * 1.6);
+    col += CHAUD * exp(-pow((bord - 2.74) / 0.3, 2.0)) * 0.5;
+    col += CHAUD * exp(-pow((bord - 2.5) / 0.16, 2.0)) * trainee * 0.55;
+    // lampes encastrées au bord du plancher
+    float point = exp(-(pow(mod(m.x, 1.5) - 0.75, 2.0) + pow(bord - 2.68, 2.0) * 4.0) * 900.0);
+    col += vec3(1.0, 0.82, 0.6) * point * 1.6;
+    // filets pointillés le long des joints, comme sur la référence
+    float tiret = step(0.55, fract(m.x / 0.9)) * exp(-pow((bord - 1.4) / 0.02, 2.0));
+    col += vec3(0.75, 0.8, 0.9) * tiret * 0.22;
+  }
+  return col;
 }
 
 void main() {
@@ -136,150 +173,33 @@ void main() {
   vec3 col;
   float alpha = 1.0;
   if (vType < 0.5) {
-    // Plancher : dalles de métal sombre, joints fins, reflet du ciel.
-    vec3 base = vec3(0.028, 0.032, 0.05);
-    float j = max(joint(vMotif.x, 1.4, 0.018), joint(vMotif.y, 1.4, 0.018));
-    base += vec3(0.05, 0.055, 0.07) * j;
-    vec3 r = reflect(v, vec3(0.0, 1.0, 0.0));
-    float fres = 0.18 + 0.62 * pow(1.0 - max(-v.y, 0.0), 4.0);
-    float flou = 1.5 + min(dist * 0.06, 3.0);
-    col = base + ciel(r, flou) * fres * 0.8;
-    // Reflets des bandeaux lumineux des bords, étirés vers nous.
-    float bord = abs(vMotif.y);
-    col += CHAUD * exp(-pow((bord - 2.72) / 0.28, 2.0)) * 0.42;
-    float montant = fract(vMotif.x / 3.0);
-    col += CHAUD * exp(-pow((bord - 2.62) / 0.09, 2.0)) * exp(-(1.0 - montant) * 2.2) * 0.22;
+    col = plancher(vMotif, abs(vMotif.y), dist, v, true);
   } else if (vType < 1.5) {
     // Tranche du plancher : métal, bandeau ambré en haut.
-    col = vec3(0.03, 0.033, 0.045) + ciel(reflect(v, n), 3.0) * 0.12;
-    col += CHAUD * smoothstep(0.62, 0.92, vMotif.y) * 0.9;
+    col = vec3(0.03, 0.033, 0.045) + ciel(reflect(v, n), 2.5) * 0.14;
+    col += CHAUD * smoothstep(0.6, 0.9, vMotif.y) * 1.1;
   } else if (vType < 2.5) {
     col = vec3(0.012, 0.014, 0.02);
   } else if (vType < 3.5) {
-    // Métal poli : le ciel s'y reflète, la lumière y laisse un éclat.
+    // Métal poli : le ciel s'y reflète, les lumières y laissent des éclats.
     vec3 r = reflect(v, n);
-    float spec = pow(max(dot(r, uLumiere), 0.0), 40.0);
-    col = vec3(0.07, 0.075, 0.085) + ciel(r, 2.0) * 0.42 + vec3(0.9, 0.85, 0.8) * spec * 0.55;
-    col += CHAUD * max(n.y, 0.0) * 0.06;
+    float spec = pow(max(dot(r, uLumiere), 0.0), 50.0);
+    col = vec3(0.06, 0.064, 0.074) + ciel(r, 1.2) * 0.55 + vec3(0.95, 0.9, 0.85) * spec * 0.7;
+    col += CHAUD * pow(max(-n.y, 0.0), 2.0) * 0.35 + CHAUD * max(n.y, 0.0) * 0.08;
   } else if (vType < 4.5) {
-    // Vitre : presque invisible, sauf sous un angle rasant.
+    // Vitre : on voit au travers ; sous un angle rasant, elle reflète.
     float fres = pow(1.0 - abs(dot(v, n)), 3.0);
-    col = ciel(reflect(v, n), 1.5) * 0.3 + vec3(0.6, 0.75, 1.0) * 0.02;
-    alpha = 0.05 + fres * 0.22;
+    col = ciel(reflect(v, n), 1.2) * 0.35 + vec3(0.55, 0.75, 1.0) * 0.025;
+    alpha = 0.05 + fres * 0.24;
   } else if (vType < 5.5) {
-    col = CHAUD * 1.15;
+    col = CHAUD * 1.25;
   } else {
-    // Plateforme : mêmes dalles, en carré autour du centre.
-    vec3 base = vec3(0.028, 0.032, 0.05);
-    float j = max(joint(vMotif.x, 1.4, 0.018), joint(vMotif.y, 1.4, 0.018));
-    base += vec3(0.05, 0.055, 0.07) * j;
-    vec3 r = reflect(v, vec3(0.0, 1.0, 0.0));
-    float fres = 0.18 + 0.62 * pow(1.0 - max(-v.y, 0.0), 4.0);
-    col = base + ciel(r, 1.5 + min(dist * 0.06, 3.0)) * fres * 0.55;
-    col += CHAUD * exp(-pow((length(vMotif) - 6.8) / 0.25, 2.0)) * 0.3;
+    col = plancher(vMotif, 0.0, dist, v, false);
+    col += CHAUD * exp(-pow((length(vMotif) - 6.78) / 0.28, 2.0)) * 0.45;
   }
   // Au loin, la passerelle se fond dans la pénombre.
   col = mix(vec3(0.012, 0.016, 0.035), col, exp(-dist * uBrume));
   gl_FragColor = vec4(col * alpha, alpha);
-}
-`;
-
-/* L'astronaute : des volumes simples (capsules, ellipsoïdes), chacun
-   avec sa matrice, éclairés comme la scène. Le reflet dans le plancher
-   est le même dessin, retourné et estompé. */
-export const ASTRO_V = /* glsl */ `
-attribute vec3 aPos;
-attribute vec3 aNormale;
-uniform mat4 uVP, uModele;
-uniform mat3 uNormales;
-varying vec3 vPos, vN, vLocal;
-void main() {
-  vec4 w = uModele * vec4(aPos, 1.0);
-  vPos = w.xyz;
-  vN = uNormales * aNormale;
-  vLocal = aPos;
-  gl_Position = uVP * w;
-}
-`;
-
-export const ASTRO_F = /* glsl */ `
-precision highp float;
-varying vec3 vPos, vN, vLocal;
-uniform vec3 uCam, uLumiere, uContre;
-uniform vec3 uCouleur;
-uniform float uBrillance, uMatiere, uReflet, uOpacite;
-
-float h3(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
-float bruit(vec3 p) {
-  vec3 i = floor(p), f = fract(p);
-  f = f * f * (3.0 - 2.0 * f);
-  return mix(mix(mix(h3(i), h3(i + vec3(1, 0, 0)), f.x), mix(h3(i + vec3(0, 1, 0)), h3(i + vec3(1, 1, 0)), f.x), f.y),
-             mix(mix(h3(i + vec3(0, 0, 1)), h3(i + vec3(1, 0, 1)), f.x), mix(h3(i + vec3(0, 1, 1)), h3(i + vec3(1, 1, 1)), f.x), f.y), f.z);
-}
-float ligne(float x, float l) { return 1.0 - smoothstep(0.0, l, abs(x)); }
-
-void main() {
-  vec3 n = normalize(vN);
-  if (uReflet > 0.5) n.y = -n.y;
-  vec3 v = normalize(uCam - vPos);
-  vec3 alb = uCouleur;
-  if (uMatiere < 0.5 || uMatiere > 1.5) {
-    // Toile épaisse : un grain doux et quelques plis.
-    alb *= 0.93 + 0.07 * bruit(vLocal * 38.0) - 0.05 * bruit(vLocal * vec3(6.0, 22.0, 6.0));
-  }
-  if (uMatiere > 0.5 && uMatiere < 1.5) {
-    // Sac dorsal : un panneau gris, deux fentes, un fin anneau bleu.
-    float dos = step(0.0, vLocal.z);
-    vec2 q = vLocal.xy;
-    float panneau = step(abs(q.x), 0.13) * step(abs(q.y + 0.02), 0.17) * dos;
-    alb = mix(alb, vec3(0.5, 0.52, 0.55), panneau * 0.6);
-    alb *= 1.0 - 0.45 * dos * (ligne(abs(q.x) - 0.13, 0.004) * step(abs(q.y + 0.02), 0.17) + ligne(abs(q.y + 0.02) - 0.17, 0.004) * step(abs(q.x), 0.13));
-    alb *= 1.0 - 0.5 * dos * step(abs(q.x), 0.07) * (ligne(q.y + 0.12, 0.006) + ligne(q.y + 0.16, 0.006));
-    float anneau = abs(length(q - vec2(0.0, 0.07)) - 0.042);
-    alb = mix(alb, vec3(0.3, 0.52, 0.95), (1.0 - smoothstep(0.004, 0.008, anneau)) * dos * 0.85);
-  }
-  if (uMatiere > 1.5) {
-    // Torse : coutures à la taille et sur la poitrine.
-    alb *= 1.0 - 0.18 * (ligne(vLocal.y + 0.17, 0.006) + ligne(vLocal.y - 0.09, 0.005));
-  }
-  // Éclairage : lumière principale (enveloppante, comme sur un tissu
-  // épais), lumière froide de la planète sur le côté, ciel au-dessus,
-  // rebond chaud des bandeaux de la passerelle en dessous.
-  float diff = max(dot(n, uLumiere) * 0.8 + 0.2, 0.0);
-  float planete = max(dot(n, uContre), 0.0);
-  float bord = pow(1.0 - max(dot(n, v), 0.0), 4.0);
-  vec3 ambiant = mix(vec3(0.1, 0.085, 0.07), vec3(0.085, 0.09, 0.11), n.y * 0.5 + 0.5);
-  vec3 h = normalize(uLumiere + v);
-  float spec = pow(max(dot(n, h), 0.0), uBrillance) * (uBrillance > 20.0 ? 0.45 : 0.12);
-  // Les faces tournées vers le bas reçoivent moins de lumière.
-  float creux = 0.72 + 0.28 * smoothstep(-0.8, 0.4, n.y);
-  vec3 col = alb * creux * (ambiant + vec3(1.0, 0.97, 0.92) * diff * 1.05 + vec3(0.32, 0.42, 0.65) * planete * 0.25)
-           + vec3(spec) + vec3(0.4, 0.55, 0.9) * bord * planete * 0.25;
-  float a = uOpacite;
-  if (uReflet > 0.5) a *= 0.2 * exp(vPos.y * 1.6);
-  gl_FragColor = vec4(col * a, a);
-}
-`;
-
-/* Ombre de contact sous l'astronaute : une tache douce, posée au sol. */
-export const OMBRE_V = /* glsl */ `
-attribute vec2 aP;
-uniform mat4 uVP;
-uniform vec3 uCentre;
-uniform vec2 uTaille;
-varying vec2 vP;
-void main() {
-  vP = aP;
-  gl_Position = uVP * vec4(uCentre + vec3(aP.x * uTaille.x, 0.004, aP.y * uTaille.y), 1.0);
-}
-`;
-export const OMBRE_F = /* glsl */ `
-precision mediump float;
-varying vec2 vP;
-uniform float uForce;
-void main() {
-  float a = (1.0 - smoothstep(0.2, 1.0, length(vP))) * uForce;
-  gl_FragColor = vec4(0.0, 0.0, 0.0, a);
 }
 `;
 
@@ -289,12 +209,13 @@ export const SPRITE_V = /* glsl */ `
 attribute vec2 aP;
 uniform mat4 uVP;
 uniform vec3 uCentre, uDroite, uHaut;
-uniform float uTaille, uAngle;
+uniform float uTaille, uAngle, uAspect; // largeur / hauteur de l'image
 uniform vec4 uRect;
 varying vec2 vUV;
 void main() {
   float c = cos(uAngle), s = sin(uAngle);
-  vec2 q = vec2(c * aP.x - s * aP.y, s * aP.x + c * aP.y);
+  vec2 e = aP * vec2(sqrt(uAspect), 1.0 / sqrt(uAspect));
+  vec2 q = vec2(c * e.x - s * e.y, s * e.x + c * e.y);
   vec3 w = uCentre + (uDroite * q.x + uHaut * q.y) * uTaille * 0.5;
   vUV = uRect.xy + (aP * vec2(0.5, -0.5) + 0.5) * uRect.zw;
   gl_Position = uVP * vec4(w, 1.0);
@@ -306,7 +227,8 @@ varying vec2 vUV;
 uniform sampler2D uAtlas;
 uniform float uOpacite;
 void main() {
-  gl_FragColor = texture2D(uAtlas, vUV) * uOpacite; // alpha prémultiplié
+  // Un niveau de détail plus fin que d'ordinaire : des bords nets.
+  gl_FragColor = texture2D(uAtlas, vUV, -1.0) * uOpacite; // alpha prémultiplié
 }
 `;
 
@@ -318,10 +240,13 @@ uniform mat4 uVP;
 uniform float uTemps, uDpr;
 varying vec3 vCol;
 void main() {
-  float sc = 0.65 + 0.35 * sin(uTemps * (0.7 + aB.w * 2.4) + aB.w * 40.0);
+  float sc = 0.55 + 0.45 * sin(uTemps * (0.7 + aB.w * 2.4) + aB.w * 40.0);
   vCol = aB.rgb * sc;
+  // Tout dérive un peu : invisible pour les étoiles lointaines, sensible
+  // pour la poussière proche de la passerelle.
+  vec3 derive = vec3(sin(uTemps * 0.11 + aB.w * 31.0), sin(uTemps * 0.083 + aB.w * 17.0) * 0.6, cos(uTemps * 0.07 + aB.w * 23.0)) * 0.9;
   gl_PointSize = aA.w * uDpr;
-  gl_Position = uVP * vec4(aA.xyz, 1.0);
+  gl_Position = uVP * vec4(aA.xyz + derive, 1.0);
 }
 `;
 export const POINTS_F = /* glsl */ `

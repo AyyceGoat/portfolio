@@ -77,7 +77,7 @@ function Panneau({ projet, rang, ouvrir }) {
       onClick={surClic}
     >
       <div className="panneau__visuel">
-        <Visuel projet={projet} sizes="(min-width: 60rem) 28rem, 88vw" />
+        <Visuel projet={projet} sizes="(min-width: 48rem) min(40rem, 46vw), 30vw" />
       </div>
       <div className="panneau__texte">
         <p className="panneau__tag mono">{projet.tag}</p>
@@ -179,9 +179,12 @@ export default function Projets() {
 
   return (
     <section className="projets" id="projets" aria-labelledby="titre-projets">
-      <h2 className="projets__titre" id="titre-projets">
-        Projets
-      </h2>
+      <header className="projets__entete">
+        <p className="rubrique mono">Projets</p>
+        <h2 className="projets__titre" id="titre-projets">
+          Mes réalisations
+        </h2>
+      </header>
       {projects.map((projet, i) => (
         <Panneau projet={projet} rang={i} ouvrir={setOuvert} key={projet.id} />
       ))}
