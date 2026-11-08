@@ -56,7 +56,7 @@ export default function Contact() {
   return (
     <section className="section contact" id="contact" aria-labelledby="titre-contact">
       <div className="carte contact__carte">
-        <p className="rubrique mono">Contact</p>
+        <p className="etiquette">Contact</p>
         <h2 className="contact__titre" id="titre-contact">
           Construisons la suite.
         </h2>

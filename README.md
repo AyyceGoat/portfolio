@@ -13,34 +13,41 @@ par étape.
 
 Un geste, une étape : un cran de molette, un glissement sur le pavé
 tactile, un balayage au doigt ou une flèche du clavier. Le geste déclenche
-la marche : l'astronaute avance à son allure naturelle, la caméra le suit,
-la passerelle défile sous ses pieds, la planète grandit ; il s'arrête à
-l'étape suivante, environ une seconde plus tard. Le geste inverse le
-ramène, en marchant à reculons. Pendant la marche, les gestes sont
+la marche : quatre pas, un peu plus de deux secondes ; la caméra suit
+l'astronaute, la passerelle avance exactement avec ses pas (le pied
+d'appui reste immobile sur le plancher tant qu'il le touche), la planète
+grandit ; il s'arrête à l'étape suivante, pieds au sol. Le geste inverse
+le ramène, en marchant à reculons. Pendant la marche, les gestes sont
 ignorés : on ne saute jamais d'étape.
 
 1. **Le titre** — l'astronaute, vu de dos, sur une passerelle suspendue
-   dans l'espace, face à une planète ; au-dessus de lui, « Portfolio —
-   Christ Emmanuel » : les lettres sortent de la profondeur, puis la
-   lumière de la planète passe une fois sur le nom. Deux chevrons invitent
-   à poursuivre. Le décor vit discrètement : étoiles qui scintillent,
-   nébuleuses qui ondulent, astéroïdes qui dérivent et tournent, rares
-   météores, reflets sur la passerelle.
-2. **La présentation** — photo, nom, présentation et parcours, dans une
-   grande carte à côté de l'astronaute qui avance.
+   dans l'espace, face à une planète ; au-dessus de lui, « Portfolio »
+   entre deux filets, puis « Christ Emmanuel » en très grand, dans un
+   dégradé lumineux, qu'un trait de lumière révèle en balayant l'écran ;
+   puis le métier et « Software Engineer ». Deux chevrons invitent à
+   poursuivre. Le décor vit : étoiles qui scintillent et défilent sur
+   plusieurs plans, nébuleuses qui glissent lentement, astéroïdes qui
+   dérivent et tournent, météores et leur traînée, poussière qui passe au
+   premier plan pendant la marche, reflets qui frémissent sur la
+   passerelle.
+2. **La présentation** — un grand panneau de verre sombre au liseré
+   bleu, à gauche : la photo dans un anneau de lumière, le nom en dégradé,
+   la présentation (mots-clés en bleu clair) et le parcours.
 3. **Mes réalisations** — le titre, seul dans le ciel.
-4. **Les projets** — chacun dans un grand panneau de verre sombre dont
-   le liseré capte la lumière de la scène, à gauche ou à droite en
-   alternance : il sort de la profondeur, son aperçu se dévoile, son texte
-   monte ligne à ligne. Aperçu, nom, une phrase, technologies, liens. Un clic ouvre la présentation détaillée, sans
+4. **Les projets** — dans le même verre, à gauche ou à droite en
+   alternance : le panneau glisse et se pose en profondeur, son liseré se
+   dessine, son image se dévoile, son titre arrive mot à mot, puis le
+   texte, et les mots-clés s'illuminent. Grande image, nom, une phrase,
+   technologies, liens. Un clic ouvre la présentation détaillée, sans
    quitter le voyage.
 5. **Au bout du chemin** — sur la plateforme, le développeur à son poste
    de travail, la planète derrière lui ; ses compétences l'entourent,
    logos dans leurs couleurs officielles, reliés au bureau par des filets.
 6. **Contact** — CV, e-mail (rédaction dans Gmail), GitHub et LinkedIn.
 
-Le menu (Profil, Projets, Compétences, Contact, CV) apparaît dès le
-premier geste et mène directement à chaque étape.
+Le menu (Profil, Projets, Compétences, Contact), centré dans une pilule
+de verre, et le CV à part, apparaissent dès le premier geste et mènent
+directement à chaque étape.
 
 ## Ajouter un projet
 
@@ -97,10 +104,18 @@ lui-même, l'agrandit ×4, le détoure (BiRefNet), retire le reflet de la
 vidéo sous les semelles (l'axe de symétrie entre l'astronaute et son
 reflet donne la ligne du sol), aligne le sol de toutes les images et
 accorde les couleurs à la scène. Les images légères sont chargées
-d'abord, les fines ensuite. Le monde calcule où se posent ses pieds sur
-la passerelle ; la distance parcourue choisit l'image, un pas par étape :
-il s'arrête toujours sur un appui. Son reflet sur le plancher et son
-ombre douce le posent sur la passerelle.
+d'abord, les fines ensuite. Son reflet sur le plancher et son ombre douce
+le posent sur la passerelle.
+
+**Le pied verrouillé.** Dans la vidéo, le sol défile plus vite que les
+pieds : la vidéo glisse. Le script suit donc, image par image, la ligne
+où le pied d'appui touche son reflet ; sa descente vers la caméra, en
+fraction de la hauteur de la figure, est l'avance du décor
+(`src/scene/marche.js`). La mise en scène la convertit en mètres selon sa
+caméra et la projette : entre deux images de la marche, l'astronaute
+descend du même nombre de pixels que le plancher. Vérifié image par image
+sur des transitions ralenties, à l'aller et au retour : le pied d'appui
+reste sur le même point du plancher à moins d'un demi-pixel près.
 
 **La passerelle est calculée.** Une image ne permet pas d'avancer : elle
 est reconstruite en 3D le long de son tracé (plancher de métal
@@ -116,14 +131,14 @@ chargées une fois ; l'initialisation est découpée en étapes, une par
 image.
 
 **Les étapes** ([`src/scene/voyage.js`](src/scene/voyage.js)) : la page
-ne défile plus que d'elle-même. Un geste accepté lance une transition
-d'une seconde environ (1,5 s pour l'arrivée), avec l'allure d'une marche
-(départ, pas égal, arrêt) ; une chronologie GSAP attachée à ScrollTrigger
+ne défile plus que d'elle-même. Un geste accepté lance quatre pas (deux
+cycles de la marche, 2,3 s ; 2,6 s pour l'arrivée), avec l'allure d'une
+marche (départ, pas égal, arrêt) ; une chronologie GSAP attachée à ScrollTrigger
 fait avancer la caméra et entrer les étapes. Pendant la transition, tout
 geste est ignoré ; ensuite, un geste n'est accepté qu'une fois l'élan de
 la molette ou du pavé retombé (150 ms sans événement). Au bout du chemin,
-la caméra se lève vers la planète, puis deux plans accompagnent le poste
-de travail et le contact.
+la caméra glisse jusqu'à la plateforme et se tourne vers la planète, puis
+deux plans accompagnent le poste de travail et le contact.
 
 **Le personnage** du poste de travail est l'illustration fournie, préparée
 par [`scripts/preparer-personnage.py`](scripts/preparer-personnage.py) ;
@@ -154,8 +169,7 @@ blocage total 10 ms, décalage cumulé 0.
 Les étapes sont vérifiées par un parcours automatisé : à la molette (un
 cran, puis six crans rapides), au pavé tactile (glissement avec élan), au
 clavier (flèches, pages) et au doigt, à l'aller comme au retour, une étape
-par geste, transitions de 1,5 s au plus, arrêt de l'astronaute sur un
-appui ; gestes ignorés pendant la marche, élan de 2,5 s compté comme un
+par geste, arrêt de l'astronaute pieds au sol ; gestes ignorés pendant la marche, élan de 2,5 s compté comme un
 seul geste ; liens du menu ; fiche de projet qui suspend le voyage.
 
 ## Accessibilité

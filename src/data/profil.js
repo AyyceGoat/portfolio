@@ -21,10 +21,11 @@ export const PORTRAIT = {
   alt: 'Portrait de Ahouet Yao Yann Christ Emmanuel.',
 };
 
+// Les [[mots-clés]] sont mis en valeur à l'affichage (src/lib/riche.jsx).
 export const PRESENTATION = [
-  "Développeur d'applications full-stack basé à Abidjan, je conçois et développe des applications web et des systèmes de gestion complets, de l'analyse du besoin jusqu'au déploiement.",
-  "Habitué à mener seul un projet face à un besoin métier réel, j'ai notamment traduit le cahier des charges d'un contrôleur de gestion en un ERP industriel déployé et utilisé chaque jour sur plusieurs sites.",
-  "Côté interface, JavaScript et React ; côté serveur et données, Python, MySQL et PostgreSQL. Les bases sont modélisées en UML et Merise avant d'être écrites : un schéma juste au départ coûte toujours moins cher qu'une correction en production.",
+  "Développeur d'applications full-stack basé à Abidjan, je conçois et développe des [[applications web]] et des [[systèmes de gestion]] complets, de l'analyse du besoin jusqu'au déploiement.",
+  "Habitué à mener seul un projet face à un besoin métier réel, j'ai notamment conçu, à partir du cahier des charges d'un contrôleur de gestion, un [[ERP de gestion industrielle]] pour une entreprise de carrières multisites.",
+  "Côté interface, [[JavaScript]] et [[React]] ; côté serveur et données, [[Python]], [[MySQL]] et [[PostgreSQL]]. Les bases sont modélisées en [[UML]] et [[Merise]] avant d'être écrites : un schéma juste au départ coûte toujours moins cher qu'une correction en production.",
 ];
 
 /** Les domaines d'expertise, tirés de la présentation. */

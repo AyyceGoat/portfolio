@@ -29,7 +29,7 @@ vec2 uvCiel(vec3 d) {
 vec3 ciel(vec3 d, float flou) {
   vec2 uv = uvCiel(d);
   // Les nébuleuses ondulent, très lentement.
-  vec2 w = uv + 0.0011 * vec2(sin(uTemps * 0.045 + uv.y * 7.0), cos(uTemps * 0.037 + uv.x * 5.0));
+  vec2 w = uv + 0.0016 * vec2(sin(uTemps * 0.06 + uv.y * 7.0), cos(uTemps * 0.05 + uv.x * 5.0));
   // Au-dessus de l'image, on lit son reflet ; plus haut, en fondu, un
   // reflet décalé vers la gauche : le disque comblé sous la planète ne
   // s'y montre jamais.
@@ -46,13 +46,14 @@ vec3 ciel(vec3 d, float flou) {
   }
   float etoile = clamp((dot(c - voisinage, vec3(0.333)) - 0.035) * 6.0, 0.0, 1.0);
   float graine = hash(floor(w * vec2(1280.0, 720.0)));
-  float sc = 0.55 + 0.45 * sin(uTemps * (0.8 + graine * 2.6) + graine * 50.0);
+  float sc = 0.45 + 0.55 * sin(uTemps * (0.9 + graine * 3.0) + graine * 50.0);
   // Seul l'éclat de l'étoile varie, jamais en dessous de son voisinage.
   vec3 col = c - max(c - voisinage, 0.0) * etoile * (1.0 - sc);
   // Un voile de nébuleuse, flou, qui glisse lentement par-dessus.
-  vec2 derive = vec2(uTemps * 0.0016, sin(uTemps * 0.021) * 0.006);
+  vec2 derive = vec2(uTemps * 0.0032, sin(uTemps * 0.03) * 0.01);
   vec3 voile = texture2D(uCiel, vec2(wc.x * 0.985 + derive.x, wc.y + derive.y), flou + 4.5).rgb;
-  col = col * 0.93 + voile * 0.16;
+  vec3 voile2 = texture2D(uCiel, vec2(wc.x * 1.02 - derive.x * 0.7, wc.y * 0.98 - derive.y), flou + 5.5).rgb;
+  col = col * 0.9 + voile * 0.13 + voile2 * 0.09;
   // La planète, qui grandit à l'approche.
   vec2 p = PLANETE_C + (uv - PLANETE_C) / uPlaneteEchelle;
   vec2 pu = (p - PLANETE_BOITE.xy) / (PLANETE_BOITE.zw - PLANETE_BOITE.xy);
@@ -145,6 +146,9 @@ vec3 plancher(vec2 m, float bord, float dist, vec3 v, bool pont) {
   float ombre = max(joint(m.x - 0.02, 1.4, 0.012), joint(m.y - 0.02, 1.4, 0.012));
   base += vec3(0.07, 0.075, 0.09) * max(jx, jy) - vec3(0.012) * ombre;
   vec3 r = reflect(v, vec3(0.0, 1.0, 0.0));
+  // le poli n'est jamais parfait : les reflets frémissent à peine
+  r.xz += vec2(sin(m.x * 3.1 + uTemps * 0.9) + sin(m.y * 5.3 - uTemps * 0.6), cos(m.y * 2.7 - uTemps * 0.7)) * 0.0035;
+  r = normalize(r);
   float fres = 0.28 + 0.66 * pow(1.0 - max(-v.y, 0.0), 3.5);
   float flou = 0.6 + min(dist * 0.045, 3.2);
   vec3 col = base + ciel(r, flou) * fres;
@@ -162,6 +166,9 @@ vec3 plancher(vec2 m, float bord, float dist, vec3 v, bool pont) {
     // filets pointillés le long des joints, comme sur la référence
     float tiret = step(0.55, fract(m.x / 0.9)) * exp(-pow((bord - 1.4) / 0.02, 2.0));
     col += vec3(0.75, 0.8, 0.9) * tiret * 0.22;
+    // une lueur lente glisse le long du plancher, comme un reflet qui passe
+    float vague = exp(-pow(fract(m.x / 14.0 - uTemps * 0.045) - 0.5, 2.0) * 90.0);
+    col += vec3(0.45, 0.6, 0.95) * vague * 0.05 * (1.0 - smoothstep(1.6, 2.6, bord));
   }
   return col;
 }
@@ -240,7 +247,7 @@ uniform mat4 uVP;
 uniform float uTemps, uDpr;
 varying vec3 vCol;
 void main() {
-  float sc = 0.55 + 0.45 * sin(uTemps * (0.7 + aB.w * 2.4) + aB.w * 40.0);
+  float sc = 0.45 + 0.55 * sin(uTemps * (0.8 + aB.w * 2.8) + aB.w * 40.0);
   vCol = aB.rgb * sc;
   // Tout dérive un peu : invisible pour les étoiles lointaines, sensible
   // pour la poussière proche de la passerelle.

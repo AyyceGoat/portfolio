@@ -55,8 +55,11 @@ const QUALITES = {
   basse: { dpr: 1.5, etoiles: 420, poussiere: 110, asteroides: 9, ciel: ['espace/ciel-2048.webp'], planete: ['espace/planete-1024.webp'] },
 };
 
-/** Longueur de la passerelle, en mètres, selon le nombre de projets. */
-export const longueurPont = (projets) => 30 + projets * 30 + 28;
+/* La caméra du voyage : derrière l'astronaute, à cette distance (en
+   mètres, horizontale) et à cette hauteur au-dessus du plancher. La
+   longueur de ses pas en dépend (scene/voyage.js). */
+export const CAMERA = { distance: 4.8, distancePortrait: 5.6, hauteur: 1.82 };
+export const enPortrait = (largeur, hauteur) => largeur / hauteur < 0.9;
 
 /* ---------- petite algèbre ---------- */
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
@@ -372,7 +375,7 @@ function construirePont(trace) {
   return { opaque: opaque.tableaux(), vitres: vitres.tableaux(), centre: C, sortie: f, droite: r };
 }
 
-export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logiciel = false, etat, surPret = null, longueur = 150 } = {}) {
+export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logiciel = false, etat, surPret = null, longueur = 150, parcours = longueur } = {}) {
   const Q = QUALITES[qualite] || QUALITES.haute;
   const gl = toile.getContext('webgl', {
     alpha: false,
@@ -511,11 +514,22 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       // proches, étoiles lointaines. Chacun défile à sa vitesse.
       const poussiere = i >= Q.etoiles;
       const proche = i < Q.etoiles * 0.3;
+      // un tiers de la poussière, tout près : elle passe au premier plan
+      const premierPlan = poussiere && i >= Q.etoiles + Q.poussiere * 0.62;
       const s = r() * (longueur + 60) - 20;
       const base = trace.point(s);
       const cote = r() < 0.5 ? -1 : 1;
       const dr = trace.droite(s);
-      if (poussiere) {
+      if (premierPlan) {
+        const lat = 0.6 + r() * 3.6;
+        const sp = r() * (longueur + 12) - 6;
+        const bp = trace.point(sp);
+        const drp = trace.droite(sp);
+        A[i * 4] = bp[0] + drp[0] * lat * cote;
+        A[i * 4 + 1] = 0.3 + r() * 3.2;
+        A[i * 4 + 2] = bp[2] + drp[2] * lat * cote;
+        A[i * 4 + 3] = 1.6 + r() * 2.2;
+      } else if (poussiere) {
         const lat = 4.5 + r() * 26;
         A[i * 4] = base[0] + dr[0] * lat * cote;
         A[i * 4 + 1] = -4 + r() * 12;
@@ -530,7 +544,7 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
         A[i * 4 + 3] = proche ? 1.4 + r() * 1.6 : 1.1 + r() * 1.3;
       }
       const t = teintes[Math.floor(r() * teintes.length)];
-      const lum = poussiere ? 0.18 + r() * 0.3 : 0.35 + r() * 0.55;
+      const lum = premierPlan ? 0.1 + r() * 0.16 : poussiere ? 0.18 + r() * 0.3 : 0.35 + r() * 0.55;
       B[i * 4] = t[0] * lum;
       B[i * 4 + 1] = t[1] * lum;
       B[i * 4 + 2] = t[2] * lum;
@@ -558,10 +572,10 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       liste.push({
         centre,
         derive: norm([r() - 0.5, (r() - 0.5) * 0.4, r() - 0.5]),
-        vitesse: 0.1 + r() * 0.18,
+        vitesse: 0.16 + r() * 0.26,
         taille,
         angle: r() * Math.PI * 2,
-        rotation: (r() < 0.5 ? -1 : 1) * (0.04 + r() * 0.1),
+        rotation: (r() < 0.5 ? -1 : 1) * (0.08 + r() * 0.17),
         image: Math.floor(r() * ATLAS.length),
         miroir: r() < 0.5,
       });
@@ -656,7 +670,7 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
   function calculerCamera() {
     const e = etat;
     const aspect = largeur / hauteur;
-    const portrait = aspect < 0.9;
+    const portrait = enPortrait(largeur, hauteur);
     const vfov = (portrait ? 66 : 54) * DEG;
     const fin = longueur + PONT.plateforme - 2.5;
     const d = borne(e.marche, 0, fin);
@@ -668,8 +682,8 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
     const biais = portrait ? 13 * DEG : 4 * DEG;
     let lacet = capChemin * 0.4 + biais + souris.cx * 0.6 * DEG;
     let tangage = 1.2 * DEG + souris.cy * 0.4 * DEG;
-    let dist = portrait ? 5.6 : 4.8;
-    let h = 1.82;
+    let dist = portrait ? CAMERA.distancePortrait : CAMERA.distance;
+    let h = CAMERA.hauteur;
     // L'arrivée : la caméra recule, s'élève et se tourne vers la planète.
     const a = lisse(0, 1, e.arrivee);
     lacet += (PLANETE.lacet * 0.72 - lacet) * a;
@@ -721,7 +735,7 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
   }
 
   /* ---------- météores : rares, rapides ---------- */
-  const meteore = { prochain: 3 + Math.random() * 3, debut: -1, x: 0, y: 0, angle: 0 };
+  const meteore = { prochain: 2.5 + Math.random() * 2.5, debut: -1, x: 0, y: 0, angle: 0 };
   function majMeteore(t) {
     if (meteore.debut < 0 && t > meteore.prochain) {
       meteore.debut = t;
@@ -733,7 +747,7 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       const p = (t - meteore.debut) / 0.75;
       if (p >= 1) {
         meteore.debut = -1;
-        meteore.prochain = t + 5 + Math.random() * 6;
+        meteore.prochain = t + 3.5 + Math.random() * 4.5;
         return [0, 0];
       }
       return [p, Math.sin(Math.PI * p) * 0.9];
@@ -776,8 +790,8 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
     const { progs, geo } = prets;
     const e = etat;
     const d = calculerCamera();
-    const L = longueur;
-    const echellePlanete = 1 + 0.42 * lisse(0, L, d) + 0.18 * lisse(0, 2, e.apres);
+    // la planète grandit au fil de la marche, puis à l'arrivée
+    const echellePlanete = 1 + 0.3 * lisse(0, parcours, d) + 0.32 * lisse(0, 2, e.apres);
     const lumiere = norm([-0.45, 0.8, 0.45]);
     const [avMeteore, iMeteore] = majMeteore(temps);
 
@@ -940,6 +954,20 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
     rendre,
     redimensionner,
     astro,
+    /** Réservé aux vérifications : un point du plancher, à l'abscisse s du
+        tracé, et sa position à l'écran (pixels CSS). */
+    verifier(s, lateral = 0) {
+      const q = add(trace.point(s), mul(trace.droite(s), lateral));
+      const v = cam.vp;
+      const x = v[0] * q[0] + v[4] * q[1] + v[8] * q[2] + v[12];
+      const y = v[1] * q[0] + v[5] * q[1] + v[9] * q[2] + v[13];
+      const w = v[3] * q[0] + v[7] * q[1] + v[11] * q[2] + v[15];
+      const lc = toile.clientWidth || window.innerWidth;
+      const hc = toile.clientHeight || window.innerHeight;
+      return [(x / w * 0.5 + 0.5) * lc, (0.5 - (y / w) * 0.5) * hc];
+    },
+    /** La distance de la caméra derrière l'astronaute, pour l'écran actuel. */
+    distanceCamera: () => (enPortrait(largeur, hauteur) ? CAMERA.distancePortrait : CAMERA.distance),
     /** La distance où l'astronaute s'arrête, sur la plateforme. */
     fin: longueur + PONT.plateforme - 2.5,
     /** Achève l'initialisation (affiche immobile, captures). */

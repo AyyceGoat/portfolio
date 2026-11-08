@@ -21,7 +21,9 @@ Prépare la marche de l'astronaute à partir de la vidéo
      à la scène ; un cadre commun à toutes les images.
   6. Sortie : public/espace/marche/l/NN.webp (figure d'environ 900 px) et
      s/NN.webp (moitié), et src/scene/marche.js (dimensions, durée du
-     cycle).
+     cycle, avance du sol image par image).
+  7. La longueur des pas : la ligne où le pied d'appui touche son reflet,
+     suivie image par image ; le décor avance exactement comme elle.
 
 Les étapes 2 et 3 sont longues (une demi-minute par image chacune, sur
 processeur) ; leurs résultats sont gardés dans TRAVAIL et réutilisés.
@@ -192,6 +194,70 @@ for taille, k, q in (('l', 900 / figure, 86), ('s', 450 / figure, 80)):
         r = cv2.resize(x, (int(round(w * k / 2) * 2), int(round(h * k))), interpolation=cv2.INTER_AREA)
         cv2.imwrite(f'{args.sortie}/{taille}/{n:02d}.webp', np.clip(r, 0, 255).astype(np.uint8), [cv2.IMWRITE_WEBP_QUALITY, q])
 
+# ---------- 7. la longueur des pas : le pied d'appui ----------
+# Tant qu'un pied touche le sol, il doit y rester immobile : le décor
+# avance donc exactement comme recule, vers la caméra, le pied d'appui. On
+# suit, image par image, la ligne où chaque pied touche son reflet (l'axe
+# de symétrie, au ras de la semelle), lissée dans le temps (programmation
+# dynamique : une ligne qui ne saute pas). Le pied d'appui est celui dont
+# la ligne descend ; sa descente, en fraction de la hauteur de la figure,
+# donne l'avance du décor. (Le sol de la vidéo, lui, défile plus vite que
+# les pieds : la vidéo glisse ; on ne le suit pas.)
+def profil_miroir(g, xa, xb, ys):
+    d = np.arange(3, int(H * 0.027), 2)
+    out = []
+    for yc in ys:
+        a_ = g[yc - d, xa:xb].ravel()
+        b_ = g[yc + d, xa:xb].ravel()
+        a_ = a_ - a_.mean()
+        b_ = b_ - b_.mean()
+        out.append(float((a_ * b_).sum() / (np.linalg.norm(a_) * np.linalg.norm(b_) + 1e-6)))
+    return np.array(out)
+
+
+ys = np.arange(int(H * 0.795), int(H * 0.885))
+profils = []
+for im, a in zip(imgs, alphas):
+    g = cv2.GaussianBlur(cv2.cvtColor(im.astype(np.uint8), cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    prof = a[int(H * 0.76):int(H * 0.815)].mean(axis=0)
+    cols = np.where(prof > 0.25)[0]
+    x0, x1 = cols.min(), cols.max()
+    lisse = np.convolve(prof[x0 + 25:x1 - 25], np.ones(9) / 9, mode='same')
+    mil = x0 + 25 + int(np.argmin(lisse))
+    profils.append([profil_miroir(g, x0, mil, ys), profil_miroir(g, mil, x1 + 1, ys)])
+
+
+def suivre(S):
+    T, n = S.shape
+    cout = -S.copy()
+    arr = np.zeros((T, n), int)
+    for t in range(1, T):
+        for j in range(n):
+            lo, hi = max(0, j - 8), min(n, j + 9)
+            pen = cout[t - 1, lo:hi] + 0.004 * (np.arange(lo, hi) - j) ** 2
+            k = int(np.argmin(pen))
+            cout[t, j] += pen[k]
+            arr[t, j] = lo + k
+    j = int(np.argmin(cout[-1]))
+    chemin = [j]
+    for t in range(T - 1, 0, -1):
+        j = arr[t, j]
+        chemin.append(j)
+    return ys[np.array(chemin[::-1])].astype(np.float32)
+
+
+lignes = np.stack([suivre(np.array([p[c] for p in profils])) for c in range(2)], axis=1)
+vitesses = np.diff(lignes, axis=0)  # descente de chaque ligne, image par image
+pas_images = []
+for v in vitesses:
+    appui = v[v > 0]
+    pas_images.append(float(appui.mean()) if len(appui) else 0.0)
+pas_images = np.array(pas_images)
+avance = np.concatenate([[0], np.cumsum(pas_images)]) / figure
+print('pied d\'appui : %.2f px par image (×4), %.4f figure par pas' % (pas_images.mean(), avance[-1] / 2))
+# (pour les vérifications : les lignes de contact, dans le repère du cadre de sortie)
+json.dump({'lignes': lignes.tolist(), 'haut': int(haut), 'sol': SOL}, open(f'{T}/lignes.json', 'w'))
+
 h, w = cadre[0].shape[:2]
 info = {
     'images': len(cadre),
@@ -200,11 +266,14 @@ info = {
     'hauteur': int(h),
     'pieds': int(SOL - haut),
     'figure': int(figure),
+    # avance du pied d'appui, cumulée image par image sur le cycle, en figures
+    'avance': [round(float(v), 5) for v in avance],
 }
 with open(args.module, 'w') as f:
     f.write('/* Produit par scripts/marche.py : la marche de l\'astronaute, un cycle\n'
             '   de deux pas tiré de la vidéo. Dimensions du cadre de référence, en\n'
             '   pixels ; durée du cycle, en secondes ; `pieds` : la ligne du sol ;\n'
-            '   `figure` : du casque aux semelles. */\n')
+            '   `figure` : du casque aux semelles ; `avance` : de combien le sol\n'
+            '   avance sous le pied d\'appui, image par image, en hauteurs de figure. */\n')
     f.write(f'export const MARCHE = {json.dumps(info)};\n')
 print(info)

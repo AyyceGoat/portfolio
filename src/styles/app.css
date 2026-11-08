@@ -65,39 +65,198 @@
   z-index: 5;
   display: flex;
   justify-content: center;
-  padding: 1.15rem var(--gouttiere);
-  background: linear-gradient(to bottom, rgba(2, 4, 10, 0.6), rgba(2, 4, 10, 0));
+  align-items: center;
+  padding: 1rem var(--gouttiere);
+  pointer-events: none;
 }
+.nav > * {
+  pointer-events: auto;
+}
+/* Le menu : une pilule de verre, centrée, au liseré lumineux. */
 .nav__liens {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 0.4rem clamp(1rem, 3vw, 2.4rem);
+  gap: 0.2rem clamp(0.4rem, 1.6vw, 1.4rem);
+  padding: 0.55rem clamp(1rem, 2.4vw, 1.8rem);
+  border: 1px solid rgba(130, 175, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(8, 14, 30, 0.56);
+  box-shadow:
+    0 0 24px -6px rgba(90, 150, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
 }
 .nav__lien,
 .nav__cv {
   font-family: var(--mono);
   font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--encre-2);
-  transition: color 0.25s ease, border-color 0.25s ease;
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.nav__lien {
+  padding: 0.3rem 0.35rem;
 }
 .nav__lien:hover {
-  color: var(--encre);
+  color: #fff;
+}
+/* Le CV, à part : une petite pilule du même verre, à droite. */
+.nav__cv-boite {
+  position: absolute;
+  right: var(--gouttiere);
 }
 .nav__cv {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.45rem 0.85rem;
-  border: 1px solid var(--trait-fort);
+  padding: 0.62rem 1rem;
+  border: 1px solid rgba(130, 175, 255, 0.4);
   border-radius: 999px;
+  background: rgba(8, 14, 30, 0.56);
   color: var(--encre);
+  box-shadow: 0 0 24px -6px rgba(90, 150, 255, 0.35);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
 }
 .nav__cv:hover {
-  border-color: var(--encre-2);
+  border-color: rgba(160, 200, 255, 0.75);
+  box-shadow: 0 0 28px -4px rgba(110, 165, 255, 0.55);
+}
+@media (max-width: 47.99rem) {
+  .nav {
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding-inline: 0.6rem;
+  }
+  .nav__liens {
+    flex-wrap: nowrap;
+    gap: 0;
+    padding: 0.45rem 0.6rem;
+  }
+  .nav__cv-boite {
+    position: static;
+    margin-left: auto;
+  }
+  .nav__cv {
+    padding: 0.5rem 0.75rem;
+  }
+}
+@media (max-width: 30rem) {
+  .nav__liens {
+    padding: 0.4rem 0.45rem;
+  }
+  .nav__lien {
+    padding: 0.3rem 0.22rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.05em;
+  }
+  .nav__cv {
+    padding: 0.42rem 0.6rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+  }
+  .intro__metier {
+    gap: 0.6em;
+    font-size: 0.86rem;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .intro__metier::before,
+  .intro__metier::after {
+    width: 1.1rem;
+  }
+}
+
+/* ---------- Le langage commun : verre, liseré, étiquettes ---------- */
+
+/* Un libellé espacé, encadré de deux lignes fines. */
+.etiquette {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9em;
+  color: #9fc2ff;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+}
+.etiquette::before,
+.etiquette::after {
+  content: '';
+  flex: none;
+  width: 2.6em;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(140, 185, 255, 0.85));
+}
+.etiquette::after {
+  background: linear-gradient(90deg, rgba(140, 185, 255, 0.85), transparent);
+  margin-left: -0.42em; /* compense l'espacement après la dernière lettre */
+}
+.etiquette--icone .icone {
+  flex: none;
+  width: 1.25em;
+  height: 1.25em;
+  margin-right: -0.2em;
+}
+
+/* Le verre sombre : coins arrondis, liseré bleu fin, légère lueur. */
+.verre {
+  position: relative;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(10, 17, 36, 0.72), rgba(5, 9, 20, 0.8));
+  box-shadow:
+    0 0 0 1px rgba(110, 160, 255, 0.16),
+    0 0 44px -10px rgba(80, 140, 255, 0.4),
+    0 50px 120px -50px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  backdrop-filter: blur(16px) saturate(130%);
+}
+.verre__bord {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.verre__bord rect {
+  fill: none;
+  stroke: rgba(130, 180, 255, 0.85);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 4px rgba(90, 150, 255, 0.8));
+}
+/* Le dégradé des noms : blanc vers bleu. */
+.degrade {
+  background: linear-gradient(100deg, #ffffff 10%, #dfe9ff 45%, #8fb6ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.degrade span {
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.degrade .mot {
+  display: inline-block;
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+/* Les mots-clés, en bleu clair. */
+.cle {
+  color: #9cc4ff;
+  font-weight: 500;
 }
 
 /* ---------- Boutons fins et liens ---------- */
@@ -157,51 +316,81 @@
 .intro__titre {
   display: grid;
   justify-items: center;
-  gap: clamp(0.8rem, 1.8vh, 1.25rem);
+  gap: clamp(0.9rem, 2.2vh, 1.4rem);
   font-weight: 400;
 }
 .intro__sur {
-  color: var(--encre-2);
-  font-size: clamp(0.7rem, 0.9vw, 0.84rem);
+  color: #c9dcff;
+  font-size: clamp(0.72rem, 0.95vw, 0.88rem);
   letter-spacing: 0.62em;
-  margin-right: -0.62em;
-  text-transform: uppercase;
+}
+.intro__sur::before,
+.intro__sur::after {
+  width: clamp(2.5rem, 6vw, 5rem);
 }
 .intro__nom {
   position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  column-gap: 0.34em;
-  color: #f4eee2;
+  display: block;
+  padding: 0.06em 0.1em;
   font-family: var(--etendu);
-  font-size: clamp(2.3rem, min(6.6vw, 12.5vh), 7.8rem);
-  font-weight: 600;
+  font-size: clamp(2.4rem, min(6.1vw, 12.5vh), 7.6rem);
+  font-weight: 700;
   line-height: 1;
-  letter-spacing: 0.035em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   /* La lumière de la scène : un halo froid venu de la planète, une ombre
-     portée qui détache le nom du ciel. */
-  text-shadow:
-    0.02em 0 0.5em rgba(120, 170, 255, 0.28),
-    0 0.06em 0.6em rgba(0, 0, 0, 0.55);
+     qui détache le nom du ciel. */
+  filter: drop-shadow(0 0 0.32em rgba(110, 165, 255, 0.35)) drop-shadow(0 0.05em 0.25em rgba(0, 0, 0, 0.5));
 }
-/* Le reflet de lumière qui passe sur le nom : une copie exacte, claire,
-   visible seulement dans une bande étroite. */
-.intro__eclat {
+.intro__lettres {
+  display: block;
+  text-wrap: balance;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f0ff 46%, #c4d8ff 72%, #9dbcff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* Le fin trait de lumière qui traverse le nom. */
+.intro__trait {
+  position: absolute;
+  top: 57%;
+  left: 50%;
+  width: min(100vw, 136%);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(150, 195, 255, 0.5) 22%, rgba(235, 244, 255, 0.95) 50%, rgba(150, 195, 255, 0.5) 78%, transparent);
+  box-shadow: 0 0 10px rgba(120, 175, 255, 0.7);
+  pointer-events: none;
+}
+.intro__eclair {
   display: none;
 }
-.intro__mot {
-  display: inline-flex;
-}
-.intro__lettre {
-  display: inline-block;
+@media (min-width: 48rem) {
+  .intro__lettres {
+    white-space: nowrap;
+  }
 }
 .intro__metier {
-  color: var(--encre-2);
-  font-size: clamp(0.95rem, 1.3vw, 1.18rem);
+  color: var(--encre);
+  font-family: var(--titre);
+  font-size: clamp(0.95rem, 1.35vw, 1.22rem);
   letter-spacing: 0.08em;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
+  text-transform: none;
+}
+.intro__metier::before,
+.intro__metier::after {
+  width: clamp(2rem, 5vw, 4rem);
+}
+.intro__metier::after {
+  margin-left: 0;
+}
+.intro__anglais {
+  margin-top: -0.4rem;
+  color: var(--encre-3);
+  font-size: clamp(0.66rem, 0.85vw, 0.78rem);
+  letter-spacing: 0.4em;
+  margin-right: -0.4em;
+  text-transform: uppercase;
 }
 .intro__chevrons {
   display: none;
@@ -226,37 +415,29 @@
 }
 .projets__entete {
   display: grid;
-  gap: 0.6rem;
+  justify-items: start;
+  gap: 0.9rem;
   grid-column: 1 / -1;
 }
 .projets__titre {
   font-family: var(--etendu);
   font-size: clamp(1.8rem, 4.4vw, 4.2rem);
-  font-weight: 800;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   line-height: 1;
   text-transform: uppercase;
   text-wrap: balance;
 }
-/* Un panneau : un verre sombre, à peine teinté par la scène, dont le
-   liseré capte la lumière froide de la planète en haut et la lumière chaude
-   de la passerelle en bas. */
+/* Un panneau de projet : le même verre que la présentation. */
 .panneau {
   cursor: pointer;
 }
 .panneau__cadre {
-  position: relative;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
   height: 100%;
-  overflow: hidden;
-  border: 1px solid transparent;
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(12, 18, 34, 0.86), rgba(4, 7, 15, 0.93)) padding-box,
-    linear-gradient(155deg, rgba(170, 200, 255, 0.5), rgba(170, 200, 255, 0.07) 36%, rgba(255, 214, 160, 0.06) 70%, rgba(255, 214, 160, 0.26)) border-box;
-  box-shadow:
-    0 60px 120px -50px rgba(0, 0, 0, 0.95),
-    0 0 90px -34px rgba(90, 140, 255, 0.2);
+  padding: 1.3rem 1.4rem 1.5rem;
   transition:
     transform 0.7s var(--sortie),
     box-shadow 0.7s var(--sortie);
@@ -264,20 +445,12 @@
 .panneau__visuel {
   position: relative;
   aspect-ratio: 16 / 9;
-  margin: 0.65rem 0.65rem 0;
   overflow: hidden;
   border-radius: 14px;
   background: #0b0f19;
-}
-/* L'image se fond dans le verre, vers le bas. */
-.panneau__visuel::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(180deg, transparent 58%, rgba(4, 7, 15, 0.45));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-  pointer-events: none;
+  box-shadow:
+    0 0 0 1px rgba(130, 175, 255, 0.22),
+    0 18px 40px -20px rgba(0, 0, 0, 0.9);
 }
 .panneau__visuel img {
   width: 100%;
@@ -287,34 +460,30 @@
 }
 .panneau__texte {
   display: grid;
-  gap: 0.75rem;
-  padding: 1.25rem 1.7rem 1.55rem;
-}
-.panneau__tag {
-  color: var(--atmo);
-  font-size: 0.68rem;
-  letter-spacing: 0.22em;
+  gap: 0.8rem;
 }
 .panneau__titre {
   font-family: var(--etendu);
   font-size: clamp(1.35rem, 2vw, 2rem);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.08;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   text-wrap: balance;
 }
 .panneau__resume {
-  max-width: 34em;
   color: var(--encre-2);
   font-size: clamp(0.98rem, 1.1vw, 1.08rem);
-  line-height: 1.58;
+  line-height: 1.6;
 }
 @media (hover: hover) {
   .panneau:hover .panneau__cadre {
     transform: translate3d(0, -5px, 0);
     box-shadow:
-      0 70px 130px -50px rgba(0, 0, 0, 0.95),
-      0 0 110px -30px rgba(110, 160, 255, 0.32);
+      0 0 0 1px rgba(130, 180, 255, 0.3),
+      0 0 60px -8px rgba(90, 150, 255, 0.55),
+      0 60px 130px -50px rgba(0, 0, 0, 0.95),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 }
 .panneau__actions {
@@ -513,62 +682,66 @@
 }
 .identite__carte {
   display: grid;
-  gap: clamp(1rem, 2.2vh, 1.5rem);
-  width: min(40rem, 100%);
-  padding: clamp(1.3rem, 3vw, 2.2rem);
+  gap: clamp(1rem, 2.4vh, 1.5rem);
+  width: min(42rem, 100%);
+  padding: clamp(1.4rem, 3vw, 2.4rem);
 }
 .identite__tete {
   display: flex;
   align-items: center;
-  gap: clamp(1rem, 2.2vw, 1.4rem);
+  gap: clamp(1.1rem, 2.4vw, 1.6rem);
+}
+/* La photo, dans un anneau de lumière bleue. */
+.identite__photo {
+  position: relative;
+  flex: none;
+  width: clamp(5rem, 8vw, 7rem);
+  aspect-ratio: 1;
+  padding: 4px;
+  border-radius: 50%;
+  background: conic-gradient(from 200deg, #6fa6ff, #b9d6ff, #4d86ff, #9cc4ff, #6fa6ff);
+  box-shadow: 0 0 26px -2px rgba(90, 150, 255, 0.6);
 }
 .identite__portrait {
-  flex: none;
-  width: clamp(4.4rem, 7vw, 6.2rem);
-  height: auto;
-  aspect-ratio: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
   object-position: 50% 30%;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.16),
-    0 0 0 5px rgba(110, 164, 255, 0.08);
-}
-.identite__tete .rubrique {
-  margin-bottom: 0.4rem;
+  border: 3px solid #070c1a;
 }
 .identite__nom {
   font-family: var(--etendu);
-  font-size: clamp(1.15rem, 2vw, 1.75rem);
+  font-size: clamp(1.2rem, 2.1vw, 1.85rem);
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.12;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   text-wrap: balance;
 }
 .identite__titre {
-  margin-top: 0.4rem;
-  color: var(--encre-2);
+  margin-top: 0.45rem;
+  color: var(--encre);
   font-size: clamp(0.95rem, 1.2vw, 1.08rem);
 }
 .identite__texte {
   display: grid;
-  gap: 0.7rem;
-  padding-top: clamp(0.9rem, 2vh, 1.3rem);
-  border-top: 1px solid var(--trait);
+  gap: 0.75rem;
 }
 .identite__paragraphe {
   color: var(--encre-2);
-  font-size: clamp(0.88rem, 1vw, 0.98rem);
-  line-height: 1.6;
+  font-size: clamp(0.9rem, 1vw, 0.99rem);
+  line-height: 1.65;
 }
 .identite__parcours {
   display: grid;
-  gap: 0.4rem;
-  padding-top: clamp(0.8rem, 1.8vh, 1.1rem);
-  border-top: 1px solid var(--trait);
+  gap: 0.55rem;
+  padding-top: clamp(0.9rem, 2vh, 1.2rem);
+  border-top: 1px solid rgba(130, 175, 255, 0.16);
 }
 .identite__fait {
-  font-size: clamp(0.9rem, 1vw, 0.98rem);
+  font-size: clamp(0.92rem, 1vw, 1rem);
   line-height: 1.5;
 }
 
@@ -970,51 +1143,49 @@
   }
 
   /* Introduction : le titre se pose dans le ciel, au-dessus de
-     l'astronaute. Chaque lettre sort du flou en montant, l'une après
-     l'autre ; puis le métier, puis les chevrons. */
+     l'astronaute. Un trait de lumière balaie l'écran de gauche à droite
+     et révèle le nom à son passage ; puis le métier apparaît. */
   .intro {
     position: absolute;
     inset: 0;
     min-height: 0;
     place-items: start center;
-    padding-top: clamp(5.2rem, 15svh, 9.5rem);
+    padding-top: clamp(5.4rem, 14svh, 9rem);
     pointer-events: none;
   }
   .intro__titre {
     will-change: transform, opacity;
   }
   .intro__sur {
-    animation: monte 1.2s var(--sortie) backwards 0.15s;
+    animation: monte 1.1s var(--sortie) backwards 0.85s;
   }
-  .intro__lettre {
-    animation: lettre 1.7s var(--sortie) backwards;
+  .intro__lettres {
+    animation: revele-nom 1.05s cubic-bezier(0.55, 0.1, 0.35, 1) backwards 0.42s;
   }
-  .retard-0 { animation-delay: 0.350s; }
-  .retard-1 { animation-delay: 0.425s; }
-  .retard-2 { animation-delay: 0.500s; }
-  .retard-3 { animation-delay: 0.575s; }
-  .retard-4 { animation-delay: 0.650s; }
-  .retard-5 { animation-delay: 0.725s; }
-  .retard-6 { animation-delay: 0.800s; }
-  .retard-7 { animation-delay: 0.875s; }
-  .retard-8 { animation-delay: 0.950s; }
-  .retard-9 { animation-delay: 1.025s; }
-  .intro__eclat {
+  .intro__trait {
+    transform-origin: 0 50%;
+    animation: trait 1.5s cubic-bezier(0.55, 0.1, 0.35, 1) backwards 0.2s;
+  }
+  /* La tête du trait : une lueur qui file le long de la ligne. */
+  .intro__eclair {
     position: absolute;
-    inset: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    column-gap: inherit;
-    color: #fff;
-    text-shadow: 0 0 0.35em rgba(170, 205, 255, 0.85);
+    top: 57%;
+    left: 50%;
+    display: block;
+    width: min(100vw, 136%);
+    height: 30px;
+    margin-top: -15px;
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.95), rgba(150, 195, 255, 0.45) 45%, transparent) 100% 50% / 10rem 100% no-repeat;
+    opacity: 0;
+    transform: translateX(-50%);
     pointer-events: none;
-    -webkit-mask: linear-gradient(100deg, transparent 44%, #000 50%, transparent 56%) -30% 0 / 260% 100% no-repeat;
-    mask: linear-gradient(100deg, transparent 44%, #000 50%, transparent 56%) -30% 0 / 260% 100% no-repeat;
-    animation: eclat 1.9s cubic-bezier(0.45, 0, 0.2, 1) forwards 1.55s;
+    animation: eclair 1.5s cubic-bezier(0.55, 0.1, 0.35, 1) 0.2s;
   }
   .intro__metier {
-    animation: monte 1.4s var(--sortie) backwards 1.35s;
+    animation: monte 1.1s var(--sortie) backwards 1.45s;
+  }
+  .intro__anglais {
+    animation: apparait 1.2s ease backwards 1.8s;
   }
   .intro__chevrons {
     position: absolute;
@@ -1024,7 +1195,7 @@
     width: 1.75rem;
     height: 1.75rem;
     margin-left: -0.875rem;
-    animation: apparait 1s ease backwards 1.8s;
+    animation: apparait 1s ease backwards 2.2s;
   }
   .intro__chevrons svg {
     width: 100%;
@@ -1129,15 +1300,12 @@
     opacity: 0;
     will-change: transform, opacity;
   }
-  .projets__entete .rubrique {
-    letter-spacing: 0.5em;
-    margin-right: -0.5em;
+  .projets__entete .etiquette {
+    font-size: clamp(0.72rem, 0.95vw, 0.86rem);
   }
   .projets__titre {
     font-size: clamp(2.2rem, min(6vw, 11vh), 6.6rem);
-    text-shadow:
-      0 0 42px rgba(110, 164, 255, 0.2),
-      0 4px 30px rgba(0, 0, 0, 0.5);
+    filter: drop-shadow(0 0 0.3em rgba(110, 165, 255, 0.3)) drop-shadow(0 0.05em 0.25em rgba(0, 0, 0, 0.5));
   }
   .panneau {
     position: absolute;
@@ -1195,6 +1363,10 @@
   .atelier,
   .contact__carte {
     will-change: transform, opacity;
+  }
+  /* Les liserés des panneaux se dessinent à leur entrée (scene/voyage.js). */
+  .voyage .verre__bord rect {
+    stroke-dasharray: 1 1;
   }
 
   /* Atelier : respiration, regard, clignement, frappe et lumière de
@@ -1259,13 +1431,20 @@
     }
     .panneau__cadre {
       display: grid;
-      grid-template-columns: 7.4rem minmax(0, 1fr);
+      grid-template-columns: 7.2rem minmax(0, 1fr);
+      grid-template-areas: 'eti eti' 'vis txt';
+      gap: 0.6rem 0.9rem;
+      padding: 0.85rem 0.9rem 0.95rem;
       border-radius: 18px;
     }
+    .panneau__cadre > .etiquette {
+      grid-area: eti;
+      font-size: 0.6rem;
+    }
     .panneau__visuel {
+      grid-area: vis;
       aspect-ratio: auto;
       height: auto;
-      margin: 0.55rem 0 0.55rem 0.55rem;
       border-radius: 11px;
     }
     .panneau__visuel .schema {
@@ -1283,8 +1462,8 @@
       font-size: 0.6rem;
     }
     .panneau__texte {
+      grid-area: txt;
       gap: 0.45rem;
-      padding: 0.85rem 0.95rem 0.95rem;
     }
     .panneau__resume {
       font-size: 0.84rem;
@@ -1300,22 +1479,43 @@
   }
 }
 
-@keyframes lettre {
+@keyframes revele-nom {
   from {
-    opacity: 0.02;
-    transform: translate3d(0, 0.08em, 0) scale(1.55);
-    filter: blur(18px);
+    clip-path: inset(-20% 99% -20% 0);
+    filter: blur(6px);
   }
   to {
-    opacity: 1;
-    transform: none;
+    clip-path: inset(-20% 0 -20% 0);
     filter: blur(0);
   }
 }
-@keyframes eclat {
+@keyframes trait {
+  from {
+    transform: translateX(-50%) scaleX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
   to {
-    -webkit-mask-position: 130% 0;
-    mask-position: 130% 0;
+    transform: translateX(-50%) scaleX(1);
+    opacity: 0.55;
+  }
+}
+@keyframes eclair {
+  0% {
+    opacity: 0;
+    transform: translateX(-150%);
+  }
+  8% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%);
   }
 }
 @keyframes monte {

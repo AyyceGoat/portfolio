@@ -85,7 +85,7 @@ export default function Atelier() {
     <section className="section atelier" id="competences" aria-labelledby="titre-competences">
       <div className="atelier__scene-fixe">
         <header className="atelier__entete">
-          <p className="rubrique mono">Le poste de travail</p>
+          <p className="etiquette">Le poste de travail</p>
           <h2 className="atelier__titre" id="titre-competences">
             Compétences
           </h2>

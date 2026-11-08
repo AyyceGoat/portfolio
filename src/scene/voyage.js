@@ -8,8 +8,9 @@
  * l'étape suivante ; le geste inverse ramène à la précédente.
  *
  * Le geste ne fait pas défiler la marche : il la déclenche. L'astronaute
- * marche alors à son allure naturelle jusqu'à l'étape suivante (un pas,
- * environ une seconde), puis s'arrête, sur l'un de ses deux appuis. Pendant ce temps, la page défile d'elle-même : une
+ * marche alors jusqu'à l'étape suivante (quatre pas, un peu plus de deux
+ * secondes), puis s'arrête, pieds au sol. Le décor avance exactement avec
+ * ses pas : tant qu'un pied touche la passerelle, il y reste immobile. Pendant ce temps, la page défile d'elle-même : une
  * chronologie GSAP, attachée au défilement (ScrollTrigger), fait avancer
  * la caméra et entrer les étapes. Tant qu'une transition dure, les
  * gestes sont ignorés ; ensuite, un nouveau geste n'est accepté qu'une
@@ -37,7 +38,7 @@ const auRepos = (f) =>
 const borne = (x, a, b) => Math.min(b, Math.max(a, x));
 
 /** L'allure d'une marche : on part, on marche d'un pas égal, on s'arrête. */
-const ELAN = 0.22;
+const ELAN = 0.14;
 const allure = (x) => {
   const v = 1 / (1 - ELAN);
   if (x < ELAN) return (v * x * x) / (2 * ELAN);
@@ -50,13 +51,24 @@ const allure = (x) => {
 const PAS = 0.85;
 const ARRIVEE = 0.8;
 
-/* D'une étape à la suivante, un pas : un demi-cycle de la vidéo, à
-   l'allure naturelle sur le palier de vitesse. L'astronaute s'arrête
-   ainsi toujours sur l'un de ses deux appuis. */
-const PAS_PAR_ETAPE = 0.5;
-const DUREE_PAS = borne((MARCHE.cycle * PAS_PAR_ETAPE) / (1 - ELAN), 1.0, 1.4);
-const DUREE_ARRIVEE = 1.5;
-const DUREE_SECTION = 1.1;
+/* D'une étape à la suivante, quatre pas : deux cycles de la vidéo.
+   L'astronaute part et s'arrête ainsi toujours sur le même appui, pieds
+   au sol. */
+const CYCLES_ETAPE = 2;
+const DUREE_PAS = 2.3;
+const DUREE_ARRIVEE = 2.6;
+const DUREE_SECTION = 1.2;
+const N = MARCHE.images;
+const AVANCE = MARCHE.avance;
+/** De combien le sol a avancé après c cycles de marche, en hauteurs de
+    figure : image par image, celle du sol de la vidéo sous le pied
+    d'appui (scripts/marche.py), interpolée entre deux images. */
+function avanceFigure(c) {
+  const n = Math.floor(c);
+  const f = (c - n) * N;
+  const k = Math.min(Math.floor(f), N - 1);
+  return n * AVANCE[N] + AVANCE[k] + (AVANCE[k + 1] - AVANCE[k]) * (f - k);
+}
 const CALME = 150; // ms sans événement : l'élan est retombé
 
 export function lancer() {
@@ -96,12 +108,10 @@ export function lancer() {
   const etat = { marche: 0, arrivee: 0, apres: 0 };
   let monde = null;
   let vivant = true;
-  let fin = 1;
+  let hauteurCamera = 1.82;
 
   /* ---------- la chronologie du voyage ---------- */
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
-  const marche = { p: 0 };
-  tl.to(marche, { p: 1, duration: total }, 0);
   tl.to(etat, { arrivee: 1, duration: ARRIVEE - 0.1, ease: 'power1.inOut' }, C_DERNIER + 0.1);
   tl.set({}, {}, total);
 
@@ -121,17 +131,6 @@ export function lancer() {
       );
     }
   }
-  /** Le contenu d'une étape se révèle ligne à ligne, après son cadre. */
-  function lignes(enfants, c, decalage = 0.16) {
-    if (!enfants.length) return;
-    tl.fromTo(
-      enfants,
-      { y: 18, opacity: 0 },
-      { y: 0, opacity: 1, duration: ENTREE * 0.62, stagger: 0.045, ease: 'power2.out' },
-      c - LECTURE - ENTREE + decalage
-    );
-  }
-
   // Le titre recule dans la profondeur de la scène dès les premiers pas.
   const intro = $('.intro');
   tl.fromTo(
@@ -142,48 +141,62 @@ export function lancer() {
   );
   tl.fromTo($('.intro__chevrons', intro), { opacity: 1 }, { opacity: 0, duration: 0.15 }, 0);
 
+  /* Un panneau de verre se révèle en plusieurs temps : il glisse et se pose
+     en profondeur ; son liseré lumineux se dessine tout autour ; son image
+     (ou la photo) se dévoile ; son titre arrive mot à mot ; puis ses
+     paragraphes, l'un après l'autre ; enfin ses mots-clés s'illuminent. */
+  const P3 = { transformPerspective: 1800 };
+  function reveler(el, carte, c, sens) {
+    if (!el || !carte) return;
+    const debut = c - LECTURE - ENTREE;
+    etape(
+      el,
+      c,
+      { xPercent: 8 * sens, z: -240, rotationY: -14 * sens, ...P3 },
+      { xPercent: 0, z: 0, rotationY: 0, ...P3 },
+      { xPercent: -5 * sens, z: -200, rotationY: 9 * sens, ...P3 }
+    );
+    const bord = $('.verre__bord rect', carte);
+    if (bord) tl.fromTo(bord, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: ENTREE * 0.75, ease: 'power2.inOut' }, debut + 0.04);
+    const etiquette = $(':scope > .etiquette', carte);
+    if (etiquette) tl.fromTo(etiquette, { opacity: 0, letterSpacing: '0.7em' }, { opacity: 1, letterSpacing: '0.42em', duration: ENTREE * 0.6, ease: 'power2.out' }, debut + 0.1);
+    const photo = $('.identite__photo', carte);
+    if (photo) tl.fromTo(photo, { clipPath: 'circle(0% at 50% 50%)', scale: 0.86 }, { clipPath: 'circle(72% at 50% 50%)', scale: 1, duration: ENTREE * 0.6, ease: 'power3.out' }, debut + 0.12);
+    const visuel = $('.panneau__visuel', carte);
+    if (visuel) {
+      tl.fromTo(visuel, { clipPath: 'inset(100% 0% 0% 0% round 14px)' }, { clipPath: 'inset(0% 0% 0% 0% round 14px)', duration: ENTREE * 0.6, ease: 'power3.inOut' }, debut + 0.12);
+      const image = visuel.firstElementChild;
+      if (image) tl.fromTo(image, { scale: 1.14 }, { scale: 1, duration: ENTREE * 0.8, ease: 'power2.out' }, debut + 0.12);
+    }
+    const mots = $$('.degrade .mot', carte);
+    if (mots.length) tl.fromTo(mots, { yPercent: 70, opacity: 0 }, { yPercent: 0, opacity: 1, duration: ENTREE * 0.4, stagger: ENTREE * 0.035, ease: 'power3.out' }, debut + 0.18);
+    const suite = $$('.identite__titre, .identite__paragraphe, .identite__parcours, .panneau__resume, .pile, .panneau__actions', carte);
+    if (suite.length) tl.fromTo(suite, { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: ENTREE * 0.4, stagger: ENTREE * 0.07, ease: 'power2.out' }, debut + 0.26);
+    const cles = $$('.cle', carte);
+    if (cles.length) {
+      tl.fromTo(
+        cles,
+        { color: 'rgba(238, 230, 212, 0.78)', textShadow: '0 0 0px rgba(110, 165, 255, 0)' },
+        { color: '#9cc4ff', textShadow: '0 0 14px rgba(110, 165, 255, 0.55)', duration: ENTREE * 0.35, stagger: ENTREE * 0.02, ease: 'sine.inOut' },
+        debut + ENTREE * 0.72
+      );
+    }
+  }
+
   // La présentation, à gauche de l'astronaute.
   const carteProfil = $('.identite__carte');
-  const P3 = { transformPerspective: 1800 };
-  etape(
-    carteProfil,
-    C_PROFIL,
-    { xPercent: -10, z: -160, rotationY: 14, ...P3 },
-    { xPercent: 0, z: 0, rotationY: 0, ...P3 },
-    { xPercent: -6, z: -120, rotationY: 9, ...P3 }
-  );
-  if (carteProfil) lignes(Array.from(carteProfil.children), C_PROFIL);
+  reveler(carteProfil, carteProfil, C_PROFIL, -1);
 
   // « Mes réalisations », seul dans le ciel.
   const entete = $('.projets__entete');
   etape(entete, C_REAL, { y: 30, scale: 1.06 }, { y: 0, scale: 1 }, { y: -24, scale: 0.94 });
 
-  // Les projets : de part et d'autre, en alternance. Le panneau sort de la
-  // profondeur en pivotant vers le centre ; son image se dévoile de bas en
-  // haut ; son texte monte ligne à ligne. Il repart dans la profondeur.
+  // Les projets : de part et d'autre, en alternance, pour laisser
+  // l'astronaute visible.
   const reperes = [];
   panneaux.forEach((p, i) => {
     const c = C_PROJET(i);
-    const sens = i % 2 ? 1 : -1;
-    etape(
-      p,
-      c,
-      { xPercent: 9 * sens, z: -260, rotationY: -15 * sens, ...P3 },
-      { xPercent: 0, z: 0, rotationY: 0, ...P3 },
-      { xPercent: -5 * sens, z: -200, rotationY: 10 * sens, ...P3 }
-    );
-    const visuel = $('.panneau__visuel', p);
-    if (visuel) {
-      tl.fromTo(
-        visuel,
-        { clipPath: 'inset(100% 0% 0% 0% round 14px)' },
-        { clipPath: 'inset(0% 0% 0% 0% round 14px)', duration: ENTREE * 0.8, ease: 'power3.inOut' },
-        c - LECTURE - ENTREE + 0.06
-      );
-      const image = visuel.firstElementChild;
-      if (image) tl.fromTo(image, { scale: 1.16 }, { scale: 1, duration: ENTREE, ease: 'power2.out' }, c - LECTURE - ENTREE + 0.06);
-    }
-    lignes($$('.panneau__texte > *', p), c, 0.2);
+    reveler(p, $('.panneau__cadre', p), c, i % 2 ? 1 : -1);
     reperes.push(c);
   });
 
@@ -198,7 +211,6 @@ export function lancer() {
     animation: tl,
     scrub: true,
     onUpdate: () => {
-      etat.marche = marche.p * fin;
     },
   });
   const auVoyage = (t) => declencheur.start + ((declencheur.end - declencheur.start) * t) / total;
@@ -273,10 +285,15 @@ export function lancer() {
   }
   const NOMS = ['haut', 'profil', 'projets', ...panneaux.map((p) => p.id), 'competences', 'contact'];
   const I_ATELIER = NOMS.length - 2;
-  /* Où en est la marche à chaque étape : la distance parcourue y est
-     relevée, pour que chaque transition fasse un pas entier. */
-  const MARCHE_ETAPE = [0, C_PROFIL, C_REAL, ...reperes, total].map((t) => t / total);
+  /* Combien de cycles de marche à chaque étape : deux de plus à chaque
+     étape, jusqu'au bout du chemin (le poste de travail). */
+  const cyclesA = (i) => Math.min(i, I_ATELIER) * CYCLES_ETAPE;
+  let cycles = 0;
+  // mètres par hauteur de figure, pour la caméra de l'écran actuel
+  let metresParFigure = 0;
 
+  // Réservé aux vérifications : transitions ralenties (?ralenti=10).
+  const ralenti = borne(Number(new URLSearchParams(window.location.search).get('ralenti')) || 1, 1, 40);
   let courante = 0;
   let enTransition = false;
   let dernierEvenement = 0;
@@ -304,8 +321,10 @@ export function lancer() {
     courante = i;
     if (tween) tween.kill();
     deplacement.y = window.scrollY;
+    deplacement.c = cycles;
     if (immediat) {
       poserDefilement(pts[i]);
+      cycles = cyclesA(i);
       enTransition = false;
       majNav();
       return;
@@ -317,7 +336,7 @@ export function lancer() {
         const haut = Math.max(i, depart);
         d = haut === I_ATELIER ? DUREE_ARRIVEE : haut > I_ATELIER ? DUREE_SECTION : DUREE_PAS;
       } else {
-        d = borne(0.9 + ecart * 0.18, 1.2, 2.2);
+        d = borne(DUREE_PAS + (ecart - 1) * 0.6, DUREE_PAS, 4.2);
       }
     }
     enTransition = true;
@@ -325,9 +344,13 @@ export function lancer() {
     const versSection = Math.max(i, depart) > I_ATELIER;
     tween = gsap.to(deplacement, {
       y: pts[i],
-      duration: d,
-      ease: versSection ? 'power2.inOut' : allure,
-      onUpdate: () => poserDefilement(deplacement.y),
+      c: cyclesA(i),
+      duration: d * ralenti,
+      ease: versSection && Math.min(i, depart) >= I_ATELIER ? 'power2.inOut' : allure,
+      onUpdate: () => {
+        cycles = deplacement.c;
+        poserDefilement(deplacement.y);
+      },
       onComplete: () => {
         tween = null;
         enTransition = false;
@@ -349,6 +372,9 @@ export function lancer() {
   // décide ; les suivants, et l'élan qui prolonge le geste, sont ignorés
   // jusqu'à 150 ms de calme.
   let cumul = 0;
+  let debutGeste = 0;
+  let amplitude = 0; // l'amplitude du dernier événement
+  let traine = false; // on croit lire la fin d'un élan
   ecouter(
     window,
     'wheel',
@@ -357,16 +383,41 @@ export function lancer() {
       e.preventDefault();
       if (e.ctrlKey) return; // zoom au pavé
       const maintenant = performance.now();
-      const calme = maintenant - dernierEvenement > CALME;
+      const ecart = maintenant - dernierEvenement;
       dernierEvenement = maintenant;
-      if (enTransition || ficheOuverte) return;
-      if (attendreCalme && !calme) return;
-      if (calme) cumul = 0;
-      attendreCalme = false;
       const delta = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+      const a = Math.abs(delta);
+      const precedente = amplitude;
+      amplitude = a;
+      if (enTransition || ficheOuverte) return;
+      // La fin d'un élan peut marquer une courte pause, puis reprendre en
+      // petits crans qui ne font que décroître : ce n'est pas un geste.
+      // Un vrai geste, lui, accélère.
+      const accelere = a >= precedente * 2 + 4;
+      if (ecart <= CALME) {
+        if (attendreCalme && !(traine && accelere)) return;
+      } else if (ecart < 600 && a < 10 && a <= precedente * 1.2 + 1) {
+        traine = true;
+        attendreCalme = true;
+        return;
+      }
+      if (attendreCalme || ecart > CALME) {
+        cumul = 0;
+        debutGeste = maintenant;
+      }
+      attendreCalme = false;
+      traine = false;
+      // Un vrai geste s'affirme vite ; quelques pixels épars, plus de
+      // 250 ms après le premier, ne sont que la traîne d'un élan : on
+      // attend de nouveau le calme.
+      if (maintenant - debutGeste > 250) {
+        attendreCalme = true;
+        return;
+      }
       cumul += delta;
-      // Un cran de molette décide aussitôt ; au pavé, quelques pixels.
-      if (Math.abs(cumul) < 6) return;
+      // Un cran de molette décide aussitôt ; au pavé, une douzaine de
+      // pixels (la traîne d'un élan n'y parvient pas en 250 ms).
+      if (Math.abs(cumul) < 12) return;
       const sens = Math.sign(cumul);
       cumul = 0;
       attendreCalme = true;
@@ -541,15 +592,6 @@ export function lancer() {
   }
 
   const dernier = { cadre: -1, x: 0, y: 0, s: 0, o: -1 };
-  /** Combien de cycles de marche à cette distance (un demi par étape). */
-  function cycles(m) {
-    const p = fin > 0 ? m / fin : 0;
-    let k = 0;
-    while (k < MARCHE_ETAPE.length - 2 && p > MARCHE_ETAPE[k + 1]) k += 1;
-    const a = MARCHE_ETAPE[k];
-    const b = MARCHE_ETAPE[k + 1];
-    return (k + borne((p - a) / Math.max(1e-6, b - a), 0, 1)) * PAS_PAR_ETAPE;
-  }
   function poserAstronaute() {
     const a = monde && monde.astro;
     const o = a && a.visible && finesse ? borne((0.6 - etat.apres) / 0.35, 0, 1) : 0;
@@ -559,9 +601,10 @@ export function lancer() {
       dernier.o = o;
     }
     if (!o) return;
-    const c = cycles(a.marche);
-    // (un dixième d'image de marge : l'arrêt tombe juste sur l'appui)
-    const cadre = Math.floor((c - Math.floor(c)) * MARCHE.images + 0.1) % MARCHE.images;
+    const c = cycles;
+    // (un centième d'image de marge : l'arrêt tombe juste sur l'appui)
+    const n = Math.floor(c + 0.01 / N);
+    const cadre = Math.min(N - 1, Math.max(0, Math.floor((c - n) * N + 0.01)));
     const image = cadre !== dernier.cadre ? imageProche(cadre) : null;
     if (image) {
       contextes.forEach((ctx, k) => {
@@ -571,9 +614,14 @@ export function lancer() {
       dernier.cadre = cadre;
       pose.dataset.cadre = String(cadre);
     }
+    if (ralenti > 1) pose.dataset.cycles = c.toFixed(5);
     const s = a.echelle / (BOITE_H * (MARCHE.figure / MARCHE.hauteur));
     const x = a.x - BOITE_L / 2;
-    const y = a.y - PIEDS;
+    // Entre deux images de la marche, le sol continue d'avancer : l'image
+    // descend d'autant (le pied d'appui suit le sol au pixel près), puis la
+    // suivante prend le relais.
+    const ecart = avanceFigure(c) - avanceFigure(n + cadre / N);
+    const y = a.y - PIEDS + ecart * a.echelle;
     if (Math.abs(x - dernier.x) > 0.05 || Math.abs(y - dernier.y) > 0.05 || Math.abs(s - dernier.s) > 0.0002) {
       pose.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) scale(${s.toFixed(4)})`;
       dernier.x = x;
@@ -588,7 +636,7 @@ export function lancer() {
   const toile = $('.monde__toile');
   auRepos(() => {
     import('./monde.js')
-      .then(({ creerMonde, choisirQualite, longueurPont }) => {
+      .then(({ creerMonde, choisirQualite, CAMERA }) => {
         if (!vivant || !toile) return;
         const params = new URLSearchParams(window.location.search);
         try {
@@ -598,7 +646,11 @@ export function lancer() {
             // Réservé aux captures de l'affiche, rendues sans GPU.
             logiciel: params.get('logiciel') === 'oui',
             etat,
-            longueur: longueurPont(n),
+            // L'astronaute parcourt quelques mètres, au rythme de ses pas ;
+            // la passerelle continue au-delà jusqu'à la plateforme, que la
+            // caméra rejoint en glissant à l'arrivée.
+            parcours: avanceFigure(cyclesA(I_ATELIER)) * ((1.8 * CAMERA.distance) / CAMERA.hauteur),
+            longueur: avanceFigure(cyclesA(I_ATELIER)) * ((1.8 * CAMERA.distancePortrait) / CAMERA.hauteur) + 30,
             // La scène n'apparaît qu'avec son astronaute.
             surPret: () => imagesMarche.then(() => doc.classList.add('monde-pret')),
           });
@@ -609,8 +661,10 @@ export function lancer() {
           doc.classList.add('monde-fixe');
           return;
         }
-        fin = monde.fin;
-        etat.marche = marche.p * fin;
+        hauteurCamera = CAMERA.hauteur;
+        // Réservé aux vérifications du pied d'appui (?ralenti=…).
+        if (ralenti > 1) window.__voyage = { monde, etat };
+        metresParFigure = (1.8 * monde.distanceCamera()) / hauteurCamera;
       })
       .catch(() => doc.classList.add('monde-fixe'));
   });
@@ -632,13 +686,18 @@ export function lancer() {
 
   const dessiner = (temps) => {
     if (!monde) return;
+    // La distance parcourue découle des pas : le décor avance avec eux.
+    etat.marche = avanceFigure(cycles) * metresParFigure;
     monde.rendre(temps);
     poserAstronaute();
   };
   gsap.ticker.add(dessiner);
 
   ecouter(window, 'resize', () => {
-    if (monde) monde.redimensionner();
+    if (monde) {
+      monde.redimensionner();
+      metresParFigure = (1.8 * monde.distanceCamera()) / hauteurCamera;
+    }
     if (!enTransition) {
       ScrollTrigger.refresh();
       allerA(courante, { immediat: true });

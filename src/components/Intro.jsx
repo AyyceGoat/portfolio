@@ -2,47 +2,22 @@ import { IDENTITE } from '../data/profil.js';
 import { typo } from '../lib/typo.js';
 
 /**
- * Les lettres du nom, chacune dans sa boîte. Leur ordre d'apparition part
- * du centre du nom vers ses extrémités (classe `retard-k`).
- */
-function Nom({ texte, eclat = false }) {
-  const mots = texte.split(' ');
-  const total = texte.replace(/ /g, '').length;
-  let rang = 0;
-  return mots.map((mot) => (
-    <span className="intro__mot" key={mot}>
-      {Array.from(mot).map((c) => {
-        const k = Math.round(Math.abs(rang + 0.5 - total / 2));
-        rang += 1;
-        return (
-          <span className={eclat ? undefined : `intro__lettre retard-${k}`} key={`${mot}-${rang}`}>
-            {c}
-          </span>
-        );
-      })}
-    </span>
-  ));
-}
-
-/**
  * Première scène : le nom, posé dans le ciel au-dessus de l'astronaute.
- * Ses lettres sortent de la profondeur, du centre vers les bords ; puis
- * la lumière de la planète passe une fois sur lui. Deux chevrons invitent
- * à poursuivre.
+ * Un trait de lumière traverse l'écran et révèle le nom à son passage ;
+ * puis le métier apparaît. Deux chevrons invitent à poursuivre.
  */
 export default function Intro() {
   return (
     <header className="intro" id="haut">
       <h1 className="intro__titre">
-        <span className="intro__sur mono">Portfolio</span>
-        <span className="visuellement-cache">{IDENTITE.court}</span>
-        <span className="intro__nom" aria-hidden="true">
-          <Nom texte={IDENTITE.court} />
-          <span className="intro__eclat">
-            <Nom texte={IDENTITE.court} eclat />
-          </span>
+        <span className="etiquette intro__sur">Portfolio</span>
+        <span className="intro__nom">
+          <span className="intro__lettres">{IDENTITE.court}</span>
+          <span className="intro__trait" aria-hidden="true" />
+          <span className="intro__eclair" aria-hidden="true" />
         </span>
-        <span className="intro__metier">{typo(IDENTITE.titre)}</span>
+        <span className="etiquette intro__metier">{typo(IDENTITE.titre)}</span>
+        <span className="intro__anglais mono">{IDENTITE.sousTitre}</span>
       </h1>
       <span className="intro__chevrons" aria-hidden="true">
         <svg viewBox="0 0 24 24" focusable="false">

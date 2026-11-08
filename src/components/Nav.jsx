@@ -14,7 +14,8 @@ const ANNONCES = {
   fait: 'CV téléchargé.',
 };
 
-/** Le menu : discret, il n'apparaît qu'une fois le voyage commencé. */
+/** Le menu : une pilule de verre centrée, le CV à part. Il n'apparaît
+    qu'une fois le voyage commencé. */
 export default function Nav() {
   const cv = useTelechargement();
 
@@ -28,15 +29,15 @@ export default function Nav() {
             </a>
           </li>
         ))}
-        <li>
-          <a className={`nav__cv est-${cv.etat}`} aria-label="Télécharger le CV au format PDF" {...cv.props}>
-            CV {cv.etat === 'fait' ? <Coche /> : <FlecheBas />}
-          </a>
-          <span className="visuellement-cache" role="status">
-            {ANNONCES[cv.etat]}
-          </span>
-        </li>
       </ul>
+      <div className="nav__cv-boite">
+        <a className={`nav__cv est-${cv.etat}`} aria-label="Télécharger le CV au format PDF" {...cv.props}>
+          CV {cv.etat === 'fait' ? <Coche /> : <FlecheBas />}
+        </a>
+        <span className="visuellement-cache" role="status">
+          {ANNONCES[cv.etat]}
+        </span>
+      </div>
     </nav>
   );
 }

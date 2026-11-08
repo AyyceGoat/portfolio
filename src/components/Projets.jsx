@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { projects } from '../data/projects.js';
 import { media } from '../lib/media.js';
+import { Riche } from '../lib/riche.jsx';
 import { typo } from '../lib/typo.js';
-import { FlecheOblique } from './Icones.jsx';
+import { Bordure, FlecheOblique } from './Icones.jsx';
 
 function Cadenas() {
   return (
@@ -76,16 +77,26 @@ function Panneau({ projet, rang, ouvrir }) {
       aria-labelledby={`titre-${projet.id}`}
       onClick={surClic}
     >
-      <div className="panneau__cadre">
+      <div className="verre panneau__cadre">
+        <Bordure />
+        <p className="etiquette">{projet.tag}</p>
         <div className="panneau__visuel">
           <Visuel projet={projet} sizes="(min-width: 48rem) min(42rem, 46vw), 30vw" />
         </div>
         <div className="panneau__texte">
-          <p className="panneau__tag mono">{projet.tag}</p>
-          <h3 className="panneau__titre" id={`titre-${projet.id}`}>
-            {typo(projet.title)}
+          <h3 className="panneau__titre degrade" id={`titre-${projet.id}`}>
+            {typo(projet.title)
+              .split(' ')
+              .map((mot, i) => (
+                <span key={`${mot}-${i}`}>
+                  {i > 0 && ' '}
+                  <span className="mot">{mot}</span>
+                </span>
+              ))}
           </h3>
-          <p className="panneau__resume">{typo(resume)}</p>
+          <p className="panneau__resume">
+            <Riche texte={resume} />
+          </p>
           <ul className="pile" aria-label={`Technologies : ${projet.title}`}>
             {projet.stack.map((item) => (
               <li key={item}>{item}</li>
@@ -182,8 +193,8 @@ export default function Projets() {
   return (
     <section className="projets" id="projets" aria-labelledby="titre-projets">
       <header className="projets__entete">
-        <p className="rubrique mono">Projets</p>
-        <h2 className="projets__titre" id="titre-projets">
+        <p className="etiquette">Projets</p>
+        <h2 className="projets__titre degrade" id="titre-projets">
           Mes réalisations
         </h2>
       </header>

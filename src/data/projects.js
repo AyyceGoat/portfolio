@@ -8,8 +8,9 @@
  *  - id        identifiant unique, en minuscules, sans espace ;
  *  - tag       nature du projet (« Projet personnel », « Mission en
  *              entreprise »…) ;
- *  - resume    une phrase, affichée sur le panneau du voyage ; le
- *              détail (desc, points) s'ouvre au clic ;
+ *  - resume    une phrase, affichée sur le panneau du voyage ; les
+ *              [[mots-clés]] y sont mis en valeur ; le détail (desc,
+ *              points) s'ouvre au clic ;
  *  - shot      capture d'écran : `src` en 1400 px de large, `small`
  *              en 700 px, toutes deux en WebP au format 16:10, chemins
  *              écrits sans barre initiale (« captures/mon-projet.webp ») ;
@@ -34,7 +35,7 @@ export const projects = [
       small: 'captures/babi-games-700.webp',
       alt: "Le Versus de Babi Games : un duel entre deux footballeurs ivoiriens à départager, en huitièmes de finale.",
     },
-    resume: 'Plateforme de mini-jeux au contenu ivoirien, installable depuis le navigateur et jouable hors ligne.',
+    resume: 'Plateforme de [[mini-jeux]] au contenu ivoirien, [[installable depuis le navigateur]] et [[jouable hors ligne]].',
     desc:
       "Plateforme de mini-jeux au contenu ivoirien, installable depuis le navigateur et jouable hors ligne. Trois jeux autour de la culture du pays : duels de personnalités, classements et estimation des prix du quotidien.",
     points: [
@@ -56,7 +57,7 @@ export const projects = [
       small: 'captures/echiquier-700.webp',
       alt: "Jeu assisté de l'Échiquier : après 1.e4 e5, le professeur Ephraim commente le coup joué et laisse le choix de le reprendre ou de le garder.",
     },
-    resume: "Application d'échecs adossée au moteur Stockfish, sans compte ni publicité, utilisable hors ligne.",
+    resume: "Application d'échecs adossée au moteur [[Stockfish]], sans compte ni publicité, [[utilisable hors ligne]].",
     desc:
       "Application d'échecs adossée au moteur Stockfish, exécuté directement sur l'appareil du joueur : sans compte, sans publicité et utilisable hors ligne. On affronte le moteur au niveau de son choix, on se fait corriger coup par coup et l'on relit ses parties avec une explication en français plutôt qu'un chiffre.",
     points: [
@@ -79,7 +80,7 @@ export const projects = [
       small: 'captures/nexus-700.webp',
       alt: "Page d'accueil de NEXUS : « Mesurez vos aptitudes cognitives. », avec le robot en trois dimensions qui suit le curseur.",
     },
-    resume: "Plateforme d'évaluation des aptitudes cognitives : un indice, un rang et un profil détaillé sur cinq aptitudes.",
+    resume: "Plateforme d'évaluation des [[aptitudes cognitives]] : un indice, un rang et un profil détaillé sur cinq aptitudes.",
     desc:
       "Plateforme d'évaluation des aptitudes cognitives : 35 questions, environ 25 minutes, puis un indice, un rang sur cent personnes et un profil détaillé sur cinq aptitudes (matrices logiques, séries numériques, analogies verbales, rotation spatiale et mémoire de travail).",
     points: [
@@ -103,7 +104,7 @@ export const projects = [
       { couche: 'Traitement', titre: 'Google Apps Script', detail: 'Règles métier, rôles, comptabilité analytique' },
       { couche: 'Données', titre: 'Google Sheets', detail: 'Source unique de données' },
     ],
-    resume: "Système de gestion complet pour une entreprise de carrières, de l'analyse du besoin au déploiement.",
+    resume: "[[Système de gestion]] complet pour une entreprise de carrières, de l'[[analyse du besoin]] au [[déploiement]].",
     desc:
       "Système de gestion complet pour une entreprise de carrières en Côte d'Ivoire, conçu et développé en tant que développeur unique, de l'analyse du besoin au déploiement. Il couvre la production, le suivi terrain et le pilotage de la direction sur plusieurs sites.",
     points: [
