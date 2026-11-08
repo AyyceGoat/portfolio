@@ -60,7 +60,7 @@ function LienPrincipal({ projet }) {
   );
 }
 
-/** Un panneau du voyage : nom, aperçu, une phrase, technologies, lien. */
+/** Un panneau du voyage : aperçu, nom, une phrase, technologies, liens. */
 function Panneau({ projet, rang, ouvrir }) {
   const resume = projet.resume || projet.desc.split('. ')[0];
   const surClic = (e) => {
@@ -76,25 +76,27 @@ function Panneau({ projet, rang, ouvrir }) {
       aria-labelledby={`titre-${projet.id}`}
       onClick={surClic}
     >
-      <div className="panneau__visuel">
-        <Visuel projet={projet} sizes="(min-width: 48rem) min(40rem, 46vw), 30vw" />
-      </div>
-      <div className="panneau__texte">
-        <p className="panneau__tag mono">{projet.tag}</p>
-        <h3 className="panneau__titre" id={`titre-${projet.id}`}>
-          {typo(projet.title)}
-        </h3>
-        <p className="panneau__resume">{typo(resume)}</p>
-        <ul className="pile" aria-label={`Technologies : ${projet.title}`}>
-          {projet.stack.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-        <div className="panneau__actions">
-          <button type="button" className="bouton-fin" onClick={() => ouvrir(rang)} aria-haspopup="dialog">
-            Détails<span className="visuellement-cache"> du projet {projet.title}</span>
-          </button>
-          <LienPrincipal projet={projet} />
+      <div className="panneau__cadre">
+        <div className="panneau__visuel">
+          <Visuel projet={projet} sizes="(min-width: 48rem) min(42rem, 46vw), 30vw" />
+        </div>
+        <div className="panneau__texte">
+          <p className="panneau__tag mono">{projet.tag}</p>
+          <h3 className="panneau__titre" id={`titre-${projet.id}`}>
+            {typo(projet.title)}
+          </h3>
+          <p className="panneau__resume">{typo(resume)}</p>
+          <ul className="pile" aria-label={`Technologies : ${projet.title}`}>
+            {projet.stack.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <div className="panneau__actions">
+            <button type="button" className="bouton-fin" onClick={() => ouvrir(rang)} aria-haspopup="dialog">
+              Détails<span className="visuellement-cache"> du projet {projet.title}</span>
+            </button>
+            <LienPrincipal projet={projet} />
+          </div>
         </div>
       </div>
     </article>
@@ -191,7 +193,6 @@ export default function Projets() {
       <dialog
         className="fiche"
         ref={dialogue}
-        data-lenis-prevent=""
         aria-labelledby="fiche-titre"
         onClose={() => {
           setOuvert(null);

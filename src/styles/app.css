@@ -168,20 +168,28 @@
   text-transform: uppercase;
 }
 .intro__nom {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  column-gap: 0.3em;
-  color: #f6f1e6;
+  column-gap: 0.34em;
+  color: #f4eee2;
   font-family: var(--etendu);
-  font-size: clamp(2.3rem, min(6.4vw, 12vh), 7.4rem);
-  font-weight: 800;
-  line-height: 0.98;
-  letter-spacing: -0.012em;
+  font-size: clamp(2.3rem, min(6.6vw, 12.5vh), 7.8rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.035em;
   text-transform: uppercase;
+  /* La lumière de la scène : un halo froid venu de la planète, une ombre
+     portée qui détache le nom du ciel. */
   text-shadow:
-    0 0 42px rgba(110, 164, 255, 0.22),
-    0 4px 30px rgba(0, 0, 0, 0.5);
+    0.02em 0 0.5em rgba(120, 170, 255, 0.28),
+    0 0.06em 0.6em rgba(0, 0, 0, 0.55);
+}
+/* Le reflet de lumière qui passe sur le nom : une copie exacte, claire,
+   visible seulement dans une bande étroite. */
+.intro__eclat {
+  display: none;
 }
 .intro__mot {
   display: inline-flex;
@@ -192,7 +200,7 @@
 .intro__metier {
   color: var(--encre-2);
   font-size: clamp(0.95rem, 1.3vw, 1.18rem);
-  letter-spacing: 0.03em;
+  letter-spacing: 0.08em;
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
 }
 .intro__chevrons {
@@ -229,52 +237,85 @@
   text-transform: uppercase;
   text-wrap: balance;
 }
+/* Un panneau : un verre sombre, à peine teinté par la scène, dont le
+   liseré capte la lumière froide de la planète en haut et la lumière chaude
+   de la passerelle en bas. */
 .panneau {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid rgba(176, 202, 255, 0.15);
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba(13, 19, 34, 0.94), rgba(5, 8, 16, 0.95));
-  box-shadow:
-    0 50px 120px -50px rgba(0, 0, 0, 0.95),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   cursor: pointer;
 }
-.panneau__visuel {
-  aspect-ratio: 16 / 10;
-  margin: 0.7rem 0.7rem 0;
+.panneau__cadre {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   overflow: hidden;
-  border-radius: 13px;
+  border: 1px solid transparent;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(12, 18, 34, 0.86), rgba(4, 7, 15, 0.93)) padding-box,
+    linear-gradient(155deg, rgba(170, 200, 255, 0.5), rgba(170, 200, 255, 0.07) 36%, rgba(255, 214, 160, 0.06) 70%, rgba(255, 214, 160, 0.26)) border-box;
+  box-shadow:
+    0 60px 120px -50px rgba(0, 0, 0, 0.95),
+    0 0 90px -34px rgba(90, 140, 255, 0.2);
+  transition:
+    transform 0.7s var(--sortie),
+    box-shadow 0.7s var(--sortie);
+}
+.panneau__visuel {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin: 0.65rem 0.65rem 0;
+  overflow: hidden;
+  border-radius: 14px;
   background: #0b0f19;
+}
+/* L'image se fond dans le verre, vers le bas. */
+.panneau__visuel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, transparent 58%, rgba(4, 7, 15, 0.45));
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  pointer-events: none;
 }
 .panneau__visuel img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 0;
 }
 .panneau__texte {
   display: grid;
-  gap: 0.7rem;
-  padding: 1.15rem 1.45rem 1.4rem;
+  gap: 0.75rem;
+  padding: 1.25rem 1.7rem 1.55rem;
 }
 .panneau__tag {
   color: var(--atmo);
   font-size: 0.68rem;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.22em;
 }
 .panneau__titre {
   font-family: var(--etendu);
-  font-size: clamp(1.2rem, 1.65vw, 1.6rem);
-  font-weight: 700;
-  line-height: 1.12;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
   text-wrap: balance;
 }
 .panneau__resume {
+  max-width: 34em;
   color: var(--encre-2);
-  font-size: clamp(0.95rem, 1.05vw, 1.04rem);
-  line-height: 1.55;
+  font-size: clamp(0.98rem, 1.1vw, 1.08rem);
+  line-height: 1.58;
+}
+@media (hover: hover) {
+  .panneau:hover .panneau__cadre {
+    transform: translate3d(0, -5px, 0);
+    box-shadow:
+      0 70px 130px -50px rgba(0, 0, 0, 0.95),
+      0 0 110px -30px rgba(110, 160, 255, 0.32);
+  }
 }
 .panneau__actions {
   display: flex;
@@ -289,9 +330,10 @@
   gap: 0.35rem;
 }
 .pile li {
-  padding: 0.26rem 0.62rem;
+  padding: 0.28rem 0.66rem;
   border-radius: 999px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(176, 202, 255, 0.16);
   color: var(--encre-2);
   font-family: var(--mono);
   font-size: 0.68rem;
@@ -448,10 +490,14 @@
   padding: 6rem var(--gouttiere) 4rem;
 }
 .carte {
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 18px;
-  background: rgba(7, 10, 18, 0.84);
-  box-shadow: 0 40px 120px -40px rgba(0, 0, 0, 0.85);
+  border: 1px solid transparent;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(12, 18, 34, 0.86), rgba(4, 7, 15, 0.92)) padding-box,
+    linear-gradient(155deg, rgba(170, 200, 255, 0.42), rgba(170, 200, 255, 0.06) 36%, rgba(255, 214, 160, 0.05) 70%, rgba(255, 214, 160, 0.2)) border-box;
+  box-shadow:
+    0 50px 120px -50px rgba(0, 0, 0, 0.9),
+    0 0 90px -34px rgba(90, 140, 255, 0.16);
 }
 
 /* ---------- 3. Présentation ---------- */
@@ -941,46 +987,34 @@
     animation: monte 1.2s var(--sortie) backwards 0.15s;
   }
   .intro__lettre {
-    animation: lettre 1.5s var(--sortie) backwards;
+    animation: lettre 1.7s var(--sortie) backwards;
   }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(1) { animation-delay: 0.320s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(2) { animation-delay: 0.362s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(3) { animation-delay: 0.404s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(4) { animation-delay: 0.446s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(5) { animation-delay: 0.488s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(6) { animation-delay: 0.530s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(7) { animation-delay: 0.572s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(8) { animation-delay: 0.614s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(9) { animation-delay: 0.656s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(10) { animation-delay: 0.698s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(11) { animation-delay: 0.740s; }
-  .intro__mot:nth-child(1) .intro__lettre:nth-child(12) { animation-delay: 0.782s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(1) { animation-delay: 0.620s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(2) { animation-delay: 0.662s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(3) { animation-delay: 0.704s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(4) { animation-delay: 0.746s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(5) { animation-delay: 0.788s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(6) { animation-delay: 0.830s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(7) { animation-delay: 0.872s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(8) { animation-delay: 0.914s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(9) { animation-delay: 0.956s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(10) { animation-delay: 0.998s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(11) { animation-delay: 1.040s; }
-  .intro__mot:nth-child(2) .intro__lettre:nth-child(12) { animation-delay: 1.082s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(1) { animation-delay: 0.920s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(2) { animation-delay: 0.962s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(3) { animation-delay: 1.004s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(4) { animation-delay: 1.046s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(5) { animation-delay: 1.088s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(6) { animation-delay: 1.130s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(7) { animation-delay: 1.172s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(8) { animation-delay: 1.214s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(9) { animation-delay: 1.256s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(10) { animation-delay: 1.298s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(11) { animation-delay: 1.340s; }
-  .intro__mot:nth-child(3) .intro__lettre:nth-child(12) { animation-delay: 1.382s; }
+  .retard-0 { animation-delay: 0.350s; }
+  .retard-1 { animation-delay: 0.425s; }
+  .retard-2 { animation-delay: 0.500s; }
+  .retard-3 { animation-delay: 0.575s; }
+  .retard-4 { animation-delay: 0.650s; }
+  .retard-5 { animation-delay: 0.725s; }
+  .retard-6 { animation-delay: 0.800s; }
+  .retard-7 { animation-delay: 0.875s; }
+  .retard-8 { animation-delay: 0.950s; }
+  .retard-9 { animation-delay: 1.025s; }
+  .intro__eclat {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: inherit;
+    color: #fff;
+    text-shadow: 0 0 0.35em rgba(170, 205, 255, 0.85);
+    pointer-events: none;
+    -webkit-mask: linear-gradient(100deg, transparent 44%, #000 50%, transparent 56%) -30% 0 / 260% 100% no-repeat;
+    mask: linear-gradient(100deg, transparent 44%, #000 50%, transparent 56%) -30% 0 / 260% 100% no-repeat;
+    animation: eclat 1.9s cubic-bezier(0.45, 0, 0.2, 1) forwards 1.55s;
+  }
   .intro__metier {
-    animation: monte 1.3s var(--sortie) backwards 1.15s;
+    animation: monte 1.4s var(--sortie) backwards 1.35s;
   }
   .intro__chevrons {
     position: absolute;
@@ -1023,8 +1057,6 @@
     left: 0;
     top: 0;
     width: 320px;
-    height: 640px;
-    transform-origin: 50% 96.875%;
     visibility: hidden;
     will-change: transform, opacity;
   }
@@ -1034,35 +1066,23 @@
     inset: 0;
     overflow: hidden;
   }
-  .astronaute__bande {
-    width: 800%;
+  .astronaute canvas {
+    display: block;
+    width: 100%;
     height: 100%;
-    background: 0 0 / 100% 100% no-repeat;
-    will-change: transform;
-  }
-  .astro-charge .astronaute__bande {
-    background-image: url('/espace/astronaute-640.webp');
-  }
-  .astro-charge.astro-hd .astronaute__bande {
-    background-image: url('/espace/astronaute-1280.webp');
   }
   /* Le reflet sur le plancher de métal : la même position, retournée
      au ras des semelles, voilée et estompée en s'éloignant des pieds. */
   .astronaute__reflet {
-    transform-origin: 50% 96.875%;
     transform: scaleY(-1);
-    opacity: 0.26;
+    opacity: 0.3;
     filter: blur(1.5px);
-    -webkit-mask-image: linear-gradient(to top, #000 3%, transparent 40%);
-    mask-image: linear-gradient(to top, #000 3%, transparent 40%);
   }
   /* L'ombre de contact, douce, sous les semelles. */
   .astronaute__ombre {
     position: absolute;
-    left: 20%;
-    width: 60%;
-    top: 94.4%;
-    height: 5%;
+    left: 14%;
+    width: 72%;
     border-radius: 50%;
     background: radial-gradient(closest-side, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.28) 55%, transparent);
   }
@@ -1125,12 +1145,13 @@
     bottom: 0;
     height: fit-content;
     margin-block: auto;
-    width: min(40rem, max(calc(50vw - 9.5rem), 26rem), calc(160svh - 36rem));
+    width: min(42rem, max(calc(50vw - 9.5rem), 26rem), calc(178svh - 41rem));
     opacity: 0;
     pointer-events: auto;
     will-change: transform, opacity;
   }
-  .panneau__visuel img {
+  .panneau__visuel,
+  .panneau__visuel > * {
     will-change: transform;
   }
   .panneau--gauche {
@@ -1143,28 +1164,37 @@
   .fiche[open] {
     animation: fiche 0.45s var(--sortie);
   }
-  /* Pendant la fiche, la page derrière ne défile plus (la place de la
-     barre de défilement reste réservée : rien ne bouge). */
-  html {
-    scrollbar-gutter: stable;
-  }
-  html.lenis-stopped {
+  /* La page ne défile plus que d'elle-même, d'étape en étape
+     (scene/voyage.js) : ni barre de défilement, ni rebond. */
+  html.par-etapes {
     overflow: hidden;
+    overscroll-behavior: none;
+  }
+  html.par-etapes body {
+    touch-action: none;
+  }
+  html.par-etapes .fiche {
+    touch-action: pan-y;
   }
 
   /* Le poste de travail reste en place le temps de la lecture. */
+  /* Le poste de travail apparaît sur place, à l'arrivée sur la plateforme,
+     puis s'efface sur place devant le contact (scene/voyage.js). */
   .atelier {
-    min-height: 130svh;
+    min-height: 100svh;
     margin-top: -60svh;
   }
   .liaison {
     stroke-dasharray: 1 1;
   }
   .atelier__scene-fixe {
-    position: sticky;
-    top: 0;
     height: 100svh;
     min-height: 0;
+    will-change: transform, opacity;
+  }
+  .atelier,
+  .contact__carte {
+    will-change: transform, opacity;
   }
 
   /* Atelier : respiration, regard, clignement, frappe et lumière de
@@ -1226,14 +1256,17 @@
       right: 3vw;
       width: auto;
       margin: 0;
+    }
+    .panneau__cadre {
       display: grid;
       grid-template-columns: 7.4rem minmax(0, 1fr);
+      border-radius: 18px;
     }
     .panneau__visuel {
       aspect-ratio: auto;
       height: auto;
       margin: 0.55rem 0 0.55rem 0.55rem;
-      border-radius: 10px;
+      border-radius: 11px;
     }
     .panneau__visuel .schema {
       grid-template-columns: 1fr;
@@ -1270,13 +1303,19 @@
 @keyframes lettre {
   from {
     opacity: 0.02;
-    transform: translate3d(0, 0.32em, 0) scale(0.94);
-    filter: blur(14px);
+    transform: translate3d(0, 0.08em, 0) scale(1.55);
+    filter: blur(18px);
   }
   to {
     opacity: 1;
     transform: none;
     filter: blur(0);
+  }
+}
+@keyframes eclat {
+  to {
+    -webkit-mask-position: 130% 0;
+    mask-position: 130% 0;
   }
 }
 @keyframes monte {
