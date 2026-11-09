@@ -564,8 +564,18 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
       const dr = trace.droite(s);
       const cote = r() < 0.55 ? -1 : 1;
       const lat = 18 + r() * 60;
-      const taille = 2.6 + r() * 3.5 + lat * 0.07;
+      let taille = 2.6 + r() * 3.5 + lat * 0.07;
       const centre = [base[0] + dr[0] * lat * cote, -8 + r() * 24, base[2] + dr[2] * lat * cote - r() * 20];
+      // Net à toute distance : jamais affiché plus grand que son image.
+      // Au plus près, il mesure à l'écran (en pixels d'un écran de 2 160
+      // pixels de haut) taille × 2 100 / distance ; on lui donne une image
+      // assez grande, sinon on le réduit.
+      const pres = Math.max(8, Math.hypot(lat, centre[1] - 2) - 4);
+      const besoin = (taille * 2100) / pres;
+      const tailles = ATLAS.map((q) => Math.max(q[2] * 2048, q[3] * 512));
+      const assez = tailles.map((t, k) => [t, k]).filter(([t]) => t >= besoin);
+      const image = assez.length ? assez[Math.floor(r() * assez.length)][1] : tailles.indexOf(Math.max(...tailles));
+      taille = Math.min(taille, (tailles[image] * pres) / 2100);
       // jamais devant la planète, vu du chemin
       const vu = norm(sub(centre, add(base, [0, 2, 0])));
       if (dot(vu, versPlanete) > Math.cos(32 * DEG)) continue;
@@ -576,7 +586,7 @@ export function creerMonde(toile, { qualite = 'haute', adaptatif = true, logicie
         taille,
         angle: r() * Math.PI * 2,
         rotation: (r() < 0.5 ? -1 : 1) * (0.08 + r() * 0.17),
-        image: Math.floor(r() * ATLAS.length),
+        image,
         miroir: r() < 0.5,
       });
     }

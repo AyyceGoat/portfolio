@@ -12,9 +12,11 @@
  * secondes), puis s'arrête, pieds au sol. Le décor avance exactement avec
  * ses pas : tant qu'un pied touche la passerelle, il y reste immobile. Pendant ce temps, la page défile d'elle-même : une
  * chronologie GSAP, attachée au défilement (ScrollTrigger), fait avancer
- * la caméra et entrer les étapes. Tant qu'une transition dure, les
- * gestes sont ignorés ; ensuite, un nouveau geste n'est accepté qu'une
- * fois l'élan de la molette ou du pavé retombé (150 ms sans événement).
+ * la caméra et entrer les étapes. On lit l'intention du geste, pas le
+ * défilement : l'élan qui prolonge un geste ne compte pas, mais un
+ * nouveau geste est toujours reconnu, même pendant cet élan. Pendant une
+ * transition, un geste dans le même sens est mémorisé et joué ensuite ;
+ * dans l'autre sens, il ramène aussitôt à l'étape de départ.
  *
  * L'astronaute est un cycle de marche tiré d'une vidéo, agrandi et
  * détouré (scripts/marche.py) : ses images sont préchargées, la moins
@@ -60,15 +62,21 @@ const DUREE_ARRIVEE = 2.6;
 const DUREE_SECTION = 1.2;
 const N = MARCHE.images;
 const AVANCE = MARCHE.avance;
-/** De combien le sol a avancé après c cycles de marche, en hauteurs de
-    figure : image par image, celle du sol de la vidéo sous le pied
-    d'appui (scripts/marche.py), interpolée entre deux images. */
-function avanceFigure(c) {
-  const n = Math.floor(c);
-  const f = (c - n) * N;
+/* L'astronaute part de l'image DEPART du cycle, celle où ses jambes se
+   croisent, et s'y arrête : la pose d'attente (pose.webp), debout et
+   d'aplomb, en dérive. */
+const DEPART = MARCHE.depart || 0;
+/** L'avance du sol sous le pied d'appui à la position p de la marche (en
+    images depuis le début du cycle), en hauteurs de figure : image par
+    image, celle mesurée dans la vidéo (scripts/marche.py), interpolée. */
+function avanceImages(p) {
+  const n = Math.floor(p / N);
+  const f = p - n * N;
   const k = Math.min(Math.floor(f), N - 1);
   return n * AVANCE[N] + AVANCE[k] + (AVANCE[k + 1] - AVANCE[k]) * (f - k);
 }
+/** De combien le sol a avancé après c cycles de marche, depuis le départ. */
+const avanceFigure = (c) => avanceImages(c * N + DEPART) - avanceImages(DEPART);
 const CALME = 150; // ms sans événement : l'élan est retombé
 
 export function lancer() {
@@ -296,9 +304,12 @@ export function lancer() {
   const ralenti = borne(Number(new URLSearchParams(window.location.search).get('ralenti')) || 1, 1, 40);
   let courante = 0;
   let enTransition = false;
-  let dernierEvenement = 0;
-  let attendreCalme = false;
   let ficheOuverte = false;
+  // La transition en cours : d'où elle part, sa durée, son début.
+  const trajet = { depart: 0, duree: 1, debut: 0 };
+  // Un geste fait pendant une transition est mémorisé (un seul), et joué
+  // dès qu'elle s'achève.
+  let enAttente = 0;
   const deplacement = { y: 0 };
   let tween = null;
 
@@ -340,6 +351,9 @@ export function lancer() {
       }
     }
     enTransition = true;
+    trajet.depart = depart;
+    trajet.duree = d * ralenti;
+    trajet.debut = performance.now();
     majNav();
     const versSection = Math.max(i, depart) > I_ATELIER;
     tween = gsap.to(deplacement, {
@@ -354,27 +368,51 @@ export function lancer() {
       onComplete: () => {
         tween = null;
         enTransition = false;
-        attendreCalme = true;
         majNav();
+        // Le geste mémorisé pendant la transition est joué maintenant.
+        const s = enAttente;
+        enAttente = 0;
+        if (s) geste(s);
       },
     });
   }
 
-  /** Un geste dans un sens : une étape, jamais plus. */
+  /** Un geste dans un sens : une étape, jamais plus. Pendant une
+      transition, un geste dans le même sens est mémorisé (un seul) ; un
+      geste dans l'autre sens ramène aussitôt vers l'étape de départ. */
   function geste(sens) {
-    if (enTransition || ficheOuverte || !vivant) return;
+    if (ficheOuverte || !vivant || !sens) return;
+    if (enTransition) {
+      const sensTrajet = Math.sign(courante - trajet.depart);
+      if (sensTrajet && sens !== sensTrajet) {
+        // Demi-tour : retour vers l'étape de départ, en autant de temps
+        // qu'il en a fallu pour venir.
+        enAttente = 0;
+        const fait = borne((performance.now() - trajet.debut) / trajet.duree, 0.25, 1);
+        const retour = trajet.depart;
+        allerA(retour, { duree: (trajet.duree / ralenti) * fait });
+      } else {
+        enAttente = sens;
+      }
+      return;
+    }
     const i = courante + sens;
     if (i < 0 || i >= NOMS.length) return;
     allerA(i);
   }
 
-  // Molette et pavé tactile : un flux d'événements par geste. Le premier
-  // décide ; les suivants, et l'élan qui prolonge le geste, sont ignorés
-  // jusqu'à 150 ms de calme.
-  let cumul = 0;
-  let debutGeste = 0;
-  let amplitude = 0; // l'amplitude du dernier événement
-  let traine = false; // on croit lire la fin d'un élan
+  /* Molette et pavé tactile : on lit l'intention, pas le défilement.
+     Chaque geste produit un flux d'événements, que prolonge l'élan (le
+     pavé continue d'émettre, en décroissant, pendant une à trois
+     secondes). Une nouvelle intention est reconnue :
+       - après un silence (150 ms sans événement), sauf si le flux reprend
+         là où il en était, en décroissant encore ;
+       - quand le sens change (un élan ne change jamais de sens) ;
+       - quand l'amplitude remonte nettement après avoir décru : un
+         nouveau coup de doigt pendant l'élan du précédent.
+     Le reste du flux (l'élan) ne compte pas. L'écoute est sur la fenêtre
+     entière : ni le curseur, ni le survol, ni le focus n'y jouent. */
+  const flux = { dernier: -1e9, derniere: 0, sens: 0, pic: 0, creux: 0, decru: false, arme: false, dernierGeste: -1e9, cumul: 0 };
   ecouter(
     window,
     'wheel',
@@ -383,44 +421,55 @@ export function lancer() {
       e.preventDefault();
       if (e.ctrlKey) return; // zoom au pavé
       const maintenant = performance.now();
-      const ecart = maintenant - dernierEvenement;
-      dernierEvenement = maintenant;
-      const delta = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+      const delta = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * window.innerHeight : e.deltaY;
       const a = Math.abs(delta);
-      const precedente = amplitude;
-      amplitude = a;
-      if (enTransition || ficheOuverte) return;
-      // La fin d'un élan peut marquer une courte pause, puis reprendre en
-      // petits crans qui ne font que décroître : ce n'est pas un geste.
-      // Un vrai geste, lui, accélère.
-      const accelere = a >= precedente * 2 + 4;
-      if (ecart <= CALME) {
-        if (attendreCalme && !(traine && accelere)) return;
-      } else if (ecart < 600 && a < 10 && a <= precedente * 1.2 + 1) {
-        traine = true;
-        attendreCalme = true;
-        return;
+      const sens = Math.sign(delta);
+      if (!sens) return;
+      const ecart = maintenant - flux.dernier;
+      const precedente = flux.derniere;
+      flux.dernier = maintenant;
+      flux.derniere = a;
+      let nouveau = false;
+      // Un trou bref dans un élan qui continue de décroître (le navigateur
+      // peut espacer ses événements) n'est pas un nouveau geste : seule une
+      // remontée nette le serait.
+      const suite = ecart < 450 && sens === flux.sens && a <= precedente * 1.15 + 1;
+      if (ecart > CALME && suite) {
+        flux.decru = true;
+        flux.creux = Math.min(flux.creux, a);
       }
-      if (attendreCalme || ecart > CALME) {
-        cumul = 0;
-        debutGeste = maintenant;
+      if (ecart > CALME && !suite) {
+        nouveau = true;
+        flux.cumul = 0;
+      } else if (sens !== flux.sens) {
+        nouveau = true;
+        flux.cumul = 0;
+      } else {
+        // l'élan décroît : on retient son creux ; un nouveau coup de doigt
+        // le fait remonter nettement
+        if (a < flux.pic * 0.6) flux.decru = true;
+        flux.creux = Math.min(flux.creux, a);
+        if (flux.decru && a >= flux.creux * 2 + 6 && a >= 10) nouveau = true;
       }
-      attendreCalme = false;
-      traine = false;
-      // Un vrai geste s'affirme vite ; quelques pixels épars, plus de
-      // 250 ms après le premier, ne sont que la traîne d'un élan : on
-      // attend de nouveau le calme.
-      if (maintenant - debutGeste > 250) {
-        attendreCalme = true;
-        return;
+      flux.sens = sens;
+      if (nouveau) {
+        flux.pic = a;
+        flux.creux = a;
+        flux.decru = false;
+        flux.arme = true;
+      } else {
+        flux.pic = Math.max(flux.pic, a);
       }
-      cumul += delta;
-      // Un cran de molette décide aussitôt ; au pavé, une douzaine de
-      // pixels (la traîne d'un élan n'y parvient pas en 250 ms).
-      if (Math.abs(cumul) < 12) return;
-      const sens = Math.sign(cumul);
-      cumul = 0;
-      attendreCalme = true;
+      // Un geste naissant s'affirme sur quelques événements (au pavé, les
+      // premiers sont minuscules) ; il compte dès qu'il a parcouru 8 px.
+      if (!flux.arme) return;
+      flux.cumul += a;
+      if (flux.cumul < 8 && a < 8) return;
+      flux.arme = false;
+      flux.cumul = 0;
+      // Deux intentions à moins de 120 ms : la même, vue deux fois.
+      if (maintenant - flux.dernierGeste < 120) return;
+      flux.dernierGeste = maintenant;
       geste(sens);
     },
     { passive: false }
@@ -447,7 +496,7 @@ export function lancer() {
       if (e.cancelable) e.preventDefault();
       if (toucherY === null || toucherFait) return;
       const dy = toucherY - e.touches[0].clientY;
-      if (Math.abs(dy) < 36) return;
+      if (Math.abs(dy) < 30) return;
       toucherFait = true;
       geste(Math.sign(dy));
     },
@@ -469,7 +518,10 @@ export function lancer() {
     else if (e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey && !surCommande)) sens = -1;
     else if (e.key === 'Home' || e.key === 'End') {
       e.preventDefault();
-      if (!enTransition && !e.repeat) allerA(e.key === 'Home' ? 0 : NOMS.length - 1);
+      if (!e.repeat) {
+        enAttente = 0;
+        allerA(e.key === 'Home' ? 0 : NOMS.length - 1);
+      }
       return;
     } else return;
     e.preventDefault();
@@ -486,13 +538,14 @@ export function lancer() {
     const i = NOMS.indexOf(id);
     if (i < 0) return;
     e.preventDefault();
+    enAttente = 0;
     if (i !== courante || enTransition) allerA(i);
   });
 
   /* La fiche d'un projet suspend le voyage ; elle défile normalement. */
   ecouter(document, 'fiche', (e) => {
     ficheOuverte = Boolean(e.detail);
-    attendreCalme = true;
+    enAttente = 0;
   });
 
   /* Au clavier, une étape dont un élément reçoit le focus vient à l'écran. */
@@ -534,17 +587,17 @@ export function lancer() {
 
   const hd = window.matchMedia('(min-resolution: 1.5dppx) and (min-width: 48rem) and (min-height: 40rem)').matches;
   const images = new Array(MARCHE.images).fill(null);
+  const poses = { image: null }; // la pose d'attente
   let finesse = 0; // 0 : rien ; 1 : images légères ; 2 : fines
-  const nom = (taille, k) => new URL(`espace/marche/${taille}/${String(k).padStart(2, '0')}.webp`, document.baseURI).href;
+  const nom = (taille, k) => new URL(`espace/marche/${taille}/${k === 'pose' ? k : String(k).padStart(2, '0')}.webp`, document.baseURI).href;
   const charger = (url) =>
     fetch(url)
       .then((r) => (r.ok ? r.blob() : Promise.reject(new Error(url))))
       .then((b) => (typeof createImageBitmap === 'function' ? createImageBitmap(b) : Promise.reject(new Error('bitmap'))));
-  /** Charge une série d'images ; se résout dès que les deux appuis (les
-      images où l'astronaute s'arrête) sont là, les autres suivent. */
+  /** Charge une série d'images ; se résout dès que la pose d'attente et
+      l'image de départ sont là, les autres suivent. */
   function serie(taille) {
-    const appuis = [0, Math.round(MARCHE.images / 2)];
-    const ordre = [...appuis, ...images.map((_, k) => k).filter((k) => !appuis.includes(k))];
+    const ordre = ['pose', DEPART, ...images.map((_, k) => k).filter((k) => k !== DEPART)];
     let dimensionne = false;
     const une = (k) =>
       charger(nom(taille, k)).then((b) => {
@@ -556,10 +609,12 @@ export function lancer() {
           });
           dernier.cadre = -1; // la toile redimensionnée est vide : on redessine
         }
-        const ancienne = images[k];
-        images[k] = b;
+        const tableau = k === 'pose' ? poses : images;
+        const cle = k === 'pose' ? 'image' : k;
+        const ancienne = tableau[cle];
+        tableau[cle] = b;
         if (ancienne && ancienne.close) ancienne.close();
-        if (k === dernier.cadre) dernier.cadre = -1;
+        dernier.cadre = -1;
       });
     const premieres = Promise.all(ordre.slice(0, 2).map(une));
     const toutes = premieres.then(() => Promise.all(ordre.slice(2).map(une)));
@@ -591,7 +646,20 @@ export function lancer() {
     return null;
   }
 
-  const dernier = { cadre: -1, x: 0, y: 0, s: 0, o: -1 };
+  const dernier = { cadre: -1, x: 0, y: 0, s: 0, o: -1, poids: -1 };
+  /** Le reflet et l'ombre s'accrochent au bas des semelles de l'image
+      affichée (la pose d'attente, ou l'image de la marche). */
+  const SEMELLES = MARCHE.semelles || [];
+  function accrocher(cadre, poids) {
+    const bas = (SEMELLES[cadre] ?? MARCHE.pieds) * (1 - poids) + (MARCHE.semellePose ?? MARCHE.pieds) * poids;
+    const y = (BOITE_H * bas) / MARCHE.hauteur;
+    reflet.style.transformOrigin = `50% ${y.toFixed(1)}px`;
+    const sous = (100 * (BOITE_H - y)) / BOITE_H;
+    const masque = `linear-gradient(to top, transparent ${(sous - 0.5).toFixed(2)}%, #000 ${sous.toFixed(2)}%, transparent ${(sous + 34).toFixed(2)}%)`;
+    reflet.style.webkitMaskImage = masque;
+    reflet.style.maskImage = masque;
+    ombre.style.top = `${(y - BOITE_H * 0.025).toFixed(1)}px`;
+  }
   function poserAstronaute() {
     const a = monde && monde.astro;
     const o = a && a.visible && finesse ? borne((0.6 - etat.apres) / 0.35, 0, 1) : 0;
@@ -602,17 +670,38 @@ export function lancer() {
     }
     if (!o) return;
     const c = cycles;
-    // (un centième d'image de marge : l'arrêt tombe juste sur l'appui)
-    const n = Math.floor(c + 0.01 / N);
-    const cadre = Math.min(N - 1, Math.max(0, Math.floor((c - n) * N + 0.01)));
-    const image = cadre !== dernier.cadre ? imageProche(cadre) : null;
-    if (image) {
-      contextes.forEach((ctx, k) => {
-        ctx.clearRect(0, 0, toiles[k].width, toiles[k].height);
-        ctx.drawImage(image, 0, 0, toiles[k].width, toiles[k].height);
-      });
-      dernier.cadre = cadre;
-      pose.dataset.cadre = String(cadre);
+    // La position dans la marche, en images (un centième de marge : l'arrêt
+    // tombe juste sur l'image de départ).
+    const pos = c * N + DEPART;
+    const cadreAbs = Math.floor(pos + 0.01);
+    const cadre = ((cadreAbs % N) + N) % N;
+    // Près d'un arrêt, la pose d'attente se substitue à la marche, en fondu
+    // sur une image et demie : il part de l'immobilité et s'y pose.
+    const repos = Math.abs(c - Math.round(c)) * N;
+    const t = borne(1 - repos / 1.5, 0, 1);
+    const poids = poses.image ? t * t * (3 - 2 * t) : 0;
+    if (cadre !== dernier.cadre || Math.abs(poids - dernier.poids) > 0.01) {
+      const image = imageProche(cadre);
+      if (image) {
+        contextes.forEach((ctx, k) => {
+          const l = toiles[k].width;
+          const h = toiles[k].height;
+          ctx.clearRect(0, 0, l, h);
+          if (poids < 1) {
+            ctx.globalAlpha = 1;
+            ctx.drawImage(image, 0, 0, l, h);
+          }
+          if (poids > 0) {
+            ctx.globalAlpha = poids;
+            ctx.drawImage(poses.image, 0, 0, l, h);
+            ctx.globalAlpha = 1;
+          }
+        });
+        dernier.cadre = cadre;
+        dernier.poids = poids;
+        pose.dataset.cadre = poids >= 1 ? 'pose' : String(cadre);
+        accrocher(cadre, poids);
+      }
     }
     if (ralenti > 1) pose.dataset.cycles = c.toFixed(5);
     const s = a.echelle / (BOITE_H * (MARCHE.figure / MARCHE.hauteur));
@@ -620,7 +709,7 @@ export function lancer() {
     // Entre deux images de la marche, le sol continue d'avancer : l'image
     // descend d'autant (le pied d'appui suit le sol au pixel près), puis la
     // suivante prend le relais.
-    const ecart = avanceFigure(c) - avanceFigure(n + cadre / N);
+    const ecart = avanceImages(pos) - avanceImages(cadreAbs);
     const y = a.y - PIEDS + ecart * a.echelle;
     if (Math.abs(x - dernier.x) > 0.05 || Math.abs(y - dernier.y) > 0.05 || Math.abs(s - dernier.s) > 0.0002) {
       pose.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) scale(${s.toFixed(4)})`;
