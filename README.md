@@ -17,9 +17,9 @@ la marche : quatre pas, un peu plus de deux secondes ; la caméra suit
 l'astronaute, la passerelle avance exactement avec ses pas (le pied
 d'appui reste immobile sur le plancher tant qu'il le touche), la planète
 grandit ; il s'arrête à l'étape suivante, pieds au sol. Le geste inverse
-le ramène, en marchant à reculons. Un geste fait pendant la marche est
-mémorisé et joué ensuite ; un geste inverse fait demi-tour aussitôt. Au
-repos, l'astronaute se tient debout, immobile et d'aplomb.
+le ramène, en marchant à reculons. Un geste, si fort soit-il, ne fait
+qu'une étape ; un nouveau geste fait pendant la marche est mémorisé et
+joué ensuite, un geste inverse fait demi-tour aussitôt.
 
 1. **Le titre** — l'astronaute, vu de dos, sur une passerelle suspendue
    dans l'espace, face à une planète ; au-dessus de lui, « Portfolio »
@@ -103,13 +103,8 @@ sa marche la plus régulière. [`scripts/marche.py`](scripts/marche.py) en
 extrait un cycle de deux pas (36 images, 1,5 s) qui se referme sur
 lui-même, l'agrandit ×4, le détoure (BiRefNet), retire le reflet de la
 vidéo sous les semelles (l'axe de symétrie entre l'astronaute et son
-reflet donne la ligne du sol), nettoie chaque image (bord resserré et
-décontaminé, fibres et points clairs effacés), redresse chaque image
-d'aplomb (le casque exactement au-dessus du bassin) et accorde les
-couleurs à la scène. La vidéo ne le montre jamais immobile : la pose
-d'attente est composée à partir de l'image où ses jambes se croisent, la
-jambe d'appui reportée en miroir de l'autre côté ; il en part et s'y
-arrête en fondu, sur une image et demie. Les images légères sont chargées
+reflet donne la ligne du sol), aligne le sol de toutes les images et
+accorde les couleurs à la scène. Les images légères sont chargées
 d'abord, les fines ensuite. Son reflet sur le plancher et son ombre douce
 le posent sur la passerelle.
 
@@ -141,11 +136,13 @@ ne défile plus que d'elle-même. Un geste accepté lance quatre pas (deux
 cycles de la marche, 2,3 s ; 2,6 s pour l'arrivée), avec l'allure d'une
 marche (départ, pas égal, arrêt) ; une chronologie GSAP attachée à ScrollTrigger
 fait avancer la caméra et entrer les étapes. Molette et pavé tactile sont
-lus comme des intentions, pas comme un défilement : un nouveau geste est
-reconnu après un silence, quand le sens change, ou quand l'amplitude
-remonte nettement pendant l'élan du précédent ; l'élan lui-même ne compte
-pas. Pendant une transition, un geste dans le même sens est mémorisé (un
-seul) ; dans l'autre sens, il ramène aussitôt à l'étape de départ. Au bout du chemin,
+lus comme des intentions, pas comme un défilement : seul le début d'un
+geste compte, jamais son élan, même long et fort. Un nouveau geste est
+reconnu quand le sens change, après un silence (sauf si le flux reprend
+en continuant de décroître : c'est encore l'élan), ou quand, l'élan bien
+retombé, l'amplitude remonte nettement deux fois de suite. Pendant une
+transition, un nouveau geste dans le même sens est mémorisé (un seul) ;
+dans l'autre sens, il ramène aussitôt à l'étape de départ. Au bout du chemin,
 la caméra glisse jusqu'à la plateforme et se tourne vers la planète, puis
 deux plans accompagnent le poste de travail et le contact.
 
@@ -178,11 +175,13 @@ blocage total 10 ms, décalage cumulé 0.
 Les étapes sont vérifiées par un parcours automatisé : à la molette (un
 cran, puis six crans rapides), au pavé tactile (glissement avec élan), au
 clavier (flèches, pages) et au doigt, à l'aller comme au retour, une étape
-par geste, arrêt de l'astronaute pieds au sol ; gestes successifs sans
-bouger le curseur, geste pendant la marche (mémorisé), demi-tour pendant
-la marche, remontée aussitôt après une descente, nouveau geste pendant
-l'élan du précédent, élan de 2,5 s compté comme un seul geste ; liens du
-menu ; fiche de projet qui suspend le voyage.
+par geste, arrêt de l'astronaute pieds au sol ; gestes très forts (élan
+de pavé de 3 s, molette libre qui ralentit) comptés comme un seul geste,
+dans les deux sens ; geste léger ; gestes successifs sans bouger le
+curseur ; second geste pendant la marche (mémorisé) ; demi-tour pendant
+la marche ; remontée aussitôt après une descente ; nouveau geste pendant
+l'élan du précédent ; liens du menu ; fiche de projet qui suspend le
+voyage.
 
 ## Accessibilité
 

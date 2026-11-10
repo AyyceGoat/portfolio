@@ -104,9 +104,9 @@ export const projects = [
       { couche: 'Traitement', titre: 'Google Apps Script', detail: 'Règles métier, rôles, comptabilité analytique' },
       { couche: 'Données', titre: 'Google Sheets', detail: 'Source unique de données' },
     ],
-    resume: "[[Système de gestion]] complet pour une entreprise de carrières, de l'[[analyse du besoin]] au [[déploiement]].",
+    resume: "Conçu et développé seul, à partir de l'[[analyse du besoin]] : production, [[suivi terrain]] et [[pilotage de la direction]].",
     desc:
-      "Système de gestion complet pour une entreprise de carrières en Côte d'Ivoire, conçu et développé en tant que développeur unique, de l'analyse du besoin au déploiement. Il couvre la production, le suivi terrain et le pilotage de la direction sur plusieurs sites.",
+      "Un ERP de gestion industrielle pour une entreprise de carrières multisites en Côte d'Ivoire, conçu et développé en tant que développeur unique, à partir de l'analyse du besoin. Il couvre la production, le suivi terrain et le pilotage de la direction.",
     points: [
       "Interface mobile pour les conducteurs : scan de QR code et authentification par code PIN, pensée pour rester lisible en plein soleil.",
       "Tableau de bord de la direction : indicateurs visuels, rapports générés par IA et export des données.",
